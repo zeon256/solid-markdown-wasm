@@ -1,0 +1,24 @@
+{
+  "name": "solid-cmark",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "module": "./dist/solid-cmark.es.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "markdown-renderer": "file:../markdown-renderer/pkg/",
+    "solid-js": "^1.9.5"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-solid": "^2.11.6"
+  }
+}
