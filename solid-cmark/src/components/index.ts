@@ -1,1 +1,1 @@
-export * from "./MarkdownRenderer"
+export { MarkdownRenderer, type MarkdownRendererProps } from "./MarkdownRenderer";
