@@ -4,9 +4,11 @@ import init, { render_md } from "markdown-renderer";
 export interface MarkdownRendererProps {
   markdown: string;
   class?: string;
+  theme?: string;
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
+  const { theme = "base16-ocean.dark" } = props;
   const [renderedHtml, setRenderedHtml] = createSignal('');
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
@@ -27,7 +29,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
   createEffect(() => {
     if (!loadingWasm()) {      
-      const result = render_md(props.markdown);
+      const result = render_md(props.markdown, theme);
       setRenderedHtml(result);
     }
   });
