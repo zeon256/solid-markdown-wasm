@@ -1,23 +1,24 @@
 use std::sync::LazyLock;
 
-use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
-use syntect::highlighting::{Theme, ThemeSet};
+use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd};
+use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn render_md(markdown: &str) -> String {
+pub fn render_md(markdown: &str, theme: &str) -> String {
     static SYNTAX_SET: LazyLock<SyntaxSet> = LazyLock::new(SyntaxSet::load_defaults_newlines);
-    static THEME: LazyLock<Theme> = LazyLock::new(|| {
-        let theme_set = ThemeSet::load_defaults();
-        theme_set.themes["base16-ocean.dark"].clone()
-    });
+    static THEME_SET: LazyLock<ThemeSet> = LazyLock::new(ThemeSet::load_defaults);
+
+    let theme = THEME_SET.themes[theme].clone();
 
     let mut sr = SYNTAX_SET.find_syntax_plain_text();
     let mut code = String::new();
+    let mut html_output = String::new();
     let mut code_block = false;
-    let parser = Parser::new(markdown).filter_map(|event| match event {
+
+    let parser = Parser::new_ext(&markdown, Options::all()).filter_map(|event| match event {
         Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(lang))) => {
             let lang = lang.trim();
             sr = SYNTAX_SET
@@ -27,23 +28,29 @@ pub fn render_md(markdown: &str) -> String {
             None
         }
         Event::End(TagEnd::CodeBlock) => {
-            let html = highlighted_html_for_string(&code, &SYNTAX_SET, &sr, &THEME)
+            let html = highlighted_html_for_string(&code, &SYNTAX_SET, &sr, &theme)
                 .unwrap_or(code.clone());
+
             code.clear();
             code_block = false;
             Some(Event::Html(html.into()))
         }
-
         Event::Text(t) => {
             if code_block {
                 code.push_str(&t);
                 return None;
             }
-            Some(Event::Text(t))
+            let sanitized = ammonia::clean(&t);
+            Some(Event::Text(sanitized.into()))
+        }
+        Event::Html(html) => {
+            let sanitized = ammonia::clean(&html);
+            Some(Event::Html(sanitized.into()))
         }
         _ => Some(event),
     });
-    let mut html_output = String::new();
+
     pulldown_cmark::html::push_html(&mut html_output, parser);
+
     html_output
 }
