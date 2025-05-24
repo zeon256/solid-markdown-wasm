@@ -17,7 +17,8 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   onMount(async () => {
     setLoadingWasm(true);
     try {
-      await init();
+      const initOutput = await init();
+      console.log(initOutput);
     } catch (err) {
       console.error("Error initializing WASM:", err);
       setError(`Failed to initialize WASM: ${err}`);
@@ -31,6 +32,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     if (!loadingWasm()) {      
       const result = render_md(props.markdown, theme);
       setRenderedHtml(result);
+      console.log("rendered!")
     }
   });
 

@@ -11,7 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "markdown-renderer": "file:../markdown-renderer/pkg/",
+    "markdown-renderer": "file:../markdown-renderer/pkg/"
+  },
+  "peerDepedencies": {
     "solid-js": "^1.9.5"
   },
   "devDependencies": {
