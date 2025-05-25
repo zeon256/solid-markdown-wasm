@@ -13,12 +13,12 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
 
-  // Initialize Wasmer SDK and compile the WASM module
+  // Initizalize wasm module
   onMount(async () => {
     setLoadingWasm(true);
     try {
       const initOutput = await init();
-      console.log(initOutput);
+      console.debug(initOutput);
     } catch (err) {
       console.error("Error initializing WASM:", err);
       setError(`Failed to initialize WASM: ${err}`);
@@ -32,7 +32,6 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     if (!loadingWasm()) {      
       const result = render_md(props.markdown, theme);
       setRenderedHtml(result);
-      console.log("rendered!")
     }
   });
 
