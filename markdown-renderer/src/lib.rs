@@ -3,9 +3,15 @@ use comrak::{
     plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
 };
 use once_cell::sync::Lazy;
+use std::collections::HashMap;
 use std::sync::LazyLock;
-use std::{collections::HashMap, sync::Arc};
+use tree_sitter_adapter::TreeSitterAdapter;
 use wasm_bindgen::prelude::*;
+
+mod highlight;
+mod tree_sitter_adapter;
+mod tree_sitter_collection;
+mod wasm_libc;
 
 static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     let mut options = Options::default();
@@ -14,30 +20,33 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options
 });
 
-static ADAPTERS: Lazy<HashMap<Arc<str>, SyntectAdapter>> = Lazy::new(|| {
-    let mut map = HashMap::new();
-    map.insert(
-        "base16-ocean.dark".into(),
-        SyntectAdapterBuilder::new()
-            .theme("base16-ocean.dark")
-            .build(),
-    );
-    map.insert(
-        "base16-ocean.light".into(),
-        SyntectAdapterBuilder::new()
-            .theme("base16-ocean.light")
-            .build(),
-    );
-    map
-});
+// static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
+//     let mut map = HashMap::new();
+//     map.insert(
+//         "base16-ocean.dark",
+//         SyntectAdapterBuilder::new()
+//             .theme("base16-ocean.dark")
+//             .build(),
+//     );
+//     map.insert(
+//         "base16-ocean.light",
+//         SyntectAdapterBuilder::new()
+//             .theme("base16-ocean.light")
+//             .build(),
+//     );
+//     map
+// });
 
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: &str) -> String {
     let mut plugins = Plugins::default();
 
-    if let Some(adapter) = ADAPTERS.get(theme) {
-        plugins.render.codefence_syntax_highlighter = Some(adapter);
-    }
+    let adapter = TreeSitterAdapter::new(Some("base16-ocean.dark"));
+    plugins.render.codefence_syntax_highlighter = Some(&adapter);
+
+    // if let Some(adapter) = ADAPTERS.get(theme) {
+    //     plugins.render.codefence_syntax_highlighter = Some(adapter);
+    // }
 
     markdown_to_html_with_plugins(markdown, &OPTIONS, &plugins)
 }
