@@ -1,7 +1,7 @@
 {
   "name": "solid-cmark",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "module": "./dist/solid-cmark.es.js",
   "types": "./dist/solid-cmark.es.d.ts",
