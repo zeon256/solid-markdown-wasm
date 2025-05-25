@@ -650,6 +650,7 @@ version = "0.1.0"
 dependencies = [
  "ammonia",
  "comrak",
+ "once_cell",
  "pulldown-cmark",
  "syntect",
  "wasm-bindgen",

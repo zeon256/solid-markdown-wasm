@@ -8,10 +8,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = "0.2.100"
-syntect = { version = "5.2.0", default-features = false, features = ["default-fancy"] } 
-pulldown-cmark = "0.13.0"
-ammonia = "4.1.0"
 comrak = "0.39.0"
+once_cell = "1.21.3"
 
 [profile.release]
 opt-level = 3

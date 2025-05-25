@@ -1,24 +1,43 @@
-use std::sync::LazyLock;
-
 use comrak::{
-    Options, Plugins, markdown_to_html, markdown_to_html_with_plugins,
-    plugins::syntect::SyntectAdapterBuilder,
+    Options, Plugins, markdown_to_html_with_plugins,
+    plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
 };
+use once_cell::sync::Lazy;
+use std::sync::LazyLock;
+use std::{collections::HashMap, sync::Arc};
 use wasm_bindgen::prelude::*;
+
+static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
+    let mut options = Options::default();
+    options.extension.table = true;
+    options.extension.front_matter_delimiter = Some("---".into());
+    options
+});
+
+static ADAPTERS: Lazy<HashMap<Arc<str>, SyntectAdapter>> = Lazy::new(|| {
+    let mut map = HashMap::new();
+    map.insert(
+        "base16-ocean.dark".into(),
+        SyntectAdapterBuilder::new()
+            .theme("base16-ocean.dark")
+            .build(),
+    );
+    map.insert(
+        "base16-ocean.light".into(),
+        SyntectAdapterBuilder::new()
+            .theme("base16-ocean.light")
+            .build(),
+    );
+    map
+});
 
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: &str) -> String {
-    static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
-        let mut options = Options::default();
-        options.extension.table = true;
-        options.extension.front_matter_delimiter = Some("---".into());
-        options
-    });
+    let mut plugins = Plugins::default();
 
-    // let adapter = SyntectAdapterBuilder::new().theme(theme).build();
-    // let mut plugins = Plugins::default();
-    // plugins.render.codefence_syntax_highlighter = Some(&adapter);
+    if let Some(adapter) = ADAPTERS.get(theme) {
+        plugins.render.codefence_syntax_highlighter = Some(adapter);
+    }
 
-    // markdown_to_html_with_plugins(markdown, &OPTIONS, &plugins)
-    markdown_to_html(markdown, &OPTIONS)
+    markdown_to_html_with_plugins(markdown, &OPTIONS, &plugins)
 }
