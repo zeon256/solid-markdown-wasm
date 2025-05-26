@@ -74,6 +74,19 @@ Since this library uses [comrak](https://github.com/kivikakk/comrak "comrak gith
 **Email**: Send an email to <me+security@inve.rs>.
 Please provide as much detail as possible about the potential vulnerability, including steps to reproduce it. We will acknowledge your report promptly and work to address the issue as quickly as possible.
 
+## Compiling From Source
+
+You will need the following tools to compiler from source
+- Rust compiler
+- wasm-pack
+- NodeJS/Bun
+
+Then run the following
+
+```bash
+npm run build
+```
+
 ## Contributing
 
 We welcome contributions to `solid-markdown-wasm`! If you have ideas for improvements, bug fixes, or new features, please feel free to contribute.
