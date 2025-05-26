@@ -1,10 +1,10 @@
 {
-  "name": "solid-cmark",
+  "name": "solid-markdown-wasm",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "module": "./dist/solid-cmark.es.js",
-  "types": "./dist/solid-cmark.es.d.ts",
+  "module": "./dist/solid-markdown-wasm.es.js",
+  "types": "./dist/solid-markdown-wasm.es.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
