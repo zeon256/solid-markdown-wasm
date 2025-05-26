@@ -1,7 +1,7 @@
 ![solid-markdown-wasm](https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20)
 
 # solid-markdown-wasm
-> common mark markdown renderer for solidjs using wasm
+> CommonMark markdown renderer for solidjs using wasm
 
 ## Features
 
