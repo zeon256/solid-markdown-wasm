@@ -74,7 +74,7 @@ jobs:
       - name: Prepare package.json for publish
         run: |
           cd release-package
-          node ../prepare-package.js
+          node ../../prepare-package.js
       - name: Install dependencies
         run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/exec
       - name: Release
