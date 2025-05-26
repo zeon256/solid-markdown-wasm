@@ -38,7 +38,6 @@ jobs:
           name: release-artifact
           path: |
             dist
-            package.lock.json
             package.json
 
       - name: Publish Library to NPM (dry run)
