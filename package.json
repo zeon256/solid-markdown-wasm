@@ -11,12 +11,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "markdown-renderer": "file:../markdown-renderer/pkg/"
+    "markdown-renderer": "file:./markdown-renderer/pkg/"
   },
   "peerDepedencies": {
     "solid-js": "^1.9.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-dts": "^4.5.4",
