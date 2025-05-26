@@ -1,5 +1,9 @@
 ![solid-markdown-wasm](https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20)
 
+<p align="center">
+	<a href="https://biomejs.dev"><img alt="Checked with Biome" src="https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome"></a>
+</p>
+
 # solid-markdown-wasm
 > CommonMark markdown renderer for solidjs using wasm
 
