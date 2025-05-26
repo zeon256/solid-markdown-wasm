@@ -63,7 +63,8 @@ Since this library uses [comrak](https://github.com/kivikakk/comrak "comrak gith
 
 ### Reporting Security Vulnerabilities:
 
-To report a security vulnerability, **please do not open a public GitHub issue**. Instead, please use the following method to contact the maintainers privately:
+> [!CAUTION]
+> To report a security vulnerability, **please do not open a public GitHub issue**. Instead, please use the following method to contact the maintainers privately:
 
 **Email**: Send an email to <me+security@inve.rs>.
 Please provide as much detail as possible about the potential vulnerability, including steps to reproduce it. We will acknowledge your report promptly and work to address the issue as quickly as possible.
