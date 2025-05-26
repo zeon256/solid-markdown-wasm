@@ -119,3 +119,6 @@ Thank you for your support!
 
 ## License
 `solid-markdown-wasm` is released under the [MIT License](./LICENSE.md).
+
+### Contribution
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in `solid-markdown-wasm` by you, shall be licensed as MIT, without any additional terms or conditions.
