@@ -39,7 +39,8 @@ jobs:
           path: |
             dist
             package.json
-
+            README.md
+            LICENSE
       - name: Publish Library to NPM (dry run)
         # Only run if the commit is tagged with v<version>
         env:
