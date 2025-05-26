@@ -41,7 +41,7 @@ jobs:
             package.json
             README.md
             LICENSE.md
-            prepare_package.js
+            prepare_package.cjs
       - name: Publish Library to NPM (dry run)
         # Only run if the commit is tagged with v<version>
         env:
@@ -78,4 +78,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: cd release-package && node prepare_package.js && npx semantic-release
+        run: cd release-package && node prepare_package.cjs && npx semantic-release
