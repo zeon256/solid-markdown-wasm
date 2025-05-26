@@ -3,8 +3,8 @@ use comrak::{
     plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
 };
 use once_cell::sync::Lazy;
+use std::collections::HashMap;
 use std::sync::LazyLock;
-use std::{collections::HashMap, sync::Arc};
 use wasm_bindgen::prelude::*;
 
 static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
@@ -14,16 +14,16 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options
 });
 
-static ADAPTERS: Lazy<HashMap<Arc<str>, SyntectAdapter>> = Lazy::new(|| {
+static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
     let mut map = HashMap::new();
     map.insert(
-        "base16-ocean.dark".into(),
+        "base16-ocean.dark",
         SyntectAdapterBuilder::new()
             .theme("base16-ocean.dark")
             .build(),
     );
     map.insert(
-        "base16-ocean.light".into(),
+        "base16-ocean.light",
         SyntectAdapterBuilder::new()
             .theme("base16-ocean.light")
             .build(),

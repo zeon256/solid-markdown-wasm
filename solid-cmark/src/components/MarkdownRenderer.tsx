@@ -30,8 +30,11 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
   createEffect(() => {
     if (!loadingWasm()) {      
+      const startTime = performance.now();
       const result = render_md(props.markdown, theme);
       setRenderedHtml(result);
+      const endTime = performance.now();
+      console.debug(`Time taken: ${endTime - startTime}`);
     }
   });
 
