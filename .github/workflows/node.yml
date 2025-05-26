@@ -40,7 +40,7 @@ jobs:
             dist
             package.json
             README.md
-            LICENSE
+            LICENSE.md
       - name: Publish Library to NPM (dry run)
         # Only run if the commit is tagged with v<version>
         env:
@@ -74,7 +74,7 @@ jobs:
       - name: Prepare package.json for publish
         run: |
           cd release-package
-          node ../../prepare-package.js
+          node ../../prepare_package.js
       - name: Install dependencies
         run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/exec
       - name: Release
