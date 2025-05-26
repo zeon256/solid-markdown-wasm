@@ -76,10 +76,10 @@ Please provide as much detail as possible about the potential vulnerability, inc
 
 ## Compiling From Source
 
-You will need the following tools to compiler from source
-- Rust compiler
-- wasm-pack
-- NodeJS/Bun
+You will need the following tools to compile from source
+- [Rust compiler](https://www.rust-lang.org/ "rust compiler")
+- [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack")
+- [NodeJS/Bun](https://bun.sh/ "bun runtime")
 
 Then run the following
 
