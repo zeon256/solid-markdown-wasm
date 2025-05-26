@@ -1,28 +1,88 @@
-## Usage
+<p>
+  <img width="100%" src="https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20" alt="solid-markdown-wasm">
+</p>
+
+# solid-markdown-wasm
+> common mark markdown renderer for solidjs using wasm
+
+
+## Installation
 
 ```bash
-$ npm install # or pnpm install or yarn install
+npm install solid-markdown-wasm
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+## Usage:
 
-## Available Scripts
+```tsx
+import { type Component, createSignal } from "solid-js";
+import { MarkdownRenderer } from "solid-markdown-wasm";
 
-In the project directory, you can run:
+const App: Component = () => {
+	const [markdown, setMarkdown] = createSignal<string>("# Hello, Markdown!");
 
-### `npm run dev`
+	const handleInput = (
+		event: InputEvent & { currentTarget: HTMLTextAreaElement },
+	) => {
+		setMarkdown(event.currentTarget.value);
+	};
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+	return (
+		<div>
+			<h1>Markdown Editor</h1>
+			<textarea
+				rows={10}
+				cols={50}
+				value={markdown()}
+				onInput={handleInput}
+				placeholder="Enter your markdown here..."
+			/>
+			<h2>Preview:</h2>
+			<MarkdownRenderer markdown={markdown()} theme="base16-ocean.dark" />
+		</div>
+	);
+};
 
-### `npm run build`
+export default App;
+```
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+## Internals
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+Internally, the renderer is implemented using the [comrak](https://github.com/kivikakk/comrak "comrak github") library and then compiled down to webassembly using [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack github")
+which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). 
 
-## Deployment
+## Security
 
-Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+Since this library uses [comrak](https://github.com/kivikakk/comrak "comrak github") compiled to WebAssembly for Markdown rendering. By default, `solid-markdown-wasm` adheres to a safe-by-default approach, mirroring comrak's behavior of scrubbing raw HTML and potentially dangerous links.
+
+Important: This library does not expose or utilize any "unsafe" options provided by comrak. Therefore, you can be assured that the rendered output will have potentially harmful HTML and links removed by the underlying comrak library.
+
+### Reporting Security Vulnerabilities:
+
+To report a security vulnerability, *please do not open a public GitHub issue*. Instead, please use the following method to contact the maintainers privately:
+
+Email: Send an email to <me+security@inve.rs>.
+Please provide as much detail as possible about the potential vulnerability, including steps to reproduce it. We will acknowledge your report promptly and work to address the issue as quickly as possible.
+
+## Contributing
+
+We welcome contributions to `solid-markdown-wasm`! If you have ideas for improvements, bug fixes, or new features, please feel free to contribute.
+
+Here's a general guideline for contributing:
+
+1.  **Fork the repository** on GitHub.
+2.  **Create a new branch** from the `main` branch for your changes.
+3.  **Make your changes** and ensure they follow the project's coding style and conventions.
+4.  **Write tests** for any new functionality or bug fixes. Ensure all tests pass.
+5.  **Commit your changes** with clear and concise commit messages.
+6.  **Push your branch** to your forked repository.
+7.  **Create a pull request** to the `main` branch of the original `solid-markdown-wasm` repository.
+
+Please provide a clear description of your changes in the pull request. We will review your contribution as soon as possible.
+
+For significant changes or new features, it's recommended to open an issue first to discuss your ideas with the maintainers. This can help ensure that your work aligns with the project's goals and avoids potential conflicts.
+
+We appreciate your contributions!
+
+## License
+solid-markdown-wasm is released under the [MIT License](./LICENSE.md).
