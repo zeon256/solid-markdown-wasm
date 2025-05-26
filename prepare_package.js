@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const packageJsonPath = path.join(__dirname, "release-package", "package.json");
+const packageJsonPath = path.join(__dirname, "package.json");
 
 fs.readFile(packageJsonPath, "utf8", (err, data) => {
   if (err) {

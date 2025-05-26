@@ -41,6 +41,7 @@ jobs:
             package.json
             README.md
             LICENSE.md
+            prepare_package.js
       - name: Publish Library to NPM (dry run)
         # Only run if the commit is tagged with v<version>
         env:
@@ -71,14 +72,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Prepare package.json for publish
-        run: |
-          cd release-package
-          node ../../prepare_package.js
       - name: Install dependencies
         run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/exec
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: cd release-package && npx semantic-release
+        run: cd release-package && node prepare_package.js && npx semantic-release
