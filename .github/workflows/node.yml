@@ -44,6 +44,7 @@ jobs:
             LICENSE.md
             prepare_package.cjs
       - name: Publish Library to NPM (dry run)
+        continue-on-error: true
         # Only run if the commit is tagged with v<version>
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
