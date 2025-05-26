@@ -3,6 +3,7 @@
 <p align="center">
 	<a href="https://biomejs.dev"><img alt="Checked with Biome" src="https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome"></a>
 	<a href="https://github.com/zeon256/solid-markdown-wasm/actions/workflows/node.yml"><img alt="Node.js CI" src="https://github.com/zeon256/solid-markdown-wasm/actions/workflows/node.yml/badge.svg"></a>
+	<img alt="GitHub License" src="https://img.shields.io/github/license/zeon256/solid-markdown-wasm">
 </p>
 
 # solid-markdown-wasm
@@ -13,6 +14,9 @@
 - Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec")
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
 - Easy to use
+
+## Example
+You can visit [live-preview.inve.rs](https://live-preview.rs "live-preview") to see the [example](./example) folder deployed. It uses [solid-monaco](https://github.com/alxnddr/solid-monaco "solid-monaco") + [tailwind](https://tailwindcss.com/ "tailwindcss") + [solidjs](https://www.solidjs.com/ "solidjs") and this library to showcase what is possible.
 
 ## Installation
 
