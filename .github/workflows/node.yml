@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build all (Node.js)
-        run: npm run build
+        run: npx vite build
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
