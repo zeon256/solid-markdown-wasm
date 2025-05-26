@@ -2,6 +2,7 @@
 
 <p align="center">
 	<a href="https://biomejs.dev"><img alt="Checked with Biome" src="https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome"></a>
+	<a href="https://github.com/zeon256/solid-markdown-wasm/actions/workflows/node.yml"><img alt="Node.js CI" src="https://github.com/zeon256/solid-markdown-wasm/actions/workflows/node.yml/badge.svg"></a>
 </p>
 
 # solid-markdown-wasm
