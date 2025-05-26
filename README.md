@@ -1,13 +1,11 @@
-<p>
-  <img width="100%" src="https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20" alt="solid-markdown-wasm">
-</p>
+![solid-markdown-wasm](https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20)
 
 # solid-markdown-wasm
 > common mark markdown renderer for solidjs using wasm
 
 ## Features
 
-- Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec") in default mode
+- Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec")
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
 - Easy to use
 
@@ -60,13 +58,14 @@ which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website").
 
 Since this library uses [comrak](https://github.com/kivikakk/comrak "comrak github") compiled to WebAssembly for Markdown rendering. By default, `solid-markdown-wasm` adheres to a safe-by-default approach, mirroring comrak's behavior of scrubbing raw HTML and potentially dangerous links.
 
-Important: This library does not expose or utilize any "unsafe" options provided by comrak. Therefore, you can be assured that the rendered output will have potentially harmful HTML and links removed by the underlying comrak library.
+> [!IMPORTANT]
+> This library does not expose or utilize any "unsafe" options provided by comrak. Therefore, you can be assured that the rendered output will have potentially harmful HTML and links removed by the underlying comrak library
 
 ### Reporting Security Vulnerabilities:
 
-To report a security vulnerability, *please do not open a public GitHub issue*. Instead, please use the following method to contact the maintainers privately:
+To report a security vulnerability, **please do not open a public GitHub issue**. Instead, please use the following method to contact the maintainers privately:
 
-Email: Send an email to <me+security@inve.rs>.
+**Email**: Send an email to <me+security@inve.rs>.
 Please provide as much detail as possible about the potential vulnerability, including steps to reproduce it. We will acknowledge your report promptly and work to address the issue as quickly as possible.
 
 ## Contributing
