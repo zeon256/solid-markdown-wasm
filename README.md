@@ -89,5 +89,13 @@ For significant changes or new features, it's recommended to open an issue first
 
 We appreciate your contributions!
 
+## Support This Project
+
+If you find `solid-markdown-wasm` useful and would like to support its development, you can consider making a donation on wise. Your contribution helps ensure continued maintenance and improvements.
+
+![Donate with WiseTag](./@budisyahiddinb-wisetag.png)
+
+Thank you for your support!
+
 ## License
 solid-markdown-wasm is released under the [MIT License](./LICENSE.md).
