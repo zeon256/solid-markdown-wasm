@@ -93,7 +93,9 @@ We appreciate your contributions!
 
 If you find `solid-markdown-wasm` useful and would like to support its development, you can consider making a donation on wise. Your contribution helps ensure continued maintenance and improvements.
 
-![Donate with WiseTag](./@budisyahiddinb-wisetag.png)
+<img src="./@budisyahiddinb-wisetag.png" width="150">
+
+[Donate on Wise](https://wise.com/pay/me/budisyahiddinb)
 
 Thank you for your support!
 
