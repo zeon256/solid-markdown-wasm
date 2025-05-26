@@ -11,23 +11,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun.js
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: latest
-
-      - name: Navigate to example folder
-        run: cd example
-
+          bun-version: latest
       - name: Install dependencies
-        run: npm ci
-
+        run: cd example && bun install
       - name: Build example
-        run: npm run build 
-
+        run: cd example && bun run build 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: jamesives/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
