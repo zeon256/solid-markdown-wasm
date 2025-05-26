@@ -12,6 +12,7 @@
     "fmt": "./node_modules/@biomejs/cli-linux-x64/biome format --write .",
     "check": "./node_modules/@biomejs/cli-linux-x64/biome check"
   },
+  "files": ["dist", "package.json", "README.md", "LICENSE"],
   "dependencies": {
     "markdown-renderer": "file:./markdown-renderer/pkg/"
   },
