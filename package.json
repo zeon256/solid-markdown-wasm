@@ -1,7 +1,7 @@
 {
   "name": "solid-markdown-wasm",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "module": "./dist/solid-markdown-wasm.es.js",
   "types": "./dist/solid-markdown-wasm.es.d.ts",
