@@ -5,6 +5,11 @@
 # solid-markdown-wasm
 > common mark markdown renderer for solidjs using wasm
 
+## Features
+
+- Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec") in default mode
+- Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
+- Easy to use
 
 ## Installation
 
@@ -12,7 +17,7 @@
 npm install solid-markdown-wasm
 ```
 
-## Usage:
+## Usage
 
 ```tsx
 import { type Component, createSignal } from "solid-js";
