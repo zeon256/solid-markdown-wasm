@@ -104,4 +104,4 @@ If you find `solid-markdown-wasm` useful and would like to support its developme
 Thank you for your support!
 
 ## License
-solid-markdown-wasm is released under the [MIT License](./LICENSE.md).
+`solid-markdown-wasm` is released under the [MIT License](./LICENSE.md).
