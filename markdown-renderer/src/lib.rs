@@ -10,6 +10,12 @@ use wasm_bindgen::prelude::*;
 static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     let mut options = Options::default();
     options.extension.table = true;
+    options.extension.tasklist = true;
+    options.extension.alerts = true;
+    options.extension.underline = true;
+    options.extension.strikethrough = true;
+    options.extension.spoiler = true;
+    options.extension.superscript = true;
     options.extension.front_matter_delimiter = Some("---".into());
     options
 });
