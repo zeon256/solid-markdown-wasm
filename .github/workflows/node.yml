@@ -24,15 +24,14 @@ jobs:
           toolchain: stable
       - name: Install wasm-pack
         run: cargo install wasm-pack
-      - name: Set up Node.js environment
-        uses: actions/setup-node@v4
+      - name: Set up Bun.js
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: latest
-          registry-url: 'https://registry.npmjs.org'
+          bun-version: latest
       - name: Install dependencies
-        run: npm ci
-      - name: Build all (Node.js)
-        run: npx vite build
+        run: bun install
+      - name: Build all
+        run: bunx vite build
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -43,12 +42,12 @@ jobs:
             README.md
             LICENSE.md
             prepare_package.cjs
-      - name: Publish Library to NPM (dry run)
+      - name: Publish Library to NPM (dry run) # Keeping the name for context, but it's now Bun
         continue-on-error: true
         # Only run if the commit is tagged with v<version>
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm set //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN && npm publish --dry-run
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Bun can also use NPM tokens
+        run: bun publish --dry-run
 
   # job depends on the build job
   release:
@@ -70,14 +69,14 @@ jobs:
         with:
           name: release-artifact
           path: release-package
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun.js
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
+          bun-version: latest
       - name: Install dependencies
-        run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/exec
+        run: bun install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/exec
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: cd release-package && node prepare_package.cjs && npx semantic-release
+        run: cd release-package && bun prepare_package.cjs && bunx semantic-release
