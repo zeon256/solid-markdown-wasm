@@ -16,7 +16,10 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options.extension.strikethrough = true;
     options.extension.spoiler = true;
     options.extension.superscript = true;
+    options.extension.math_code = true;
+    options.extension.math_dollars = true;
     options.extension.front_matter_delimiter = Some("---".into());
+
     options
 });
 
