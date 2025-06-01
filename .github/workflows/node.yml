@@ -24,6 +24,8 @@ jobs:
           toolchain: stable
       - name: Install wasm-pack
         run: cargo install wasm-pack
+      - name: Build Rust project
+        run: cd markdown-renderer && wasm-pack build --target web --release
       - name: Set up Bun.js
         uses: oven-sh/setup-bun@v2
         with:
