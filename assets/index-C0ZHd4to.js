@@ -83,7 +83,7 @@ _You **can** combine them_
     2. Item 3b
 
 ### Tasklist
-- [ ] Wake up
+- [x] Wake up
 - [ ] Drink water
 - [ ] Make lunch
 
