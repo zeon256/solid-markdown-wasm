@@ -12,7 +12,8 @@
       "./tsconfig.node.json",
       "./tsconfig.json",
       "./tsconfig.app.json",
-      "./dist"
+      "./dist",
+      "./prepare_package.cjs"
     ]
   },
   "formatter": {
