@@ -8,8 +8,12 @@ crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = "0.2.100"
-comrak = "0.39.0"
+comrak = { version = "0.39.0", default-features = false } 
 once_cell = "1.21.3"
+syntastica = { version = "0.6.0", default-features = false, features = ["runtime-c2rust"] } 
+syntastica-parsers-git = { version = "0.6.0", default-features = false, features = ["runtime-c2rust", "rust"] } 
+syntastica-themes = { version = "0.6.0", default-features = false, features = ["runtime-c2rust"] }
+parking_lot = { version = "0.12.4" } 
 
 [profile.release]
 opt-level = 3

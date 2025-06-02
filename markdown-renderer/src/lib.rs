@@ -1,11 +1,16 @@
-use comrak::{
-    Options, Plugins, markdown_to_html_with_plugins,
-    plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
-};
+use comrak::{Options, Plugins, markdown_to_html_with_plugins};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::LazyLock;
+use syntastica::theme::ResolvedTheme;
+use syntastica_adapter::SyntasticaAdapter;
+use syntastica_parsers_git::LanguageSetImpl;
 use wasm_bindgen::prelude::*;
+
+mod syntastica_adapter;
+
+static GLOBAL_LANGUAGE_SET: Lazy<LanguageSetImpl> = Lazy::new(LanguageSetImpl::new);
+static GLOBAL_DARK_THEME: Lazy<ResolvedTheme> = Lazy::new(syntastica_themes::one::dark);
 
 static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     let mut options = Options::default();
@@ -23,19 +28,11 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options
 });
 
-static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
+static ADAPTERS: Lazy<HashMap<&'static str, SyntasticaAdapter>> = Lazy::new(|| {
     let mut map = HashMap::new();
     map.insert(
         "base16-ocean.dark",
-        SyntectAdapterBuilder::new()
-            .theme("base16-ocean.dark")
-            .build(),
-    );
-    map.insert(
-        "base16-ocean.light",
-        SyntectAdapterBuilder::new()
-            .theme("base16-ocean.light")
-            .build(),
+        SyntasticaAdapter::new(&GLOBAL_DARK_THEME, &GLOBAL_LANGUAGE_SET),
     );
     map
 });
