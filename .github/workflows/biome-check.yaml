@@ -1,0 +1,22 @@
+name: BiomeJS Checks
+
+on:
+  pull_request:
+    branches: [main] 
+
+jobs:
+  biome:
+    name: Run BiomeJS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install Dependencies
+        run: bun install
+      - name: Run Biome Check
+        run: bun run check
