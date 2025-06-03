@@ -37,13 +37,14 @@ static ADAPTERS: Lazy<HashMap<&'static str, SyntasticaAdapter>> = Lazy::new(|| {
     map
 });
 
+static PLUGINS: Lazy<Plugins<'static>> = Lazy::new(|| {
+    let mut plugins = Plugins::default();
+    plugins.render.codefence_syntax_highlighter = Some(&ADAPTERS["base16-ocean.dark"]);
+
+    plugins
+});
+
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: &str) -> String {
-    let mut plugins = Plugins::default();
-
-    if let Some(adapter) = ADAPTERS.get(theme) {
-        plugins.render.codefence_syntax_highlighter = Some(adapter);
-    }
-
-    markdown_to_html_with_plugins(markdown, &OPTIONS, &plugins)
+    markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS)
 }
