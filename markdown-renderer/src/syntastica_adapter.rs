@@ -22,7 +22,7 @@ impl SyntaxHighlighterAdapter for SyntasticaAdapter {
     fn write_highlighted(
         &self,
         output: &mut dyn io::Write,
-        lang_name: Option<&str>, // comrak provides the language string from the fence
+        lang_name: Option<&str>,
         code: &str,
     ) -> io::Result<()> {
         // use rust for testing first
