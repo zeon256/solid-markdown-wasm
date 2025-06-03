@@ -4,10 +4,12 @@ use comrak::{
 };
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use std::sync::LazyLock;
 use wasm_bindgen::prelude::*;
 
-static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
+const BASE16_OCEAN_DARK: &str = "base16-ocean.dark";
+const BASE16_OCEAN_LIGHT: &str = "base16-ocean.light";
+
+static OPTIONS: Lazy<Options> = Lazy::new(|| {
     let mut options = Options::default();
     options.extension.table = true;
     options.extension.tasklist = true;
@@ -24,29 +26,38 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
 });
 
 static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
-    let mut map = HashMap::new();
+    let mut map = HashMap::with_capacity(2);
     map.insert(
-        "base16-ocean.dark",
+        BASE16_OCEAN_DARK,
         SyntectAdapterBuilder::new()
-            .theme("base16-ocean.dark")
+            .theme(BASE16_OCEAN_DARK)
             .build(),
     );
     map.insert(
-        "base16-ocean.light",
+        BASE16_OCEAN_LIGHT,
         SyntectAdapterBuilder::new()
-            .theme("base16-ocean.light")
+            .theme(BASE16_OCEAN_LIGHT)
             .build(),
     );
     map
 });
 
+static PLUGINS: Lazy<HashMap<&'static str, Plugins<'static>>> = Lazy::new(|| {
+    let mut map = HashMap::with_capacity(2);
+
+    let mut plugin_dark = Plugins::default();
+    plugin_dark.render.codefence_syntax_highlighter = Some(&ADAPTERS[BASE16_OCEAN_DARK]);
+
+    let mut plugin_light = Plugins::default();
+    plugin_light.render.codefence_syntax_highlighter = Some(&ADAPTERS[BASE16_OCEAN_LIGHT]);
+
+    map.insert(BASE16_OCEAN_DARK, plugin_dark);
+    map.insert(BASE16_OCEAN_LIGHT, plugin_light);
+
+    map
+});
+
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: &str) -> String {
-    let mut plugins = Plugins::default();
-
-    if let Some(adapter) = ADAPTERS.get(theme) {
-        plugins.render.codefence_syntax_highlighter = Some(adapter);
-    }
-
-    markdown_to_html_with_plugins(markdown, &OPTIONS, &plugins)
+    markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS[theme])
 }
