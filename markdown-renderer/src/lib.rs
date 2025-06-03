@@ -1,10 +1,10 @@
-use comrak::{
-    Options, Plugins, markdown_to_html_with_plugins,
-    plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
-};
+use comrak::{Options, Plugins, markdown_to_html_with_plugins};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
+use syntect_adapter::{SyntectAdapter, SyntectAdapterBuilder};
 use wasm_bindgen::prelude::*;
+
+mod syntect_adapter;
 
 const BASE16_OCEAN_DARK: &str = "base16-ocean.dark";
 const BASE16_OCEAN_LIGHT: &str = "base16-ocean.light";
