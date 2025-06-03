@@ -25,14 +25,17 @@ impl SyntaxHighlighterAdapter for SyntasticaAdapter {
         lang_name: Option<&str>,
         code: &str,
     ) -> io::Result<()> {
-        // use rust for testing first
+        match lang_name {
+            Some(lang_name) => {
+                let mut processor_guard = self.processor.lock();
 
-        let mut processor_guard = self.processor.lock();
+                let highlights = processor_guard.process(code, Lang::Rust).unwrap();
+                let html = syntastica::render(&highlights, &mut HtmlRenderer::new(), self.theme);
 
-        let highlights = processor_guard.process(code, Lang::Rust).unwrap();
-        let html = syntastica::render(&highlights, &mut HtmlRenderer::new(), self.theme);
-
-        output.write_all(html.as_bytes())
+                output.write_all(html.as_bytes())
+            }
+            None => output.write_all(code.as_bytes()),
+        }
     }
 
     fn write_pre_tag(

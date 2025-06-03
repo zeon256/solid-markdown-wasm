@@ -1,7 +1,6 @@
 use comrak::{Options, Plugins, markdown_to_html_with_plugins};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use std::sync::LazyLock;
 use syntastica::theme::ResolvedTheme;
 use syntastica_adapter::SyntasticaAdapter;
 use syntastica_parsers_git::LanguageSetImpl;
@@ -10,9 +9,9 @@ use wasm_bindgen::prelude::*;
 mod syntastica_adapter;
 
 static GLOBAL_LANGUAGE_SET: Lazy<LanguageSetImpl> = Lazy::new(LanguageSetImpl::new);
-static GLOBAL_DARK_THEME: Lazy<ResolvedTheme> = Lazy::new(syntastica_themes::one::dark);
+static GLOBAL_DARK_THEME: Lazy<ResolvedTheme> = Lazy::new(syntastica_themes::one::darker);
 
-static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
+static OPTIONS: Lazy<Options> = Lazy::new(|| {
     let mut options = Options::default();
     options.extension.table = true;
     options.extension.tasklist = true;
