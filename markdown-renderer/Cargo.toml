@@ -11,7 +11,7 @@ wasm-bindgen = "0.2.100"
 comrak = { version = "0.39.0" } 
 once_cell = "1.21.3"
 syntastica = { version = "0.6.0", default-features = false, features = ["runtime-c2rust"] } 
-syntastica-parsers-git = { version = "0.6.0", default-features = false, features = ["runtime-c2rust", "most"] } 
+syntastica-parsers-git = { version = "0.6.0", default-features = false, features = ["runtime-c2rust", "some"] } 
 syntastica-themes = { version = "0.6.0", default-features = false, features = ["runtime-c2rust"] }
 parking_lot = { version = "0.12.4" } 
 
@@ -19,4 +19,3 @@ parking_lot = { version = "0.12.4" }
 opt-level = 3
 lto = true
 codegen-units = 1
-panic = 'abort'
