@@ -49,22 +49,22 @@ static ADAPTERS_TREESITTER: Lazy<HashMap<&'static str, SyntasticaAdapter>> = Laz
     map
 });
 
-static ADAPTERS_SYNTECT: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
-    let mut map = HashMap::with_capacity(2);
-    map.insert(
-        BASE16_OCEAN_DARK,
-        SyntectAdapterBuilder::new()
-            .theme(BASE16_OCEAN_DARK)
-            .build(),
-    );
-    map.insert(
-        BASE16_OCEAN_LIGHT,
-        SyntectAdapterBuilder::new()
-            .theme(BASE16_OCEAN_LIGHT)
-            .build(),
-    );
-    map
-});
+// static ADAPTERS_SYNTECT: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
+//     let mut map = HashMap::with_capacity(2);
+//     map.insert(
+//         BASE16_OCEAN_DARK,
+//         SyntectAdapterBuilder::new()
+//             .theme(BASE16_OCEAN_DARK)
+//             .build(),
+//     );
+//     map.insert(
+//         BASE16_OCEAN_LIGHT,
+//         SyntectAdapterBuilder::new()
+//             .theme(BASE16_OCEAN_LIGHT)
+//             .build(),
+//     );
+//     map
+// });
 
 static PLUGINS_TREESITTER: Lazy<HashMap<&'static str, Plugins<'static>>> = Lazy::new(|| {
     let mut map = HashMap::with_capacity(2);
@@ -80,30 +80,31 @@ static PLUGINS_TREESITTER: Lazy<HashMap<&'static str, Plugins<'static>>> = Lazy:
     map
 });
 
-static PLUGINS_SYNTECT: Lazy<HashMap<&'static str, Plugins<'static>>> = Lazy::new(|| {
-    let mut map = HashMap::with_capacity(2);
+// static PLUGINS_SYNTECT: Lazy<HashMap<&'static str, Plugins<'static>>> = Lazy::new(|| {
+//     let mut map = HashMap::with_capacity(2);
 
-    let mut plugin_dark = Plugins::default();
-    plugin_dark.render.codefence_syntax_highlighter = Some(&ADAPTERS_SYNTECT[BASE16_OCEAN_DARK]);
+//     let mut plugin_dark = Plugins::default();
+//     plugin_dark.render.codefence_syntax_highlighter = Some(&ADAPTERS_SYNTECT[BASE16_OCEAN_DARK]);
 
-    let mut plugin_light = Plugins::default();
-    plugin_light.render.codefence_syntax_highlighter = Some(&ADAPTERS_SYNTECT[BASE16_OCEAN_LIGHT]);
+//     let mut plugin_light = Plugins::default();
+//     plugin_light.render.codefence_syntax_highlighter = Some(&ADAPTERS_SYNTECT[BASE16_OCEAN_LIGHT]);
 
-    map.insert(BASE16_OCEAN_DARK, plugin_dark);
-    map.insert(BASE16_OCEAN_LIGHT, plugin_light);
+//     map.insert(BASE16_OCEAN_DARK, plugin_dark);
+//     map.insert(BASE16_OCEAN_LIGHT, plugin_light);
 
-    map
-});
+//     map
+// });
 
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: &str) -> String {
-    if markdown.len() > 10_000 {
-        if theme.contains("dark") {
-            markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_SYNTECT[BASE16_OCEAN_DARK])
-        } else {
-            markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_SYNTECT[BASE16_OCEAN_LIGHT])
-        }
-    } else {
-        markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_TREESITTER[theme])
-    }
+    markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_TREESITTER[theme])
+    // if markdown.len() > 10_000 {
+    //     if theme.contains("dark") {
+    //         markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_SYNTECT[BASE16_OCEAN_DARK])
+    //     } else {
+    //         markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_SYNTECT[BASE16_OCEAN_LIGHT])
+    //     }
+    // } else {
+    //     markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS_TREESITTER[theme])
+    // }
 }

@@ -27,7 +27,7 @@ impl FromStr for WrappedLang {
         match s {
             "bash" => Ok(WrappedLang(Lang::Bash)),
             "c" => Ok(WrappedLang(Lang::C)),
-            "cpp" => Ok(WrappedLang(Lang::Cpp)),
+            "cpp" | "c++" => Ok(WrappedLang(Lang::Cpp)),
             "css" => Ok(WrappedLang(Lang::Css)),
             "go" => Ok(WrappedLang(Lang::Go)),
             "html" => Ok(WrappedLang(Lang::Html)),
@@ -42,7 +42,8 @@ impl FromStr for WrappedLang {
             "tsx" => Ok(WrappedLang(Lang::Tsx)),
             "typescript" => Ok(WrappedLang(Lang::Typescript)),
             "yaml" => Ok(WrappedLang(Lang::Yaml)),
-            _ => Err("Unknown language string"),
+            "markdown" | "md" => Ok(WrappedLang(Lang::Markdown)),
+            _ => Ok(WrappedLang(Lang::Markdown)),
         }
     }
 }
