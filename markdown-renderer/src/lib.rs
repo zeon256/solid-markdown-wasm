@@ -166,7 +166,7 @@ mod test {
 
         println!("Available themes:");
         for theme in THEME_SET.themes.keys() {
-            println!("\"{}\",", theme);
+            println!("`{}`,", theme);
         }
     }
 
@@ -194,7 +194,13 @@ mod test {
             from_binary(include_bytes!("../sublime/syntaxes/newlines.packdump"));
         println!("All syntaxes:");
         for syntax in syntaxes.syntaxes().iter() {
-            println!("- {} {}", syntax.name, syntax.file_extensions.join(", "));
+            let extensions = syntax
+                .file_extensions
+                .iter()
+                .map(|ext| format!("`{}`", ext))
+                .collect::<Vec<String>>()
+                .join(", ");
+            println!("- **{}**: {}", syntax.name, extensions);
         }
     }
 }

@@ -15,6 +15,7 @@
 
 - Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec")
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
+- Huge support for languages and themes
 - Easy to use
 
 ## Example
@@ -59,6 +60,10 @@ const App: Component = () => {
 
 export default App;
 ```
+
+## Available Themes and supported Languages
+
+For a list of available themes and languages, please refer to [THEMES_AND_LANGS.md](./THEMES_AND_LANGS.md). Autocomplete is also supported via your IDE as the themes are exported as unions of string literals.
 
 ## Internals
 
