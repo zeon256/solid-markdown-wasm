@@ -128,7 +128,7 @@ static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
 
     for theme in THEMES.iter() {
         let adapter = SyntectAdapterBuilder::new()
-            .theme(*theme)
+            .theme(theme)
             .syntax_set(&SYNTAX_SET)
             .theme_set(&THEME_SET)
             .build();

@@ -46,7 +46,7 @@ impl SyntectAdapter {
                 // fall back to HTML classes.
                 let mut html_generator = ClassedHTMLGenerator::new_with_class_style(
                     syntax,
-                    &self.syntax_set,
+                    self.syntax_set,
                     ClassStyle::Spaced,
                 );
                 for line in LinesWithEndings::from(code) {
