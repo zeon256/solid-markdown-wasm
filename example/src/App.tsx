@@ -66,7 +66,7 @@ const App: Component = () => {
         <div class="m-0 h-full shadow-sm overflow-y-auto p-4 px-6">
           <MarkdownRenderer
             markdown={debouncedMarkdown()}
-            theme="base16-ocean.dark"
+            theme="one-dark"
             class="markdown-body"
           />
         </div>

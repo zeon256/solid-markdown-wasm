@@ -1,0 +1,192 @@
+# Available Themes
+
+- `1337`
+- `OneHalfDark`
+- `OneHalfLight`
+- `Tomorrow`
+- `agola-dark`
+- `ascetic-white`
+- `axar`
+- `ayu-dark`
+- `ayu-light`
+- `ayu-mirage`
+- `base16-atelierdune-light`
+- `base16-ocean-dark`
+- `base16-ocean-light`
+- `bbedit`
+- `boron`
+- `charcoal`
+- `cheerfully-light`
+- `classic-modified`
+- `demain`
+- `dimmed-fluid`
+- `dracula`
+- `gray-matter-dark`
+- `green`
+- `gruvbox-dark`
+- `gruvbox-light`
+- `idle`
+- `inspired-github`
+- `ir-white`
+- `kronuz`
+- `material-dark`
+- `material-light`
+- `monokai`
+- `nord`
+- `nyx-bold`
+- `one-dark`
+- `railsbase16-green-screen-dark`
+- `solarized-dark`
+- `solarized-light`
+- `subway-madrid`
+- `subway-moscow`
+- `two-dark`
+- `visual-studio-dark`
+- `zenburn`
+
+# Available Languages
+
+- **Plain Text**: `txt`
+- **ASP**: `asa`
+- **HTML (ASP)**: `asp`
+- **ActionScript**: `as`
+- **AppleScript**: `applescript`, `script editor`
+- **Batch File**: `bat`, `cmd`
+- **NAnt Build File**: `build`
+- **C#**: `cs`, `csx`
+- **C++**: `cpp`, `cc`, `cp`, `cxx`, `c++`, `C`, `h`, `hh`, `hpp`, `hxx`, `h++`, `inl`, `ipp`
+- **C**: `c`, `h`
+- **CSS**: `css`, `css.erb`, `css.liquid`
+- **Clojure**: `clj`, `cljc`, `cljs`, `edn`
+- **D**: `d`, `di`
+- **DMD Output**: 
+- **Diff**: `diff`, `patch`
+- **Erlang**: `erl`, `hrl`, `Emakefile`, `emakefile`, `escript`
+- **HTML (Erlang)**: `yaws`
+- **Git Attributes**: `attributes`, `gitattributes`, `.gitattributes`
+- **Git Commit**: `COMMIT_EDITMSG`, `MERGE_MSG`, `TAG_EDITMSG`
+- **Git Common**: 
+- **Git Config**: `gitconfig`, `.gitconfig`, `.gitmodules`
+- **Git Ignore**: `exclude`, `gitignore`, `.gitignore`
+- **Git Link**: `.git`
+- **Git Log**: `gitlog`
+- **Git Mailmap**: `.mailmap`, `mailmap`
+- **Git Rebase Todo**: `git-rebase-todo`
+- **Go**: `go`
+- **Graphviz (DOT)**: `dot`, `DOT`, `gv`
+- **Groovy**: `groovy`, `gvy`, `gradle`, `Jenkinsfile`
+- **HTML**: `html`, `htm`, `shtml`, `xhtml`
+- **Haskell**: `hs`
+- **Literate Haskell**: `lhs`
+- **Java Server Page (JSP)**: `jsp`
+- **Java**: `java`, `bsh`
+- **Javadoc**: 
+- **Java Properties**: `properties`
+- **JSON**: `json`, `sublime-settings`, `sublime-menu`, `sublime-keymap`, `sublime-mousemap`, `sublime-theme`, `sublime-build`, `sublime-project`, `sublime-completions`, `sublime-commands`, `sublime-macro`, `sublime-color-scheme`, `ipynb`, `Pipfile.lock`
+- **JavaScript**: `js`, `htc`
+- **Regular Expressions (Javascript)**: 
+- **BibTeX**: `bib`
+- **LaTeX Log**: 
+- **LaTeX**: `tex`, `ltx`
+- **TeX**: `sty`, `cls`
+- **Lisp**: `lisp`, `cl`, `clisp`, `l`, `mud`, `el`, `scm`, `ss`, `lsp`, `fasl`
+- **Lua**: `lua`
+- **Make Output**: 
+- **Makefile**: `make`, `GNUmakefile`, `makefile`, `Makefile`, `makefile.am`, `Makefile.am`, `makefile.in`, `Makefile.in`, `OCamlMakefile`, `mak`, `mk`
+- **Markdown**: `md`, `mdown`, `markdown`, `markdn`
+- **MultiMarkdown**: 
+- **MATLAB**: `matlab`
+- **OCaml**: `ml`, `mli`
+- **OCamllex**: `mll`
+- **OCamlyacc**: `mly`
+- **camlp4**: 
+- **Objective-C++**: `mm`, `M`, `h`
+- **Objective-C**: `m`, `h`
+- **PHP Source**: 
+- **PHP**: `php`, `php3`, `php4`, `php5`, `php7`, `phps`, `phpt`, `phtml`
+- **Regular Expressions (PHP)**: 
+- **Pascal**: `pas`, `p`, `dpr`
+- **Perl**: `pl`, `pc`, `pm`, `pmc`, `pod`, `t`
+- **Python**: `py`, `py3`, `pyw`, `pyi`, `pyx`, `pyx.in`, `pxd`, `pxd.in`, `pxi`, `pxi.in`, `rpy`, `cpy`, `SConstruct`, `Sconstruct`, `sconstruct`, `SConscript`, `gyp`, `gypi`, `Snakefile`, `vpy`, `wscript`, `bazel`, `bzl`
+- **Regular Expressions (Python)**: 
+- **R Console**: 
+- **R**: `R`, `r`, `Rprofile`
+- **Rd (R Documentation)**: `rd`
+- **HTML (Rails)**: `rails`, `rhtml`, `erb`, `html.erb`
+- **JavaScript (Rails)**: `js.erb`
+- **Ruby Haml**: `haml`, `sass`
+- **Ruby on Rails**: `rxml`, `builder`
+- **SQL (Rails)**: `erbsql`, `sql.erb`
+- **Regular Expression**: `re`
+- **reStructuredText**: `rst`, `rest`
+- **Ruby**: `rb`, `Appfile`, `Appraisals`, `Berksfile`, `Brewfile`, `capfile`, `cgi`, `Cheffile`, `config.ru`, `Deliverfile`, `Fastfile`, `fcgi`, `Gemfile`, `gemspec`, `Guardfile`, `irbrc`, `jbuilder`, `Podfile`, `podspec`, `prawn`, `rabl`, `rake`, `Rakefile`, `Rantfile`, `rbx`, `rjs`, `ruby.rail`, `Scanfile`, `simplecov`, `Snapfile`, `thor`, `Thorfile`, `Vagrantfile`
+- **Cargo Build Results**: 
+- **Rust**: `rs`
+- **SQL**: `sql`, `ddl`, `dml`
+- **Scala**: `scala`, `sbt`, `sc`
+- **Bourne Again Shell (bash)**: `sh`, `bash`, `zsh`, `ash`, `.bash_aliases`, `.bash_completions`, `.bash_functions`, `.bash_login`, `.bash_logout`, `.bash_profile`, `.bash_variables`, `.bashrc`, `.profile`, `.textmate_init`, `.zlogin`, `.zlogout`, `.zprofile`, `.zshenv`, `.zshrc`, `PKGBUILD`, `.ebuild`, `.eclass`
+- **Shell-Unix-Generic**: 
+- **commands-builtin-shell-bash**: 
+- **HTML (Tcl)**: `adp`
+- **Tcl**: `tcl`
+- **Textile**: `textile`
+- **XML**: `xml`, `xsd`, `xslt`, `tld`, `dtml`, `rng`, `rss`, `opml`, `svg`
+- **YAML**: `yaml`, `yml`, `sublime-syntax`
+- **Assembly x86 (NASM)**: `asm`, `inc`, `nasm`
+- **Advanced CSV**: `csv`, `tsv`
+- **Crystal**: `cr`
+- **Dart**: `dart`
+- **Dockerfile**: `Dockerfile`, `dockerfile`
+- **GDScript (Godot Engine)**: `gd`
+- **GraphQL**: `graphql`, `graphqls`, `gql`
+- **Handlebars**: `handlebars`, `handlebars.html`, `hbr`, `hbrs`, `hbs`, `hdbs`, `hjs`, `mu`, `mustache`, `rac`, `stache`, `template`, `tmpl`
+- **Julia**: `jl`
+- **Kotlin**: `kt`, `kts`
+- **Less**: `less`, `css.less`
+- **MiniZinc (MZN)**: `mzn`, `dzn`
+- **Nim**: `nim`, `nims`
+- **Nix**: `nix`
+- **PowerShell**: `ps1`, `psm1`, `psd1`
+- **SWI-Prolog**: `pro`
+- **Racket**: `rkt`
+- **Reason**: `re`, `rei`
+- **Stylus**: `styl`, `stylus`
+- **CMake C Header**: `h.in`
+- **CMake C++ Header**: `hh.in`, `hpp.in`, `hxx.in`, `h++.in`
+- **CMake**: `CMakeLists.txt`, `cmake`
+- **CMakeCache**: `CMakeCache.txt`
+- **CMakeCommands**: 
+- **Generic Config**: `cfg`, `conf`, `config`, `ini`, `pro`, `mak`, `mk`, `Doxyfile`, `inputrc`, `.inputrc`, `dircolors`, `.dircolors`, `gitmodules`, `.gitmodules`, `gitignore`, `.gitignore`, `gitattributes`, `.gitattributes`
+- **Elm Compile Messages**: 
+- **Elm Documentation**: 
+- **Elm**: `elm`
+- **Fortran (Fixed Form)**: `f`, `F`, `f77`, `F77`, `for`, `FOR`, `fpp`, `FPP`
+- **Fortran (Modern)**: `f90`, `F90`, `f95`, `F95`, `f03`, `F03`, `f08`, `F08`
+- **Fortran Namelist**: `namelist`
+- **GFortran Build Results**: 
+- **OpenMP (Fortran)**: 
+- **SCSS**: `scss`
+- **Sass**: `sass`
+- **Linker Script**: `ld`
+- **Swift**: `swift`
+- **TypeScript**: `ts`
+- **TypeScriptReact**: `tsx`
+- **VimL**: `vim`
+- **AWK**: `awk`
+- **Elixir**: `ex`, `exs`
+- **HTML (EEx)**: `html.eex`, `html.leex`
+- **Regular Expressions (Elixir)**: `ex.re`
+- **lrc**: `lrc`, `lyric`
+- **Protocol Buffer**: `proto`, `protodevel`
+- **Protocol Buffer (TEXT)**: `pb.txt`, `proto.text`, `textpb`, `pbtxt`, `prototxt`
+- **srt**: `srt`, `subrip`
+- **ClojureC**: `clj`, `cljs`, `cljc`, `cljx`, `boot`
+- **EDN**: `edn`
+- **Friendly Interactive Shell (fish)**: `fish`
+- **GLSL**: `vs`, `fs`, `gs`, `vsh`, `fsh`, `gsh`, `vshader`, `fshader`, `gshader`, `vert`, `frag`, `geom`, `tesc`, `tese`, `comp`, `glsl`
+- **HTML (Jinja2)**: `htm.j2`, `html.j2`, `xhtml.j2`, `xml.j2`
+- **Jinja2**: `j2`, `jinja2`, `jinja`
+- **PureScript**: `purs`
+- **Zig**: `zig`
+- **TOML**: `toml`, `tml`, `Cargo.lock`, `Gopkg.lock`, `Pipfile`
+- **F#**: `fs`, `fsi`, `fsx`

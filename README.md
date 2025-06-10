@@ -15,6 +15,7 @@
 
 - Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec")
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
+- Huge support for languages and themes
 - Easy to use
 
 ## Example
@@ -33,32 +34,36 @@ import { type Component, createSignal } from "solid-js";
 import { MarkdownRenderer } from "solid-markdown-wasm";
 
 const App: Component = () => {
-	const [markdown, setMarkdown] = createSignal<string>("# Hello, Markdown!");
+  const [markdown, setMarkdown] = createSignal<string>("# Hello, Markdown!");
 
-	const handleInput = (
-		event: InputEvent & { currentTarget: HTMLTextAreaElement },
-	) => {
-		setMarkdown(event.currentTarget.value);
-	};
+  const handleInput = (
+    event: InputEvent & { currentTarget: HTMLTextAreaElement }
+  ) => {
+    setMarkdown(event.currentTarget.value);
+  };
 
-	return (
-		<div>
-			<h1>Markdown Editor</h1>
-			<textarea
-				rows={10}
-				cols={50}
-				value={markdown()}
-				onInput={handleInput}
-				placeholder="Enter your markdown here..."
-			/>
-			<h2>Preview:</h2>
-			<MarkdownRenderer markdown={markdown()} theme="base16-ocean.dark" />
-		</div>
-	);
+  return (
+    <div>
+      <h1>Markdown Editor</h1>
+      <textarea
+        rows={10}
+        cols={50}
+        value={markdown()}
+        onInput={handleInput}
+        placeholder="Enter your markdown here..."
+      />
+      <h2>Preview:</h2>
+      <MarkdownRenderer markdown={markdown()} theme="base16-ocean-dark" />
+    </div>
+  );
 };
 
 export default App;
 ```
+
+## Available Themes and supported Languages
+
+For a list of available themes and languages, please refer to [THEMES_AND_LANGS.md](./THEMES_AND_LANGS.md). Autocomplete is also supported via your IDE as the themes are exported as unions of string literals.
 
 ## Internals
 
@@ -95,23 +100,7 @@ npm run build
 
 ## Contributing
 
-We welcome contributions to `solid-markdown-wasm`! If you have ideas for improvements, bug fixes, or new features, please feel free to contribute.
-
-Here's a general guideline for contributing:
-
-1.  **Fork the repository** on GitHub.
-2.  **Create a new branch** from the `main` branch for your changes.
-3.  **Make your changes** and ensure they follow the project's coding style and conventions.
-4.  **Write tests** for any new functionality or bug fixes. Ensure all tests pass.
-5.  **Commit your changes** with clear and concise commit messages.
-6.  **Push your branch** to your forked repository.
-7.  **Create a pull request** to the `main` branch of the original `solid-markdown-wasm` repository.
-
-Please provide a clear description of your changes in the pull request. We will review your contribution as soon as possible.
-
-For significant changes or new features, it's recommended to open an issue first to discuss your ideas with the maintainers. This can help ensure that your work aligns with the project's goals and avoids potential conflicts.
-
-We appreciate your contributions!
+For contributing to `solid-markdown-wasm`, please refer to the [CONTRIBUTING.md](./CONTRIBUTING.md) file for guidelines on how to contribute to this project.
 
 ## Support This Project
 

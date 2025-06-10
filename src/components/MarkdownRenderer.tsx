@@ -1,14 +1,14 @@
-import init, { render_md } from "markdown-renderer";
+import init, { render_md, type Themes } from "markdown-renderer";
 import { type Component, createEffect, createSignal, onMount } from "solid-js";
 
 export interface MarkdownRendererProps {
   markdown: string;
   class?: string;
-  theme?: string;
+  theme?: Themes;
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
-  const { theme = "base16-ocean.dark" } = props;
+  const { theme = "one-dark" } = props;
   const [renderedHtml, setRenderedHtml] = createSignal("");
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
