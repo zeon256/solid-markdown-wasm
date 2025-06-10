@@ -16,9 +16,9 @@ jobs:
         with:
           toolchain: stable
       - name: Check Rust code
-        run: cargo check
+        run: cd markdown-renderer && cargo check
       - name: Run Clippy
-        run: cargo clippy
+        run: cd markdown-renderer && cargo clippy -- -D warnings
   biome:
     name: Run BiomeJS
     runs-on: ubuntu-latest
