@@ -9,7 +9,7 @@
   --base-text-weight-normal: 400;
   --base-text-weight-medium: 500;
   --base-text-weight-semibold: 600;
-  --fontStack-monospace: ui-monospace, Iosevka;
+  --fontStack-monospace: ui-monospace, Iosevka, monospace;
   --fgColor-accent: Highlight;
 }
 
