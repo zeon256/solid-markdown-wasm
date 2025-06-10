@@ -166,7 +166,7 @@ mod test {
 
         println!("Available themes:");
         for theme in THEME_SET.themes.keys() {
-            println!("`{}`,", theme);
+            println!("- `{}`", theme);
         }
     }
 
