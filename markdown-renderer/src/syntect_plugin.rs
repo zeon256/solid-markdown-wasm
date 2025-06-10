@@ -33,7 +33,7 @@ impl SyntectAdapter {
 
                 let mut output = String::new();
                 for line in LinesWithEndings::from(code) {
-                    let regions = highlighter.highlight_line(line, &self.syntax_set)?;
+                    let regions = highlighter.highlight_line(line, self.syntax_set)?;
                     append_highlighted_html_for_styled_line(
                         &regions[..],
                         IncludeBackground::IfDifferent(bg),
