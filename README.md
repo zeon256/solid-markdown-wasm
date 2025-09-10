@@ -53,7 +53,12 @@ const App: Component = () => {
         placeholder="Enter your markdown here..."
       />
       <h2>Preview:</h2>
-      <MarkdownRenderer markdown={markdown()} theme="base16-ocean-dark" />
+      <MarkdownRenderer 
+        markdown={markdown()} 
+        theme="base16-ocean-dark"
+        onLoaded={() => {console.log("Markdown rendered successfully")}}
+        fallback={<div>Loading...</div>} 
+      />
     </div>
   );
 };
