@@ -100,7 +100,7 @@ You will need the following tools to compile from source
 Then run the following
 
 ```bash
-npm run build
+bun run build
 ```
 
 ## Contributing

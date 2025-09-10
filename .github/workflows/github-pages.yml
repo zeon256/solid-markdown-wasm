@@ -15,10 +15,36 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Cache wasm-pack
+        id: cache-wasm-pack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-pack
+          key: wasm-pack-${{ runner.os }}
+
+      - name: Install wasm-pack
+        if: steps.cache-wasm-pack.outputs.cache-hit != 'true'
+        run: cargo install wasm-pack
+      - name: Build Rust project
+        run: cd markdown-renderer && wasm-pack build --target web --release
+
+      - name: Set up Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - name: Install dependencies
-        run: bun install && bun run build && cd example && bun install
+        run: bun install
+
+      - name: Build all
+        run: bunx vite build
+
+      - name: Install dependencies for example
+        run: bun run build && cd example && bun install
+
       - name: Build example
         run: cd example && bun run build 
+
       - name: Deploy to GitHub Pages
         uses: jamesives/github-pages-deploy-action@v4
         with:
