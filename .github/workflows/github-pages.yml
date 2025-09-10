@@ -40,7 +40,7 @@ jobs:
         run: bunx vite build
 
       - name: Install dependencies for example
-        run: bun run build && cd example && bun install
+        run: cd example && bun install
 
       - name: Build example
         run: cd example && bun run build 
