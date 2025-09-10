@@ -2,7 +2,6 @@ import { type Component, createSignal, onCleanup, onMount } from "solid-js";
 import { MarkdownRenderer } from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
 import initialMarkdown from "../src/assets/markdown_preview.md?raw";
-import "./Spinner.css";
 
 const LoadingFallback = () => (
   <div class="flex justify-center items-center h-full">
