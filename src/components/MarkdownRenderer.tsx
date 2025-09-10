@@ -1,10 +1,19 @@
 import init, { render_md, type Themes } from "markdown-renderer";
-import { type Component, createEffect, createSignal, onMount } from "solid-js";
+import {
+  type Component,
+  createEffect,
+  createSignal,
+  type JSX,
+  onMount,
+  Show,
+} from "solid-js";
 
 export interface MarkdownRendererProps {
   markdown: string;
   class?: string;
   theme?: Themes;
+  fallback?: JSX.Element;
+  onLoaded?: () => void;
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
@@ -25,6 +34,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     } finally {
       setLoadingWasm(false);
       console.debug("Loaded WASM successfully");
+      props.onLoaded?.();
     }
   });
 
@@ -41,10 +51,11 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   return (
     <div>
       {error() && <div style={{ color: "red" }}>{error()}</div>}
-      {loadingWasm() && <p>Loading WASM...</p>}
-      <div class={props.class}>
-        <div innerHTML={renderedHtml()} />
-      </div>
+      <Show when={!loadingWasm() && !error()} fallback={props.fallback}>
+        <div class={props.class}>
+          <div innerHTML={renderedHtml()} />
+        </div>
+      </Show>
     </div>
   );
 };

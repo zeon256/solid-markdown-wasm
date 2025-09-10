@@ -16,7 +16,7 @@ jobs:
         with:
           bun-version: latest
       - name: Install dependencies
-        run: cd example && bun install
+        run: bun install && bun run build && cd example && bun install
       - name: Build example
         run: cd example && bun run build 
       - name: Deploy to GitHub Pages

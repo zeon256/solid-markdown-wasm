@@ -2,6 +2,13 @@ import { type Component, createSignal, onCleanup, onMount } from "solid-js";
 import { MarkdownRenderer } from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
 import initialMarkdown from "../src/assets/markdown_preview.md?raw";
+import "./Spinner.css";
+
+const LoadingFallback = () => (
+  <div class="flex justify-center items-center h-full">
+    <div class="spinner" />
+  </div>
+);
 
 const App: Component = () => {
   const [markdown, setMarkdown] = createSignal("");
@@ -66,8 +73,10 @@ const App: Component = () => {
         <div class="m-0 h-full shadow-sm overflow-y-auto p-4 px-6">
           <MarkdownRenderer
             markdown={debouncedMarkdown()}
-            theme="one-dark"
+            theme="ayu-dark"
             class="markdown-body"
+            fallback={<LoadingFallback />}
+            onLoaded={() => console.log("WASM Loaded")}
           />
         </div>
       </div>
