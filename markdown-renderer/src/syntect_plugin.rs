@@ -2,16 +2,17 @@
 
 use comrak::adapters::SyntaxHighlighterAdapter;
 use comrak::html;
-use std::collections::{hash_map, HashMap};
-use std::io::{self, Write};
+use std::borrow::Cow;
+use std::collections::{HashMap, hash_map};
+use std::fmt::{self, Write};
+use syntect::Error;
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Color, ThemeSet};
 use syntect::html::{
-    append_highlighted_html_for_styled_line, ClassStyle, ClassedHTMLGenerator, IncludeBackground,
+    ClassStyle, ClassedHTMLGenerator, IncludeBackground, append_highlighted_html_for_styled_line,
 };
 use syntect::parsing::{SyntaxReference, SyntaxSet};
 use syntect::util::LinesWithEndings;
-use syntect::Error;
 
 #[derive(Debug)]
 /// Syntect syntax highlighter plugin.
@@ -64,7 +65,7 @@ impl SyntaxHighlighterAdapter for SyntectAdapter {
         output: &mut dyn Write,
         lang: Option<&str>,
         code: &str,
-    ) -> io::Result<()> {
+    ) -> Result<(), fmt::Error> {
         let fallback_syntax = "Plain Text";
 
         let lang: &str = match lang {
@@ -82,16 +83,16 @@ impl SyntaxHighlighterAdapter for SyntectAdapter {
             });
 
         match self.highlight_html(code, syntax) {
-            Ok(highlighted_code) => output.write_all(highlighted_code.as_bytes()),
-            Err(_) => output.write_all(code.as_bytes()),
+            Ok(highlighted_code) => output.write_str(&highlighted_code),
+            Err(_) => output.write_str(code),
         }
     }
 
     fn write_pre_tag(
         &self,
         output: &mut dyn Write,
-        attributes: HashMap<String, String>,
-    ) -> io::Result<()> {
+        attributes: HashMap<&'static str, Cow<'_, str>>,
+    ) -> Result<(), fmt::Error> {
         match &self.theme {
             Some(theme) => {
                 let theme = &self.theme_set.themes[theme];
@@ -116,26 +117,26 @@ impl SyntaxHighlighterAdapter for SyntectAdapter {
     fn write_code_tag(
         &self,
         output: &mut dyn Write,
-        attributes: HashMap<String, String>,
-    ) -> io::Result<()> {
+        attributes: HashMap<&'static str, Cow<'_, str>>,
+    ) -> Result<(), fmt::Error> {
         html::write_opening_tag(output, "code", attributes)
     }
 }
 
-struct SyntectPreAttributes {
+struct SyntectPreAttributes<'s> {
     syntect_style: String,
-    attributes: HashMap<String, String>,
+    attributes: HashMap<&'static str, Cow<'s, str>>,
 }
 
-impl SyntectPreAttributes {
-    fn new(attributes: HashMap<String, String>, syntect_style: &str) -> Self {
+impl<'s> SyntectPreAttributes<'s> {
+    fn new(attributes: HashMap<&'static str, Cow<'s, str>>, syntect_style: &str) -> Self {
         Self {
             syntect_style: syntect_style.into(),
             attributes,
         }
     }
 
-    fn iter_mut(&mut self) -> SyntectPreAttributesIter<'_> {
+    fn iter_mut(&mut self) -> SyntectPreAttributesIter<'_, 's> {
         SyntectPreAttributesIter {
             iter_mut: self.attributes.iter_mut(),
             syntect_style: &self.syntect_style,
@@ -144,20 +145,20 @@ impl SyntectPreAttributes {
     }
 }
 
-struct SyntectPreAttributesIter<'a> {
-    iter_mut: hash_map::IterMut<'a, String, String>,
+struct SyntectPreAttributesIter<'a, 's> {
+    iter_mut: hash_map::IterMut<'a, &'static str, Cow<'s, str>>,
     syntect_style: &'a str,
     style_written: bool,
 }
 
-impl<'a> Iterator for SyntectPreAttributesIter<'a> {
+impl<'a, 's> Iterator for SyntectPreAttributesIter<'a, 's> {
     type Item = (&'a str, &'a str);
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter_mut.next() {
-            Some((k, v)) if k == "style" && !self.style_written => {
+            Some((k, v)) if *k == "style" && !self.style_written => {
                 self.style_written = true;
-                v.insert_str(0, self.syntect_style);
+                v.to_mut().insert_str(0, self.syntect_style);
                 Some((k, v))
             }
             Some((k, v)) => Some((k, v)),
@@ -224,7 +225,9 @@ impl SyntectAdapterBuilder {
             syntax_set: self
                 .syntax_set
                 .unwrap_or_else(|| Box::leak(Box::new(SyntaxSet::load_defaults_newlines()))),
-            theme_set: self.theme_set.unwrap_or_else(|| Box::leak(Box::new(ThemeSet::load_defaults()))),
+            theme_set: self
+                .theme_set
+                .unwrap_or_else(|| Box::leak(Box::new(ThemeSet::load_defaults()))),
         }
     }
 }

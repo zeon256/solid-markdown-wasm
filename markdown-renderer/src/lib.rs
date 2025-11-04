@@ -1,4 +1,4 @@
-use comrak::{Options, Plugins, markdown_to_html_with_plugins};
+use comrak::{Options, markdown_to_html_with_plugins, options::Plugins};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use syntect::{dumps::from_binary, highlighting::ThemeSet, parsing::SyntaxSet};
