@@ -14,6 +14,7 @@
 ## Features
 
 - Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec")
+- Math rendering support (using a forked version of [comrak](https://github.com/DoublePrecision/comrak "comrak fork"))
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
 - Huge support for languages and themes
 - Easy to use
@@ -101,8 +102,8 @@ For a list of available themes and languages, please refer to [THEMES_AND_LANGS.
 
 ## Internals
 
-Internally, the renderer is implemented using the [comrak](https://github.com/kivikakk/comrak "comrak github") library and then compiled down to webassembly using [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack github")
-which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). 
+Internally, the renderer is implemented using a [forked version of comrak](https://github.com/DoublePrecision/comrak "comrak fork") (with added math rendering support) and then compiled down to webassembly using [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack github")
+which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). The fork extends the original [comrak](https://github.com/kivikakk/comrak "comrak github") library to include mathematical expression rendering capabilities. 
 
 ## Security
 

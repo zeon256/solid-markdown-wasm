@@ -284,6 +284,7 @@ dependencies = [
 [[package]]
 name = "comrak"
 version = "0.47.0"
+source = "git+https://github.com/DoublePrecision/comrak.git?branch=feat%2Fmath-renderer#b9a47d193902af6676ecb26796dc1b7880728be0"
 dependencies = [
  "caseless",
  "entities",
