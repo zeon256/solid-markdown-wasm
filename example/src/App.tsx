@@ -13,7 +13,7 @@ const App: Component = () => {
   const [markdown, setMarkdown] = createSignal("");
   const [debouncedMarkdown, setDebouncedMarkdown] = createSignal("");
   const [isDarkMode, setIsDarkMode] = createSignal(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
+    window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   let timeoutId: number | NodeJS.Timeout | undefined;
 
@@ -51,7 +51,7 @@ const App: Component = () => {
       setIsDarkMode(e.matches);
     };
     mediaQuery.addEventListener("change", handleChange);
-    
+
     onCleanup(() => {
       mediaQuery.removeEventListener("change", handleChange);
     });
@@ -71,7 +71,10 @@ const App: Component = () => {
   });
 
   return (
-    <div class="flex w-screen h-screen" classList={{ "bg-[#1e1e1e]": isDarkMode(), "bg-white": !isDarkMode() }}>
+    <div
+      class="flex w-screen h-screen"
+      classList={{ "bg-[#1e1e1e]": isDarkMode(), "bg-white": !isDarkMode() }}
+    >
       <div class="w-1/2 flex flex-col m-4">
         <MonacoEditor
           language="markdown"
@@ -82,7 +85,10 @@ const App: Component = () => {
           }}
         />
       </div>
-      <div class="w-1/2 flex flex-col" classList={{ "bg-[#0d1117]": isDarkMode(), "bg-white": !isDarkMode() }}>
+      <div
+        class="w-1/2 flex flex-col"
+        classList={{ "bg-[#0d1117]": isDarkMode(), "bg-white": !isDarkMode() }}
+      >
         <div class="m-0 h-full shadow-sm overflow-y-auto p-4 px-6">
           <MarkdownRenderer
             markdown={debouncedMarkdown()}

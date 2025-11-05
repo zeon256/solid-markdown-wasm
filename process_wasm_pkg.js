@@ -16,7 +16,7 @@ try {
   // This tells Vite to treat it as an asset URL instead of a module to bundle
   const modifiedContent = content.replace(
     "new URL('markdown_renderer_bg.wasm', import.meta.url)",
-    "new URL('./markdown_renderer_bg.wasm?url', import.meta.url).href"
+    "new URL('./markdown_renderer_bg.wasm?url', import.meta.url).href",
   );
 
   if (content !== modifiedContent) {
@@ -30,7 +30,7 @@ try {
   const base64Pattern = /data:application\/wasm;base64,/;
   if (base64Pattern.test(content)) {
     console.error(
-      "✗ Found base64-encoded wasm! This shouldn't happen with wasm-pack --target web"
+      "✗ Found base64-encoded wasm! This shouldn't happen with wasm-pack --target web",
     );
     process.exit(1);
   }

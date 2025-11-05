@@ -1,11 +1,11 @@
 import init, { render_md, type Themes } from "markdown-renderer";
 import {
   type Component,
+  type JSX,
+  Show,
   createEffect,
   createSignal,
-  type JSX,
   onMount,
-  Show,
 } from "solid-js";
 
 export interface MarkdownRendererProps {

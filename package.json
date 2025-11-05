@@ -12,10 +12,16 @@
     "preview": "vite preview",
     "example:dev": "cd example && bun run dev",
     "example:build": "cd example && bun run build",
-    "fmt": "./node_modules/@biomejs/cli-linux-x64/biome format --write .",
-    "check": "./node_modules/@biomejs/cli-linux-x64/biome check"
+    "fmt": "./node_modules/@biomejs/biome/bin/biome format --write .",
+    "check": "./node_modules/@biomejs/biome/bin/biome check"
   },
-  "files": ["dist", "markdown-renderer/pkg", "package.json", "README.md", "LICENSE.md"],
+  "files": [
+    "dist",
+    "markdown-renderer/pkg",
+    "package.json",
+    "README.md",
+    "LICENSE.md"
+  ],
   "dependencies": {
     "markdown-renderer": "file:./markdown-renderer/pkg/"
   },

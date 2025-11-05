@@ -60,12 +60,7 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: [
-        "solid-js",
-        "solid-js/web",
-        "markdown-renderer",
-        /\.wasm$/,
-      ],
+      external: ["solid-js", "solid-js/web", "markdown-renderer", /\.wasm$/],
       output: {
         assetFileNames: (assetInfo) => {
           // Keep .wasm files with their original names

@@ -39,6 +39,9 @@ jobs:
       - name: Build library
         run: bun run build
 
+      - name: Install example dependencies
+        run: cd example && bun install
+
       - name: Build example
         run: cd example && bun run build 
 
