@@ -26,21 +26,18 @@ jobs:
       - name: Install wasm-pack
         if: steps.cache-wasm-pack.outputs.cache-hit != 'true'
         run: cargo install wasm-pack
+
       - name: Build Rust project
         run: cd markdown-renderer && wasm-pack build --target web --release
 
-      - name: Set up Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - name: Install dependencies
+      - name: Post-process wasm package
+        run: bun process_wasm_pkg.js
+
+      - name: Install dependencies (workspace)
         run: bun install
 
-      - name: Build all
-        run: bunx vite build
-
-      - name: Install dependencies for example
-        run: cd example && bun install
+      - name: Build library
+        run: bun run build
 
       - name: Build example
         run: cd example && bun run build 
