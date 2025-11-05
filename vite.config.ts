@@ -37,13 +37,13 @@ export default defineConfig({
       closeBundle: () => {
         return new Promise((resolve, reject) => {
           exec(
-            "cp markdown-renderer/pkg/markdown_renderer_bg.wasm markdown-renderer/pkg/markdown_renderer_bg.wasm.d.ts dist/",
+            "cp markdown-renderer/pkg/markdown_renderer_bg.wasm markdown-renderer/pkg/markdown_renderer_bg.wasm.d.ts markdown-renderer/pkg/markdown_renderer.js markdown-renderer/pkg/markdown_renderer.d.ts dist/",
             (err) => {
               if (err) {
-                console.error("Failed to copy wasm files:", err);
+                console.error("Failed to copy wasm and JS files:", err);
                 reject(err);
               } else {
-                console.log("✓ Copied .wasm and .d.ts files to dist/");
+                console.log("✓ Copied .wasm, .js and .d.ts files to dist/");
                 resolve();
               }
             },
@@ -60,7 +60,7 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["solid-js", "solid-js/web", "markdown-renderer", /\.wasm$/],
+      external: ["solid-js", "solid-js/web", "markdown-renderer"],
       output: {
         assetFileNames: (assetInfo) => {
           // Keep .wasm files with their original names
@@ -69,6 +69,9 @@ export default defineConfig({
           }
           return "assets/[name]-[hash][extname]";
         },
+        paths: {
+          "markdown-renderer": "./markdown_renderer.js"
+        }
       },
     },
     assetsInlineLimit: 0, // Disable inlining of assets (prevents base64 encoding)

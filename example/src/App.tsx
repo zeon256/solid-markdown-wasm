@@ -23,7 +23,7 @@ const App: Component = () => {
       clearTimeout(timeoutId);
     }
 
-    const debounceAmount = value.length > 10000 ? 50 : 0;
+    const debounceAmount = value.length > 100000 ? 50 : 0;
 
     // Schedule a new update
     timeoutId = setTimeout(() => {

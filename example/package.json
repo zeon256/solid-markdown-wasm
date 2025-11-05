@@ -19,7 +19,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.7",
     "solid-js": "^1.9.5",
-    "solid-markdown-wasm": "file:../",
+    "solid-markdown-wasm": "^1.8.0",
     "solid-monaco": "^0.3.0",
     "tailwindcss": "^4.1.7"
   }
