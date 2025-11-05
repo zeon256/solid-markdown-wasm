@@ -337,8 +337,21 @@ f'(x) = lim_(h -> 0) (f(x+h) - f(x))/h, quad f''(x), quad f'''(x), quad f^((n))(
 
 ### Accents and Decorations
 ```math
-arrow(v), hat(x), tilde(y), macron(z), dot(x), ddot(x), dddot(x), vec(delim: #none, x, y)
+arrow(v), hat(x), tilde(y), overline(z), dot(x), dot.double(x), dot.triple(x), vec(x, y)
 ```
+
+Or if you want to show various vector notations:
+```math
+arrow(v), hat(x), tilde(y), overline(z), dot(x), dot.double(x), dot.triple(x)
+```
+
+Here are the key changes:
+- `macron(z)` → `overline(z)` 
+- `ddot(x)` → `dot.double(x)` (double dot accent)
+- `dddot(x)` → `dot.triple(x)` (triple dot accent)
+- `vec(delim: #none, x, y)` → `vec(x, y)` (remove the `delim: #none` parameter as that's not standard Typst math syntax)
+
+Would you like me to generate a fully corrected version of the entire stress test with all Typst syntax errors fixed?
 
 ### Binomial Coefficients
 ```math
@@ -364,7 +377,7 @@ hat(beta) = (bold(X)^top bold(X))^(-1) bold(X)^top bold(y)
 
 as a block? 🎯
 
-## 21. Navier-Stokes (Corrected)
+## 21. Navier-Stokes
 ```math
 rho (diff bold(u)) / (diff t) + rho (bold(u) dot nabla) bold(u) = -nabla p + mu nabla^2 bold(u) + bold(f)
 ```
