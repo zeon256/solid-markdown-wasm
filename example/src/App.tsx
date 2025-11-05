@@ -12,6 +12,9 @@ const LoadingFallback = () => (
 const App: Component = () => {
   const [markdown, setMarkdown] = createSignal("");
   const [debouncedMarkdown, setDebouncedMarkdown] = createSignal("");
+  const [isDarkMode, setIsDarkMode] = createSignal(
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
   let timeoutId: number | NodeJS.Timeout | undefined;
 
   const debouncedSetMarkdown = (value: string) => {
@@ -41,6 +44,17 @@ const App: Component = () => {
     } catch (error) {
       console.error("Failed to load initial markdown:", error);
     }
+
+    // Listen for color scheme changes
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    
+    onCleanup(() => {
+      mediaQuery.removeEventListener("change", handleChange);
+    });
   });
 
   // Clean up any pending timeouts when the component unmounts
@@ -50,29 +64,29 @@ const App: Component = () => {
     }
   });
 
-  const editorOptions = {
+  const editorOptions = () => ({
     fontFamily: "'Iosevka', monospace",
     fontSize: 22,
-    theme: "vs-dark",
-  };
+    theme: isDarkMode() ? "vs-dark" : "vs-light",
+  });
 
   return (
-    <div class="flex w-screen h-screen bg-[#1e1e1e]">
+    <div class="flex w-screen h-screen" classList={{ "bg-[#1e1e1e]": isDarkMode(), "bg-white": !isDarkMode() }}>
       <div class="w-1/2 flex flex-col m-4">
         <MonacoEditor
           language="markdown"
-          options={editorOptions}
+          options={editorOptions()}
           value={markdown()}
           onChange={(val, _ev) => {
             handleInput(val);
           }}
         />
       </div>
-      <div class="w-1/2 flex flex-col bg-[#0d1117]">
+      <div class="w-1/2 flex flex-col" classList={{ "bg-[#0d1117]": isDarkMode(), "bg-white": !isDarkMode() }}>
         <div class="m-0 h-full shadow-sm overflow-y-auto p-4 px-6">
           <MarkdownRenderer
             markdown={debouncedMarkdown()}
-            theme="ayu-dark"
+            theme={isDarkMode() ? "ayu-dark" : "ayu-light"}
             class="markdown-body"
             fallback={<LoadingFallback />}
             onLoaded={() => console.log("WASM Loaded")}
