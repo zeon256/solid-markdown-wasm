@@ -70,8 +70,8 @@ export default defineConfig({
           return "assets/[name]-[hash][extname]";
         },
         paths: {
-          "markdown-renderer": "./markdown_renderer.js"
-        }
+          "markdown-renderer": "./markdown_renderer.js",
+        },
       },
     },
     assetsInlineLimit: 0, // Disable inlining of assets (prevents base64 encoding)

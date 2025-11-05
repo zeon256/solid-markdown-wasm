@@ -15,12 +15,7 @@
     "fmt": "./node_modules/@biomejs/biome/bin/biome format --write .",
     "check": "./node_modules/@biomejs/biome/bin/biome check"
   },
-  "files": [
-    "dist",
-    "package.json",
-    "README.md",
-    "LICENSE.md"
-  ],
+  "files": ["dist", "package.json", "README.md", "LICENSE.md"],
   "dependencies": {
     "markdown-renderer": "file:./markdown-renderer/pkg/"
   },
