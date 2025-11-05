@@ -17,13 +17,33 @@ export default defineConfig({
       buildStart: () => {
         return new Promise((resolve, reject) => {
           exec(
-            "cd markdown-renderer && wasm-pack build --target web --release",
+            "cd markdown-renderer && wasm-pack build --target web --release && cd .. && bun process_wasm_pkg.js",
             (err, stdout, stderr) => {
               if (err) {
                 console.log("Stdout:", stdout);
                 console.log("Stderr:", stderr);
                 reject(err);
               } else {
+                console.log(stdout);
+                resolve();
+              }
+            },
+          );
+        });
+      },
+    },
+    {
+      name: "copy-wasm-files",
+      closeBundle: () => {
+        return new Promise((resolve, reject) => {
+          exec(
+            "cp markdown-renderer/pkg/markdown_renderer_bg.wasm markdown-renderer/pkg/markdown_renderer_bg.wasm.d.ts dist/",
+            (err) => {
+              if (err) {
+                console.error("Failed to copy wasm files:", err);
+                reject(err);
+              } else {
+                console.log("✓ Copied .wasm and .d.ts files to dist/");
                 resolve();
               }
             },
@@ -40,14 +60,24 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["solid-js", "solid-js/web"],
+      external: [
+        "solid-js",
+        "solid-js/web",
+        "markdown-renderer",
+        /\.wasm$/,
+      ],
       output: {
-        manualChunks(id) {
-          if (id.includes("markdown-renderer")) {
-            return "markdown-renderer";
+        assetFileNames: (assetInfo) => {
+          // Keep .wasm files with their original names
+          if (assetInfo.name?.endsWith(".wasm")) {
+            return "[name][extname]";
           }
+          return "assets/[name]-[hash][extname]";
         },
       },
     },
+    assetsInlineLimit: 0, // Disable inlining of assets (prevents base64 encoding)
   },
+  // Ensure .wasm files are treated as assets, not modules
+  assetsInclude: ["**/*.wasm"],
 });

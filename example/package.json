@@ -13,7 +13,8 @@
   "devDependencies": {
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
-    "vite-plugin-solid": "^2.11.6"
+    "vite-plugin-solid": "^2.11.6",
+    "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.7",
