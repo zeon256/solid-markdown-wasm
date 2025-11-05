@@ -14,6 +14,7 @@
 ## Features
 
 - Compliant with [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/ "commonmark spec")
+- Math rendering support (using a forked version of [comrak](https://github.com/DoublePrecision/comrak "comrak fork"))
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
 - Huge support for languages and themes
 - Easy to use
@@ -26,6 +27,35 @@ You can visit [live-preview.inve.rs](https://live-preview.inve.rs "live-preview"
 ```bash
 npm install solid-markdown-wasm
 ```
+
+## Vite Configuration
+
+This library uses WebAssembly. To ensure the WASM binary is kept separate (not inlined as base64), you need to configure Vite:
+
+### Install the required plugin:
+
+```bash
+npm install -D vite-plugin-wasm
+# or
+bun add -d vite-plugin-wasm
+```
+
+### Update your `vite.config.ts`:
+
+```typescript
+import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
+import wasm from "vite-plugin-wasm";
+
+export default defineConfig({
+  plugins: [
+    wasm(), // Add this plugin (must be before solid())
+    solid(),
+  ],
+});
+```
+
+> **Note:** The `vite-plugin-wasm` plugin ensures the `.wasm` file is kept as a separate binary asset instead of being inlined as base64, which would significantly increase bundle size.
 
 ## Usage
 
@@ -72,8 +102,8 @@ For a list of available themes and languages, please refer to [THEMES_AND_LANGS.
 
 ## Internals
 
-Internally, the renderer is implemented using the [comrak](https://github.com/kivikakk/comrak "comrak github") library and then compiled down to webassembly using [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack github")
-which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). 
+Internally, the renderer is implemented using a [forked version of comrak](https://github.com/DoublePrecision/comrak "comrak fork") (with added math rendering support) and then compiled down to webassembly using [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack github")
+which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). The fork extends the original [comrak](https://github.com/kivikakk/comrak "comrak github") library to include mathematical expression rendering capabilities. 
 
 ## Security
 

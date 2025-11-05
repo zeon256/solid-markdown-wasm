@@ -5,22 +5,26 @@
   "type": "module",
   "module": "./dist/solid-markdown-wasm.es.js",
   "types": "./dist/solid-markdown-wasm.es.d.ts",
+  "workspaces": ["example"],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "example:dev": "cd example && bun run dev",
+    "example:build": "cd example && bun run build",
     "fmt": "./node_modules/@biomejs/cli-linux-x64/biome format --write .",
     "check": "./node_modules/@biomejs/cli-linux-x64/biome check"
   },
-  "files": ["dist", "package.json", "README.md", "LICENSE.md"],
+  "files": ["dist", "markdown-renderer/pkg", "package.json", "README.md", "LICENSE.md"],
   "dependencies": {
     "markdown-renderer": "file:./markdown-renderer/pkg/"
   },
-  "peerDepedencies": {
+  "peerDependencies": {
     "solid-js": "^1.9.5"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "solid-js": "^1.9.5",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-dts": "^4.5.4",

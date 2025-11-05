@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@source inline('inline-block');
+@source inline('align-middle');
+@source inline('text-center');
+@source inline('block');
 
 .spinner {
   width: 40px;
