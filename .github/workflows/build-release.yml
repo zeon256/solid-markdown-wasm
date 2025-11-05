@@ -33,14 +33,16 @@ jobs:
         run: cargo install wasm-pack
       - name: Build Rust project
         run: cd markdown-renderer && wasm-pack build --target web --release
+      - name: Post-process wasm package
+        run: bun process_wasm_pkg.js
       - name: Set up Bun.js
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: Install dependencies
+      - name: Install dependencies (workspace)
         run: bun install
-      - name: Build all
-        run: bunx vite build
+      - name: Build library
+        run: bun run build
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
