@@ -27,6 +27,35 @@ You can visit [live-preview.inve.rs](https://live-preview.inve.rs "live-preview"
 npm install solid-markdown-wasm
 ```
 
+## Vite Configuration
+
+This library uses WebAssembly. To ensure the WASM binary is kept separate (not inlined as base64), you need to configure Vite:
+
+### Install the required plugin:
+
+```bash
+npm install -D vite-plugin-wasm
+# or
+bun add -d vite-plugin-wasm
+```
+
+### Update your `vite.config.ts`:
+
+```typescript
+import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
+import wasm from "vite-plugin-wasm";
+
+export default defineConfig({
+  plugins: [
+    wasm(), // Add this plugin (must be before solid())
+    solid(),
+  ],
+});
+```
+
+> **Note:** The `vite-plugin-wasm` plugin ensures the `.wasm` file is kept as a separate binary asset instead of being inlined as base64, which would significantly increase bundle size.
+
 ## Usage
 
 ```tsx
