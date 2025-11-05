@@ -84,8 +84,8 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: Install dependencies
-        run: bun install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/exec
+      - name: Install semantic-release and plugins
+        run: bun install -g semantic-release@24.2.9 @semantic-release/git@10.0.1 @semantic-release/changelog@6.0.3 @semantic-release/npm@13.0.0 @semantic-release/github@11.0.6 @semantic-release/commit-analyzer@13.0.1 @semantic-release/release-notes-generator@14.1.0
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
