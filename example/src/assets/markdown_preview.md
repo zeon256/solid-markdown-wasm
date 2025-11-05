@@ -1,5 +1,7 @@
 # Markdown syntax guide 🔥🔥🔥🔥
 
+> You are using [solid-markdown-wasm (github)](https://github.com/zeon256/solid-markdown-wasm). 
+
 ## Blockquotes
 
 > [!NOTE]
@@ -93,7 +95,7 @@ _You **can** combine them_
 
 ## Links
 
-You may be using [solid-markdown-wasm](https://github.com/zeon256/solid-markdown-wasm).
+You are using [solid-markdown-wasm](https://github.com/zeon256/solid-markdown-wasm).
 
 ## Tables
 
@@ -107,7 +109,7 @@ You may be using [solid-markdown-wasm](https://github.com/zeon256/solid-markdown
 
 This web site is using `solid-markdown-wasm`.
 
-# 🔬 Typst Math Mode in markdown!
+# 🔬 Ultimate Markdown + Typst Math Stress Test
 
 ## 1. Complex Multi-line Equations
 
