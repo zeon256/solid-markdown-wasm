@@ -109,7 +109,7 @@ You are using [solid-markdown-wasm](https://github.com/zeon256/solid-markdown-wa
 
 This web site is using `solid-markdown-wasm`.
 
-# 🔬 Ultimate Markdown + Typst Math Stress Test
+# 🔬 Typst Math in Markdown!
 
 ## 1. Complex Multi-line Equations
 
