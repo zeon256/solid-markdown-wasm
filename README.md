@@ -139,6 +139,10 @@ Then run the following
 bun run build
 ```
 
+## Performance Optimizations
+
+In order to not recompute syntax highlighting on every render, all code and math blocks are cached in an LRU cache. This drastically improves performance when rendering large documents with many code blocks.
+
 ## Contributing
 
 For contributing to `solid-markdown-wasm`, please refer to the [CONTRIBUTING.md](./CONTRIBUTING.md) file for guidelines on how to contribute to this project.
