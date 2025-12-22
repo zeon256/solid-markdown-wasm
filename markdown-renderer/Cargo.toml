@@ -9,11 +9,25 @@ crate-type = ["cdylib"]
 [dependencies]
 wasm-bindgen = "0.2.105"
 comrak = { git = "https://github.com/DoublePrecision/comrak.git", branch = "feat/math-renderer", default-features = false }
-once_cell = "1.21.3"
 syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"]}
+mini-moka = "0.10.3"
 
 [profile.release]
-opt-level = "z" 
+opt-level = 's'
 lto = "fat"
 codegen-units = 1
 panic = 'abort'
+
+[target.wasm32-unknown-unknown]
+rustflags = ['-Cstrip=symbols']
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+regex = "1.12.2"
+
+[[bench]]
+name = "my_benchmark"
+harness = false
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Oz", "--enable-simd", "--enable-bulk-memory", "--enable-mutable-globals"]

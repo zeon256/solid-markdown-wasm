@@ -22,7 +22,10 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "markdown-renderer": ["./markdown-renderer/pkg"]
+    }
   },
   "include": ["src"]
 }
