@@ -1,0 +1,115 @@
+# Markdown syntax guide 🔥🔥🔥🔥
+
+## Blockquotes
+
+> [!NOTE]
+> This is an informational blockquote.
+
+> [!TIP]
+> This is a tip blockquote.
+
+> [!IMPORTANT]
+> This is an important blockquote.
+
+> [!WARNING]
+> This is a warning blockquote.
+
+> [!CAUTION]
+> This is a caution blockquote.
+
+
+> Markdown is a lightweight markup language with plain-text-formatting syntax, created in 2004 by John Gruber with Aaron Swartz.
+>
+>> Markdown is often used to format readme files, for writing messages in online discussion forums, and to create rich text using a plain text editor.
+
+## Blocks of code
+
+```javascript
+let message = 'Hello world';
+alert(message);
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+ 
+auto main() -> int {
+    std::vector<int> v = {8, 4, 5, 9};
+ 
+    v.emplace_back(6);
+    v.emplace_back(9);
+ 
+    v[2] = -1;
+ 
+    for (int n : v)
+        std::cout << n << ' ';
+    std::cout << '\n';
+}
+```
+
+## Math
+
+```math
+x = 3
+y = 2
+```
+
+## Headers
+
+# This is a Heading h1
+## This is a Heading h2
+###### This is a Heading h6
+
+## Emphasis
+
+*This text will be italic*  
+_This will also be italic_
+
+**This text will be bold**  
+__This will also be bold__
+
+_You **can** combine them_
+
+## Lists
+
+### Unordered
+
+* Item 1
+* Item 2
+* Item 2a
+* Item 2b
+    * Item 3a
+    * Item 3b
+
+### Ordered
+
+1. Item 1
+2. Item 2
+3. Item 3
+    1. Item 3a
+    2. Item 3b
+
+### Tasklist
+- [x] Wake up
+- [ ] Drink water
+- [ ] Make lunch
+
+## Images
+
+![This is an alt text.](/images/tung.jpeg "This is a sample image.")
+
+## Links
+
+You may be using [solid-markdown-wasm](https://github.com/zeon256/solid-markdown-wasm).
+
+## Tables
+
+| Left columns  | Right columns |
+| ------------- |:-------------:|
+| left foo      | right foo     |
+| left bar      | right bar     |
+| left baz      | right baz     |
+
+## Inline code
+
+This web site is using `solid-markdown-wasm`.

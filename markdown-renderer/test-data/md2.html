@@ -1,0 +1,201 @@
+<h1>Simlimprice.com: A Price Comparison Platform for Singapore Computer Parts 🇸🇬</h1>
+<p>It's currently challenging to find a centralized price comparison tool for computer parts specifically within Singapore's Sim Lim Square. Many individuals resort to downloading PDF price lists or visiting stores in person to inquire about prices. 😩</p>
+<p>This initiative proposes the development of a price comparison tool designed to parse price lists (potentially utilizing Deepseek OCR or classic PDF parsing techniques) and offer a single platform for users to search and identify the best prices available. 🚀</p>
+<p>This is a novel concept, as there isn't a readily available solution addressing this need, especially considering Singapore's tech-savvy population and abundance of computer science graduates. 💡</p>
+<h2>Technical Approach 💻</h2>
+<p>Our plan is to maintain a <strong>super simple</strong> architecture:</p>
+<ul>
+<li><strong>Database:</strong> We will utilize <strong>LibSQL</strong> as our database.</li>
+<li><strong>Data Ingestion:</strong> Prices will be downloaded and parsed nightly, then inserted into the database.</li>
+<li><strong>Local-First Architecture:</strong> Initially, we aim for a local-first approach, potentially using <strong>WASM Turso</strong>. This allows direct connection to a remote read-only replica.
+<ul>
+<li><em>SEO Consideration:</em> The impact on SEO with this architecture is being considered. Server-side rendering (SSR) might be necessary, but this is a secondary concern for now. 🤔</li>
+</ul>
+</li>
+</ul>
+<h2>Monetization Strategy 💰</h2>
+<p>Our proposed monetization strategies include:</p>
+<ul>
+<li><strong>Affiliate Marketing:</strong> Partnering with retailers and earning commissions on sales generated through our platform.</li>
+<li><strong>Google Ads:</strong> Displaying targeted advertisements on the website.</li>
+<li><strong>Shareable Part Lists:</strong> Implementing a &quot;share&quot; button allowing users to create and share their custom computer part lists. This can also contribute to SEO efforts by generating user-created content. 📝</li>
+</ul>
+<h2>Additional Revenue Streams &amp; Considerations 📈</h2>
+<p>We are exploring other avenues for revenue generation:</p>
+<ul>
+<li><strong>Price Alerts:</strong> While a valuable feature, implementing real-time alerts would necessitate a departure from our current local-first architecture, potentially requiring a more robust backend infrastructure. This is a trade-off to consider carefully. 🔔</li>
+</ul>
+<h1>Technical Details</h1>
+<h2>Prompt</h2>
+<h2>Stage 0: Partition</h2>
+<p>Partition using classic PDF techniques and export each one.</p>
+<h2>Stage 1: Routing</h2>
+<p>Use the following prompt to decide the section.</p>
+<pre style="background-color:#282c34;"><code class="language-markdown"><span style="color:#dcdfe4;">You are an expert PC hardware category classifier for Singapore/Malaysia PC shops (Sim Lim Square style).
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## YOUR JOB:
+</span><span style="color:#dcdfe4;">Given a </span><span style="color:#c678dd;">**single extracted PDF section/box**</span><span style="color:#dcdfe4;">, classify it into </span><span style="color:#c678dd;">**EXACTLY ONE**</span><span style="color:#dcdfe4;"> PC hardware category.
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Input Format:
+</span><span style="color:#dcdfe4;">You will receive text from ONE PDF section/box containing:
+</span><span style="color:#dcdfe4;">- Product name(s)
+</span><span style="color:#dcdfe4;">- Price(s) 
+</span><span style="color:#dcdfe4;">- Specifications
+</span><span style="color:#dcdfe4;">- Possibly brand names
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Available Categories (CHOOSE EXACTLY ONE):
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#dcdfe4;">CPU - Intel/AMD processors (i3/i5/i7/i9, Ryzen 3/5/7/9)
+</span><span style="color:#dcdfe4;">GPU - Graphics cards (RTX 30/40, RX 6000/7000, GTX)
+</span><span style="color:#dcdfe4;">Motherboard - Motherboards (B550, Z790, X670, etc.)
+</span><span style="color:#dcdfe4;">RAM - Memory modules (DDR4/DDR5, 16GB/32GB, 3200/6000MHz)
+</span><span style="color:#dcdfe4;">SSD - Solid State Drives (NVMe M.2, SATA, 512GB/1TB/2TB)
+</span><span style="color:#dcdfe4;">HDD - Hard Disk Drives (1TB/2TB/4TB, 7200RPM)
+</span><span style="color:#dcdfe4;">PSU - Power Supplies (650W/850W, 80+ Gold/Bronze)
+</span><span style="color:#dcdfe4;">Cooler - CPU Coolers (Air coolers, AIO liquid, 240mm/360mm)
+</span><span style="color:#dcdfe4;">Case - PC Cases (ATX/Mini-ITX, tempered glass)
+</span><span style="color:#dcdfe4;">Monitor - Computer Monitors (24&quot;/27&quot;/32&quot;, 144Hz/165Hz, IPS/VA)
+</span><span style="color:#dcdfe4;">Keyboard - Keyboards (mechanical, wireless, RGB)
+</span><span style="color:#dcdfe4;">Mouse - Computer Mice (gaming, wireless, 16000 DPI)
+</span><span style="color:#dcdfe4;">KeyboardMouseCombo - Keyboard + Mouse bundles
+</span><span style="color:#dcdfe4;">CPUMotherboardCombo - CPU + Motherboard bundle deals
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Classification Rules:
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#dcdfe4;">1. </span><span style="color:#c678dd;">**MATCH THE PRIMARY PRODUCT**</span><span style="color:#dcdfe4;"> in the section
+</span><span style="color:#dcdfe4;">2. </span><span style="color:#c678dd;">**LOOK FOR KEYWORDS**</span><span style="color:#dcdfe4;"> (examples below)
+</span><span style="color:#dcdfe4;">3. </span><span style="color:#c678dd;">**PRIORITIZE SPECIFIC CATEGORIES**</span><span style="color:#dcdfe4;"> over generic ones
+</span><span style="color:#dcdfe4;">4. </span><span style="color:#c678dd;">**Output ONLY ONE category**</span><span style="color:#dcdfe4;"> - no &quot;multiple&quot; or &quot;unclear&quot;
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Keyword Detection Guide:
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#dcdfe4;">| Category | Key Detection Words |
+</span><span style="color:#dcdfe4;">|----------|-------------------|
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**CPU** </span><span style="color:#dcdfe4;">| Intel i3/i5/i7/i9, AMD Ryzen, Core i5, R5 5600X, LGA1700 |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**GPU** </span><span style="color:#dcdfe4;">| RTX 3060/4070/4080, RX 6700/7800, GeForce, Radeon |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**Motherboard** </span><span style="color:#dcdfe4;">| B550, Z790, X670, ATX, mATX, DDR4/DDR5 |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**RAM** </span><span style="color:#dcdfe4;">| DDR4, DDR5, 3200MHz, 6000MHz, 16GB, 32GB, CL16 |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**SSD** </span><span style="color:#dcdfe4;">| NVMe, M.2, PCIe 4.0, 1TB SSD, Samsung 990 |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**HDD** </span><span style="color:#dcdfe4;">| 7200RPM, 2TB HDD, 3.5&quot;, Seagate Barracuda |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**PSU** </span><span style="color:#dcdfe4;">| 650W, 80+ Gold, Modular, Corsair RM850x |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**Cooler** </span><span style="color:#dcdfe4;">| AIO, 240mm, 360mm, Air Cooler, Noctua NH |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**Case** </span><span style="color:#dcdfe4;">| ATX Case, Tempered Glass, NZXT H510 |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**Monitor** </span><span style="color:#dcdfe4;">| 27&quot; IPS, 144Hz, 4K, LG UltraGear |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**Keyboard** </span><span style="color:#dcdfe4;">| Mechanical, RGB Keyboard, Keychron |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**Mouse** </span><span style="color:#dcdfe4;">| Gaming Mouse, Logitech G, 16000 DPI |
+</span><span style="color:#dcdfe4;">| </span><span style="color:#c678dd;">**CPUMotherboardCombo** </span><span style="color:#dcdfe4;">| i5+B660, Ryzen 5+B550, CPU+MB Bundle |
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Output Format:
+</span><span style="color:#c678dd;">**Output ONLY this exact JSON structure:**
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#dcdfe4;">```</span><span style="color:#e5c07b;">json
+</span><span style="color:#dcdfe4;">{
+</span><span style="color:#dcdfe4;">  </span><span style="color:#98c379;">&quot;category&quot;</span><span style="color:#dcdfe4;">: </span><span style="color:#98c379;">&quot;EXACT_CATEGORY_NAME&quot;</span><span style="color:#dcdfe4;">,
+</span><span style="color:#dcdfe4;">  </span><span style="color:#98c379;">&quot;reasoning&quot;</span><span style="color:#dcdfe4;">: </span><span style="color:#98c379;">&quot;Brief explanation (1 sentence)&quot;
+</span><span style="color:#dcdfe4;">}
+</span></code></pre>
+<pre style="background-color:#282c34;"><code class="language-markdown"><span style="color:#dcdfe4;">You are an expert PC hardware price extractor for Singapore PC shops (Sim Lim Square style).
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## IMPORTANT: CATEGORY-SPECIFIC EXTRACTION MODE
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#c678dd;">**This prompt is for extracting ONLY ONE SPECIFIC CATEGORY at a time.** 
+</span><span style="color:#dcdfe4;">You will receive instructions specifying </span><span style="color:#c678dd;">**exactly which category**</span><span style="color:#dcdfe4;"> to extract in each pass.
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Your Job:
+</span><span style="color:#dcdfe4;">Extract </span><span style="color:#c678dd;">**ALL**</span><span style="color:#dcdfe4;"> individually sold PC components from </span><span style="color:#c678dd;">**ONLY THE SPECIFIED CATEGORY**</span><span style="color:#dcdfe4;"> below, plus CPU+Motherboard combos when instructed.
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Categories Available for Single-Pass Extraction:
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#c678dd;">**Use ONLY the category specified in your instructions:**
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Available Categories (extract ONE at a time):
+</span><span style="color:#dcdfe4;">- CPU (Intel/AMD CPUs only)
+</span><span style="color:#dcdfe4;">- GPU (NVIDIA/AMD graphics cards only) 
+</span><span style="color:#dcdfe4;">- Motherboard (Motherboards only)
+</span><span style="color:#dcdfe4;">- RAM (DDR4/DDR5 RAM modules/kits only)
+</span><span style="color:#dcdfe4;">- SSD (NVMe/SATA SSDs only)
+</span><span style="color:#dcdfe4;">- HDD (Hard drives only)
+</span><span style="color:#dcdfe4;">- PSU (Power supplies only)
+</span><span style="color:#dcdfe4;">- Cooler (CPU coolers - Air/AIO only)
+</span><span style="color:#dcdfe4;">- Case (PC cases only)
+</span><span style="color:#dcdfe4;">- Monitor (Monitors only)
+</span><span style="color:#dcdfe4;">- Keyboard (Keyboards only)
+</span><span style="color:#dcdfe4;">- Mouse (Mice only)
+</span><span style="color:#dcdfe4;">- KeyboardMouseCombo (Keyboard+Mouse combos only)
+</span><span style="color:#dcdfe4;">- CPUMotherboardCombo (CPU + Motherboard bundles only)
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Extraction Rules:
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#dcdfe4;">1. </span><span style="color:#c678dd;">**Ignore everything except the specified category**
+</span><span style="color:#dcdfe4;">2. </span><span style="color:#c678dd;">**Ignore**</span><span style="color:#dcdfe4;">: laptops, mini-PCs, system bundles, promotional text, shop info, warranties
+</span><span style="color:#dcdfe4;">3. </span><span style="color:#c678dd;">**For CPUMotherboardCombo only**</span><span style="color:#dcdfe4;">: Extract CPU+Motherboard bundles as single items
+</span><span style="color:#dcdfe4;">4. </span><span style="color:#c678dd;">**Do NOT extract**</span><span style="color:#dcdfe4;"> other categories even if they&#39;re present in the document
+</span><span style="color:#dcdfe4;">5. </span><span style="color:#c678dd;">**Ignore prices that are - or NA and don&#39;t append to the list** 
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Current Extraction Task:
+</span><span style="color:#c678dd;">**[INSTRUCTIONS: Specify the exact category here, e.g., &quot;Extract ONLY RAM&quot; or &quot;Extract ONLY SSD&quot;]**
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#61afef;">## Output Format:
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#c678dd;">**Output ONLY a valid JSON array**</span><span style="color:#dcdfe4;"> matching the </span><span style="color:#c678dd;">**EXACT**</span><span style="color:#dcdfe4;"> TypeScript interface for the specified category:
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#dcdfe4;">```</span><span style="color:#e5c07b;">typescript
+</span><span style="color:#dcdfe4;">// Example for RAM extraction only:
+</span><span style="color:#dcdfe4;">[
+</span><span style="color:#dcdfe4;">  {
+</span><span style="color:#dcdfe4;">    &quot;name&quot;: &quot;Corsair Vengeance RGB 32GB (2x16GB)&quot;,
+</span><span style="color:#dcdfe4;">    &quot;brand&quot;: &quot;Corsair&quot;,
+</span><span style="color:#dcdfe4;">    &quot;model&quot;: &quot;Vengeance RGB&quot;,
+</span><span style="color:#dcdfe4;">    &quot;price&quot;: 499,
+</span><span style="color:#dcdfe4;">    &quot;currency&quot;: &quot;SGD&quot;
+</span><span style="color:#dcdfe4;">    &quot;category&quot;: &quot;RAM&quot;,
+</span><span style="color:#dcdfe4;">    &quot;metadata&quot;: {
+</span><span style="color:#dcdfe4;">      &quot;type&quot;: &quot;Desktop&quot;,
+</span><span style="color:#dcdfe4;">      &quot;ddr&quot;: &quot;DDR5&quot;,
+</span><span style="color:#dcdfe4;">      &quot;speed_mhz&quot;: 6000,
+</span><span style="color:#dcdfe4;">      &quot;capacity_mb&quot;: 32768,
+</span><span style="color:#dcdfe4;">      &quot;kit&quot;: &quot;Dual&quot;,
+</span><span style="color:#dcdfe4;">      &quot;rgb&quot;: true
+</span><span style="color:#dcdfe4;">    }
+</span><span style="color:#dcdfe4;">  }
+</span><span style="color:#dcdfe4;">]
+</span></code></pre>
+<h2>Data format</h2>
+<pre style="background-color:#282c34;"><code class="language-typescript"><span style="color:#c678dd;">type </span><span style="color:#dcdfe4;">Category </span><span style="color:#c678dd;">=
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;CPU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;GPU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Motherboard&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;RAM&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;SSD&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;HDD&quot;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;PSU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Cooler&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Case&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Monitor&quot;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Keyboard&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Mouse&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;KeyboardMouseCombo&quot;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;CPUMotherboardCombo&quot;</span><span style="color:#dcdfe4;">;
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#c678dd;">interface </span><span style="color:#dcdfe4;">BaseItem {
+</span><span style="color:#dcdfe4;">  </span><span style="color:#e06c75;">name</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#e06c75;">brand</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#e06c75;">model</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#e06c75;">price</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#e06c75;">currency</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;SGD&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;MYR&quot;
+</span><span style="color:#dcdfe4;">  </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">Category;
+</span><span style="color:#dcdfe4;">}
+</span><span style="color:#dcdfe4;">
+</span><span style="color:#c678dd;">type </span><span style="color:#dcdfe4;">PCItem </span><span style="color:#c678dd;">=
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;CPU&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">coreCount</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">baseClock</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">boostClock</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">socket</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">generation</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">integratedGraphics</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;GPU&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">series</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">vram_gb</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">length_mm</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">tdp_w</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Motherboard&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">chipset</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">formFactor</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">socket</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">memoryType</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;DDR4&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;DDR5&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">memorySlots</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;RAM&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">type</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Desktop&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Laptop&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">ddr</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;DDR4&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;DDR5&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">speed_mhz</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">capacity_mb</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">kit</span><span style="color:#c678dd;">?: </span><span style="color:#98c379;">&quot;Single&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Dual&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Quad&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">rgb</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean; </span><span style="color:#e06c75;">cl</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;SSD&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">interface</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;NVMe&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;SATA&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">formFactor</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">capacity_gb</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">readSpeed_mb_s</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">writeSpeed_mb_s</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">gen</span><span style="color:#c678dd;">?: </span><span style="color:#98c379;">&quot;Gen3&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Gen4&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Gen5&quot; </span><span style="color:#dcdfe4;">} })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;HDD&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">rpm</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">cache_mb</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">capacity_gb</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">formFactor</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;2.5</span><span style="color:#56b6c2;">\&quot;</span><span style="color:#98c379;">&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;3.5</span><span style="color:#56b6c2;">\&quot;</span><span style="color:#98c379;">&quot; </span><span style="color:#dcdfe4;">} })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;PSU&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">wattage</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">efficiency</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">modular</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Full&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Semi&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Non&quot; </span><span style="color:#dcdfe4;">} })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Cooler&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">type</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Air&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;AIO&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">size_mm</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">radiatorSize_mm</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">socketSupport</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">rgb</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Case&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">formFactor</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">sidePanel</span><span style="color:#c678dd;">?: </span><span style="color:#98c379;">&quot;Tempered Glass&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Solid&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">rgbFansIncluded</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Monitor&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">size_inches</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">resolution_width</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">resolution_height</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">refreshRate_hz</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">panel</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;IPS&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;VA&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;TN&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;OLED&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">curved</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean; </span><span style="color:#e06c75;">adaptiveSync</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">string } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Keyboard&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">switchType</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">layout</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">connection</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Wired&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Wireless&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">rgb</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean; </span><span style="color:#e06c75;">size</span><span style="color:#c678dd;">?: </span><span style="color:#98c379;">&quot;60%&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;65%&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;75%&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;TKL&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Full&quot; </span><span style="color:#dcdfe4;">} })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Mouse&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">dpi</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number; </span><span style="color:#e06c75;">connection</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Wired&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Wireless&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">sensor</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">rgb</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;KeyboardMouseCombo&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">connection</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Wired&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Wireless&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">rgb</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">boolean } })
+</span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#dcdfe4;">(BaseItem </span><span style="color:#c678dd;">&amp; </span><span style="color:#dcdfe4;">{ 
+</span><span style="color:#dcdfe4;">      </span><span style="color:#e06c75;">category</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;CPUMotherboardCombo&quot;</span><span style="color:#dcdfe4;">; 
+</span><span style="color:#dcdfe4;">      </span><span style="color:#e06c75;">metadata</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ 
+</span><span style="color:#dcdfe4;">        </span><span style="color:#e06c75;">cpu</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">brand</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;Intel&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;AMD&quot;</span><span style="color:#dcdfe4;">; </span><span style="color:#e06c75;">model</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">socket</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">generation</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number };
+</span><span style="color:#dcdfe4;">        </span><span style="color:#e06c75;">motherboard</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">{ </span><span style="color:#e06c75;">brand</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">model</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">chipset</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">formFactor</span><span style="color:#c678dd;">: </span><span style="color:#dcdfe4;">string; </span><span style="color:#e06c75;">memoryType</span><span style="color:#c678dd;">: </span><span style="color:#98c379;">&quot;DDR4&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;DDR5&quot; </span><span style="color:#dcdfe4;">};
+</span><span style="color:#dcdfe4;">        </span><span style="color:#e06c75;">comboSaving</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number;
+</span><span style="color:#dcdfe4;">      }
+</span><span style="color:#dcdfe4;">    });
+</span></code></pre>

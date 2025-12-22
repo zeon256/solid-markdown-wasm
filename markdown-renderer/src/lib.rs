@@ -1,10 +1,9 @@
 use comrak::{Options, markdown_to_html_with_plugins, options::Plugins};
-use once_cell::sync::Lazy;
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::LazyLock};
 use syntect::{dumps::from_binary, highlighting::ThemeSet, parsing::SyntaxSet};
 use wasm_bindgen::prelude::*;
 
-use crate::syntect_plugin::{SyntectAdapter, SyntectAdapterBuilder};
+use crate::syntect_plugin::{SyntectAdapterCached, SyntectAdapterCachedBuilder};
 
 mod syntect_plugin;
 
@@ -101,13 +100,13 @@ const THEMES: [&str; 43] = [
     "zenburn",
 ];
 
-pub static SYNTAX_SET: Lazy<SyntaxSet> =
-    Lazy::new(|| from_binary(include_bytes!("../sublime/syntaxes/newlines.packdump")));
+pub static SYNTAX_SET: LazyLock<SyntaxSet> =
+    LazyLock::new(|| from_binary(include_bytes!("../sublime/syntaxes/newlines.packdump")));
 
-pub static THEME_SET: Lazy<ThemeSet> =
-    Lazy::new(|| from_binary(include_bytes!("../sublime/themes/all.themedump")));
+pub static THEME_SET: LazyLock<ThemeSet> =
+    LazyLock::new(|| from_binary(include_bytes!("../sublime/themes/all.themedump")));
 
-static OPTIONS: Lazy<Options> = Lazy::new(|| {
+static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     let mut options = Options::default();
     options.extension.table = true;
     options.extension.tasklist = true;
@@ -123,11 +122,11 @@ static OPTIONS: Lazy<Options> = Lazy::new(|| {
     options
 });
 
-static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
+static ADAPTERS: LazyLock<HashMap<&'static str, SyntectAdapterCached>> = LazyLock::new(|| {
     let mut map = HashMap::with_capacity(THEMES.len());
 
     for theme in THEMES.iter() {
-        let adapter = SyntectAdapterBuilder::new()
+        let adapter = SyntectAdapterCachedBuilder::new()
             .theme(theme)
             .syntax_set(&SYNTAX_SET)
             .theme_set(&THEME_SET)
@@ -138,8 +137,8 @@ static ADAPTERS: Lazy<HashMap<&'static str, SyntectAdapter>> = Lazy::new(|| {
     map
 });
 
-static PLUGINS: Lazy<HashMap<&'static str, Plugins<'static>>> = Lazy::new(|| {
-    let mut map = HashMap::with_capacity(3);
+static PLUGINS: LazyLock<HashMap<&'static str, Plugins<'static>>> = LazyLock::new(|| {
+    let mut map = HashMap::with_capacity(6);
 
     for (theme, adapter) in ADAPTERS.iter() {
         let mut plugins = Plugins::default();
@@ -157,12 +156,15 @@ pub fn render_md(markdown: &str, theme: Themes) -> String {
 
 #[cfg(test)]
 mod test {
+    use std::{io::Write, sync::LazyLock};
+
     use super::*;
 
+    #[ignore]
     #[test]
     fn print_all_themes() {
-        static THEME_SET: Lazy<ThemeSet> =
-            Lazy::new(|| from_binary(include_bytes!("../sublime/themes/all.themedump")));
+        static THEME_SET: LazyLock<ThemeSet> =
+            LazyLock::new(|| from_binary(include_bytes!("../sublime/themes/all.themedump")));
 
         println!("Available themes:");
         for theme in THEME_SET.themes.keys() {
@@ -170,6 +172,7 @@ mod test {
         }
     }
 
+    #[ignore]
     #[test]
     fn print_default_themes() {
         let themes = ThemeSet::load_defaults();
@@ -179,6 +182,7 @@ mod test {
         }
     }
 
+    #[ignore]
     #[test]
     fn print_default_syntaxes() {
         let syntaxes = SyntaxSet::load_defaults_newlines();
@@ -188,6 +192,7 @@ mod test {
         }
     }
 
+    #[ignore]
     #[test]
     fn print_all_syntaxes() {
         let syntaxes: SyntaxSet =
@@ -202,5 +207,94 @@ mod test {
                 .join(", ");
             println!("- **{}**: {}", syntax.name, extensions);
         }
+    }
+
+    // #[ignore]
+    #[test]
+    fn generate_ground_truth_test_data() {
+        let md0 = include_str!("../sample-data/md0.md");
+        let md1 = include_str!("../sample-data/md1.md");
+        let md2 = include_str!("../sample-data/md2.md");
+
+        use std::fs::File;
+        let mut file0 = File::create("test-data/md0_cached.html").unwrap();
+        let mut file1 = File::create("test-data/md1_cached.html").unwrap();
+        let mut file2 = File::create("test-data/md2_cached.html").unwrap();
+
+        let _ = file0.write(render_md_cached_syntax(md0, Themes::OneHalfDark).as_bytes());
+        let _ = file1.write(render_md_cached_syntax(md1, Themes::OneHalfDark).as_bytes());
+        let _ = file2.write(render_md_cached_syntax(md2, Themes::OneHalfDark).as_bytes());
+    }
+
+    // #[test]
+    // fn test_output() {
+    //     let expected_md0 = include_str!("../test-data/md0.html");
+    //     let expected_md1 = include_str!("../test-data/md1.html");
+    //     let expected_md2 = include_str!("../test-data/md2.html");
+
+    //     let md0 = include_str!("../sample-data/md0.md");
+    //     let md1 = include_str!("../sample-data/md1.md");
+    //     let md2 = include_str!("../sample-data/md2.md");
+
+    //     assert_eq!(expected_md0, render_md(md0, Themes::OneHalfDark));
+    //     assert_eq!(expected_md1, render_md(md1, Themes::OneHalfDark));
+    //     assert_eq!(expected_md2, render_md(md2, Themes::OneHalfDark));
+    // }
+
+    /// Normalize SVG glyph IDs to make them deterministic for testing
+    fn normalize_svg_ids(html: &str) -> String {
+        use std::collections::HashMap;
+        let mut id_map = HashMap::new();
+        let mut counter = 0;
+
+        // Replace all glyph IDs with normalized ones
+        let id_regex = regex::Regex::new(r#"(id|xlink:href)="(#?)g[A-F0-9]{32}""#).unwrap();
+
+        id_regex
+            .replace_all(html, |caps: &regex::Captures| {
+                let attr = &caps[1];
+                let hash = &caps[2];
+                let full_id = &caps[0];
+
+                // Extract the actual ID (without # if present)
+                let id = if hash == "#" {
+                    &full_id[full_id.find("#g").unwrap() + 1..full_id.len() - 1]
+                } else {
+                    &full_id[full_id.find("g").unwrap()..full_id.len() - 1]
+                };
+
+                let normalized = id_map.entry(id.to_string()).or_insert_with(|| {
+                    let new_id = format!("gNORM{:04}", counter);
+                    counter += 1;
+                    new_id
+                });
+
+                format!(r#"{}="{}{}""#, attr, hash, normalized)
+            })
+            .to_string()
+    }
+
+    #[test]
+    fn test_cached_syntax_highlighting() {
+        let expected_md0 = include_str!("../test-data/md0.html");
+        let expected_md1 = include_str!("../test-data/md1.html");
+        let expected_md2 = include_str!("../test-data/md2.html");
+
+        let md0 = include_str!("../sample-data/md0.md");
+        let md1 = include_str!("../sample-data/md1.md");
+        let md2 = include_str!("../sample-data/md2.md");
+
+        assert_eq!(
+            normalize_svg_ids(expected_md0),
+            normalize_svg_ids(&render_md_cached_syntax(md0, Themes::OneHalfDark))
+        );
+        assert_eq!(
+            normalize_svg_ids(expected_md1),
+            normalize_svg_ids(&render_md_cached_syntax(md1, Themes::OneHalfDark))
+        );
+        assert_eq!(
+            normalize_svg_ids(expected_md2),
+            normalize_svg_ids(&render_md_cached_syntax(md2, Themes::OneHalfDark))
+        );
     }
 }
