@@ -7,6 +7,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::{HashMap, hash_map};
 use std::fmt::{self, Write};
+use std::marker::PhantomData;
 use syntect::Error;
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Color, ThemeSet};
@@ -16,21 +17,87 @@ use syntect::html::{
 use syntect::parsing::{SyntaxReference, SyntaxSet};
 use syntect::util::LinesWithEndings;
 
-#[derive(Debug)]
-/// Syntect syntax highlighter plugin.
-pub struct SyntectAdapterCached {
-    theme: Option<String>,
-    syntax_set: &'static SyntaxSet,
-    theme_set: &'static ThemeSet,
+/// Strategy for highlighting code - either cached or uncached.
+pub trait HighlightStrategy: Send + Sync {
+    fn highlight(
+        theme: Option<&String>,
+        theme_set: &ThemeSet,
+        syntax_set: &SyntaxSet,
+        code: &str,
+        syntax: &SyntaxReference,
+    ) -> Result<String, Error>;
 }
 
-impl SyntectAdapterCached {
-    fn highlight_html(&self, code: &str, syntax: &SyntaxReference) -> Result<String, Error> {
+/// Uncached highlighting strategy - computes highlighting every time.
+#[cfg(test)]
+#[derive(Debug)]
+pub struct Uncached;
+
+/// Cached highlighting strategy - uses an LRU cache to memoize results.
+#[derive(Debug)]
+pub struct Cached;
+
+fn do_highlight(
+    theme: Option<&String>,
+    theme_set: &ThemeSet,
+    syntax_set: &SyntaxSet,
+    code: &str,
+    syntax: &SyntaxReference,
+) -> Result<String, Error> {
+    match theme {
+        Some(theme_name) => {
+            let theme = &theme_set.themes[theme_name];
+            let mut highlighter = HighlightLines::new(syntax, theme);
+            let bg = theme.settings.background.unwrap_or(Color::WHITE);
+
+            let mut output = String::new();
+            for line in LinesWithEndings::from(code) {
+                let regions = highlighter.highlight_line(line, syntax_set)?;
+                append_highlighted_html_for_styled_line(
+                    &regions[..],
+                    IncludeBackground::IfDifferent(bg),
+                    &mut output,
+                )?;
+            }
+            Ok(output)
+        }
+        None => {
+            let mut html_generator =
+                ClassedHTMLGenerator::new_with_class_style(syntax, syntax_set, ClassStyle::Spaced);
+            for line in LinesWithEndings::from(code) {
+                html_generator.parse_html_for_line_which_includes_newline(line)?;
+            }
+            Ok(html_generator.finalize())
+        }
+    }
+}
+
+#[cfg(test)]
+impl HighlightStrategy for Uncached {
+    fn highlight(
+        theme: Option<&String>,
+        theme_set: &ThemeSet,
+        syntax_set: &SyntaxSet,
+        code: &str,
+        syntax: &SyntaxReference,
+    ) -> Result<String, Error> {
+        do_highlight(theme, theme_set, syntax_set, code, syntax)
+    }
+}
+
+impl HighlightStrategy for Cached {
+    fn highlight(
+        theme: Option<&String>,
+        theme_set: &ThemeSet,
+        syntax_set: &SyntaxSet,
+        code: &str,
+        syntax: &SyntaxReference,
+    ) -> Result<String, Error> {
         thread_local! {
-            static LRU: RefCell<Cache<Box<str>, String>> = RefCell::new(Cache::builder().max_capacity(1024).build());
+            static LRU: RefCell<Cache<Box<str>, String>> =
+                RefCell::new(Cache::builder().max_capacity(1024).build());
         }
 
-        // check lru
         LRU.with_borrow_mut(|lru| {
             let key = Box::<str>::from(code);
 
@@ -38,48 +105,42 @@ impl SyntectAdapterCached {
                 return Ok(html.clone());
             }
 
-            match &self.theme {
-                Some(theme) => {
-                    // syntect::html::highlighted_html_for_string, without the opening/closing <pre>.
-                    let theme = &self.theme_set.themes[theme];
-                    let mut highlighter = HighlightLines::new(syntax, theme);
-
-                    let bg = theme.settings.background.unwrap_or(Color::WHITE);
-
-                    let mut output = String::new();
-                    for line in LinesWithEndings::from(code) {
-                        let regions = highlighter.highlight_line(line, self.syntax_set)?;
-                        append_highlighted_html_for_styled_line(
-                            &regions[..],
-                            IncludeBackground::IfDifferent(bg),
-                            &mut output,
-                        )?;
-                    }
-
-                    lru.insert(key, output.clone());
-
-                    Ok(output)
-                }
-                None => {
-                    // fall back to HTML classes.
-                    let mut html_generator = ClassedHTMLGenerator::new_with_class_style(
-                        syntax,
-                        self.syntax_set,
-                        ClassStyle::Spaced,
-                    );
-                    for line in LinesWithEndings::from(code) {
-                        html_generator.parse_html_for_line_which_includes_newline(line)?;
-                    }
-                    let html = html_generator.finalize();
-                    lru.insert(key, html.clone());
-                    Ok(html)
-                }
-            }
+            let result = do_highlight(theme, theme_set, syntax_set, code, syntax)?;
+            lru.insert(key, result.clone());
+            Ok(result)
         })
     }
 }
 
-impl SyntaxHighlighterAdapter for SyntectAdapterCached {
+#[derive(Debug)]
+/// Generic Syntect syntax highlighter plugin parameterized by caching strategy.
+pub struct SyntectAdapter<S: HighlightStrategy> {
+    theme: Option<String>,
+    syntax_set: &'static SyntaxSet,
+    theme_set: &'static ThemeSet,
+    _strategy: PhantomData<S>,
+}
+
+/// Type alias for the cached adapter (used in production).
+pub type SyntectAdapterCached = SyntectAdapter<Cached>;
+
+/// Type alias for the uncached adapter (used for generating ground truth in tests).
+#[cfg(test)]
+pub type SyntectAdapterUncached = SyntectAdapter<Uncached>;
+
+impl<S: HighlightStrategy> SyntectAdapter<S> {
+    fn highlight_html(&self, code: &str, syntax: &SyntaxReference) -> Result<String, Error> {
+        S::highlight(
+            self.theme.as_ref(),
+            self.theme_set,
+            self.syntax_set,
+            code,
+            syntax,
+        )
+    }
+}
+
+impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAdapter<S> {
     fn write_highlighted(
         &self,
         output: &mut dyn Write,
@@ -192,27 +253,36 @@ impl<'a, 's> Iterator for SyntectPreAttributesIter<'a, 's> {
 }
 
 #[derive(Debug)]
-/// A builder for [`SyntectAdapterCached`].
+/// A builder for [`SyntectAdapter`].
 ///
 /// Allows customization of `Theme`, [`ThemeSet`], and [`SyntaxSet`].
-pub struct SyntectAdapterCachedBuilder {
+pub struct SyntectAdapterBuilder<S: HighlightStrategy> {
     theme: Option<String>,
     syntax_set: Option<&'static SyntaxSet>,
     theme_set: Option<&'static ThemeSet>,
+    _strategy: PhantomData<S>,
 }
 
-impl Default for SyntectAdapterCachedBuilder {
+/// Type alias for the cached adapter builder.
+pub type SyntectAdapterCachedBuilder = SyntectAdapterBuilder<Cached>;
+
+/// Type alias for the uncached adapter builder.
+#[cfg(test)]
+pub type SyntectAdapterUncachedBuilder = SyntectAdapterBuilder<Uncached>;
+
+impl<S: HighlightStrategy> Default for SyntectAdapterBuilder<S> {
     fn default() -> Self {
-        SyntectAdapterCachedBuilder {
+        SyntectAdapterBuilder {
             theme: Some("InspiredGitHub".into()),
             syntax_set: None,
             theme_set: None,
+            _strategy: PhantomData,
         }
     }
 }
 
-impl SyntectAdapterCachedBuilder {
-    /// Create a new empty [`SyntectAdapterCachedBuilder`].
+impl<S: HighlightStrategy> SyntectAdapterBuilder<S> {
+    /// Create a new empty [`SyntectAdapterBuilder`].
     pub fn new() -> Self {
         Default::default()
     }
@@ -235,12 +305,12 @@ impl SyntectAdapterCachedBuilder {
         self
     }
 
-    /// Builds the [`SyntectAdapterCached`]. Default values:
+    /// Builds the [`SyntectAdapter`]. Default values:
     /// - `theme`: `InspiredGitHub`
     /// - `syntax_set`: [`SyntaxSet::load_defaults_newlines()`]
     /// - `theme_set`: [`ThemeSet::load_defaults()`]
-    pub fn build(self) -> SyntectAdapterCached {
-        SyntectAdapterCached {
+    pub fn build(self) -> SyntectAdapter<S> {
+        SyntectAdapter {
             theme: self.theme,
             syntax_set: self
                 .syntax_set
@@ -248,6 +318,7 @@ impl SyntectAdapterCachedBuilder {
             theme_set: self
                 .theme_set
                 .unwrap_or_else(|| Box::leak(Box::new(ThemeSet::load_defaults()))),
+            _strategy: PhantomData,
         }
     }
 }
