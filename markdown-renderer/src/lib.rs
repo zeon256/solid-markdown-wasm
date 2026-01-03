@@ -271,7 +271,8 @@ mod test {
         let mut counter = 0;
 
         // Replace all glyph IDs with normalized ones
-        let id_regex = regex::Regex::new(r#"(id|xlink:href)="(#?)g[A-F0-9]{32}""#).unwrap();
+        // IDs can have variable length hex strings (typically 31-32 chars)
+        let id_regex = regex::Regex::new(r#"(id|xlink:href)="(#?)g[A-F0-9]+""#).unwrap();
 
         id_regex
             .replace_all(html, |caps: &regex::Captures| {
