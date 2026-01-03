@@ -263,6 +263,40 @@ mod test {
         let _ = file2.write(render_md_uncached(md2, "OneHalfDark").as_bytes());
     }
 
+    /// Normalize SVG glyph IDs to make them deterministic for testing.
+    /// SVG glyph IDs contain random hashes that differ between runs.
+    fn normalize_svg_ids(html: &str) -> String {
+        use std::collections::HashMap;
+        let mut id_map = HashMap::new();
+        let mut counter = 0;
+
+        // Replace all glyph IDs with normalized ones
+        let id_regex = regex::Regex::new(r#"(id|xlink:href)="(#?)g[A-F0-9]{32}""#).unwrap();
+
+        id_regex
+            .replace_all(html, |caps: &regex::Captures| {
+                let attr = &caps[1];
+                let hash = &caps[2];
+                let full_id = &caps[0];
+
+                // Extract the actual ID (without # if present)
+                let id = if hash == "#" {
+                    &full_id[full_id.find("#g").unwrap() + 1..full_id.len() - 1]
+                } else {
+                    &full_id[full_id.find("g").unwrap()..full_id.len() - 1]
+                };
+
+                let normalized = id_map.entry(id.to_string()).or_insert_with(|| {
+                    let new_id = format!("gNORM{:04}", counter);
+                    counter += 1;
+                    new_id
+                });
+
+                format!(r#"{}="{}{}""#, attr, hash, normalized)
+            })
+            .to_string()
+    }
+
     #[test]
     fn test_cached_syntax_highlighting() {
         let expected_md0 = include_str!("../test-data/md0.html");
@@ -273,8 +307,17 @@ mod test {
         let md1 = include_str!("../sample-data/md1.md");
         let md2 = include_str!("../sample-data/md2.md");
 
-        assert_eq!(expected_md0, render_md(md0, Themes::OneHalfDark));
-        assert_eq!(expected_md1, render_md(md1, Themes::OneHalfDark));
-        assert_eq!(expected_md2, render_md(md2, Themes::OneHalfDark));
+        assert_eq!(
+            normalize_svg_ids(expected_md0),
+            normalize_svg_ids(&render_md(md0, Themes::OneHalfDark))
+        );
+        assert_eq!(
+            normalize_svg_ids(expected_md1),
+            normalize_svg_ids(&render_md(md1, Themes::OneHalfDark))
+        );
+        assert_eq!(
+            normalize_svg_ids(expected_md2),
+            normalize_svg_ids(&render_md(md2, Themes::OneHalfDark))
+        );
     }
 }
