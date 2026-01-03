@@ -12,6 +12,7 @@ comrak = { git = "https://github.com/DoublePrecision/comrak.git", branch = "feat
 syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"]}
 mini-moka = { version = "0.10.3", optional = true }
 ammonia = { version = "4.1.2", optional = true }
+regex = "1.12.2"
 
 [features]
 default = ["mini-moka"]
@@ -26,7 +27,7 @@ panic = 'abort'
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
-regex = "1.12.2"
+
 
 [[bench]]
 name = "my_benchmark"

@@ -17,6 +17,8 @@
 - Math rendering support (using a forked version of [comrak](https://github.com/DoublePrecision/comrak "comrak fork"))
 - Syntax highlighting using [syntect](https://github.com/trishume/syntect "syntect github")
 - Huge support for languages and themes
+- Support for iframes (e.g. YouTube embeds)
+- Sanitization of HTML and links for security with ammonia library
 - Easy to use
 
 ## Users
@@ -101,6 +103,106 @@ const App: Component = () => {
 
 export default App;
 ```
+
+## Customising Code Block Headers
+
+The rendered code blocks include a header with a language label and buttons for copying and collapsing code. You can customise these using CSS.
+
+### CSS Classes
+
+| Class | Description |
+|-------|-------------|
+| `.code-block-wrapper` | Container wrapping the entire code block |
+| `.code-block-header` | The header bar containing language label and buttons |
+| `.code-block-language` | The language label text (e.g., "typescript") |
+| `.code-block-buttons` | Container for the action buttons |
+| `.code-block-copy` | The copy button |
+| `.code-block-collapse` | The collapse/expand button |
+| `.code-block-wrapper.collapsed` | Applied when code block is collapsed |
+| `.code-block-copy.copied` | Applied when code has been copied (for 2 seconds) |
+
+### Example CSS
+
+```css
+/* Dark theme header */
+.markdown-body .code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #151b23;
+  border-bottom: 1px solid #3d444db3;
+}
+
+/* Language label */
+.markdown-body .code-block-language {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #9198a1;
+}
+
+/* Button container */
+.markdown-body .code-block-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Copy and collapse buttons */
+.markdown-body .code-block-copy,
+.markdown-body .code-block-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: #9198a1;
+  background: transparent;
+  border: 1px solid #3d444db3;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.markdown-body .code-block-copy:hover,
+.markdown-body .code-block-collapse:hover {
+  color: #f0f6fc;
+  background-color: #656c7633;
+  border-color: #3d444d;
+}
+
+/* Icon sizing */
+.markdown-body .code-block-copy svg,
+.markdown-body .code-block-collapse svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Hide code when collapsed */
+.markdown-body .code-block-wrapper.collapsed pre {
+  display: none;
+}
+
+/* Success state after copying */
+.markdown-body .code-block-copy.copied {
+  color: #5eeed8;
+  border-color: #5eeed8;
+}
+```
+
+### CSS Variables
+
+The default styles use CSS variables that you can override:
+
+| Variable | Description | Default (dark) |
+|----------|-------------|----------------|
+| `--bgColor-muted` | Header background | `#151b23` |
+| `--borderColor-muted` | Border color | `#3d444db3` |
+| `--fgColor-muted` | Muted text/icon color | `#9198a1` |
+| `--fgColor-default` | Default text/icon color | `#f0f6fc` |
+| `--bgColor-neutral-muted` | Hover background | `#656c7633` |
+| `--borderColor-default` | Hover border color | `#3d444d` |
+| `--fgColor-success` | Success state color | `#5eeed8` |
 
 ## Available Themes and supported Languages
 

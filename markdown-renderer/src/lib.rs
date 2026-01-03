@@ -174,10 +174,13 @@ static PLUGINS: LazyLock<HashMap<&'static str, Plugins<'static>>> = LazyLock::ne
 
 #[cfg(feature = "sanitize")]
 static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
+    use std::collections::HashSet;
+
     let mut builder = ammonia::Builder::default();
 
     // Get default tags and add iframe + SVG elements
-    let mut tags = HashSet::new();
+    let mut tags = HashSet::with_capacity(100);
+
     // Standard HTML tags from ammonia defaults
     for tag in [
         "a",
@@ -299,7 +302,7 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
     let mut tag_attributes: HashMap<&str, HashSet<&str>> = HashMap::new();
 
     // iframe attributes
-    let iframe_attrs: HashSet<&str> = [
+    let iframe_attrs = [
         "src",
         "width",
         "height",
@@ -312,11 +315,12 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
         "referrerpolicy",
     ]
     .into_iter()
-    .collect();
+    .collect::<HashSet<&str>>();
+
     tag_attributes.insert("iframe", iframe_attrs);
 
     // SVG attributes - common attributes used across many SVG elements
-    let svg_common_attrs: HashSet<&str> = [
+    let svg_common_attrs = [
         "id",
         "class",
         "style",
@@ -385,7 +389,7 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
         "systemLanguage",
     ]
     .into_iter()
-    .collect();
+    .collect::<HashSet<&str>>();
 
     // Apply common SVG attributes to all SVG elements
     for svg_tag in [
@@ -421,21 +425,30 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
     }
 
     // Input attributes (for tasklists)
-    let input_attrs: HashSet<&str> = ["type", "checked", "disabled"].into_iter().collect();
+    let input_attrs = ["type", "checked", "disabled"]
+        .into_iter()
+        .collect::<HashSet<&str>>();
     tag_attributes.insert("input", input_attrs);
 
-    // Image attributes
-    let img_attrs: HashSet<&str> = ["src", "alt", "title", "width", "height"]
+    // Span attributes (for code block language labels)
+    let span_attrs = ["data-lang", "hidden"]
         .into_iter()
-        .collect();
+        .collect::<HashSet<&str>>();
+    tag_attributes.insert("span", span_attrs);
+
+    // Image attributes
+    let img_attrs = ["src", "alt", "title", "width", "height"]
+        .into_iter()
+        .collect::<HashSet<&str>>();
+
     tag_attributes.insert("img", img_attrs);
 
     // Link attributes (note: 'rel' is managed by ammonia automatically)
-    let a_attrs: HashSet<&str> = ["href", "title"].into_iter().collect();
+    let a_attrs = ["href", "title"].into_iter().collect::<HashSet<&str>>();
     tag_attributes.insert("a", a_attrs);
 
     // Table alignment
-    let td_attrs: HashSet<&str> = ["align"].into_iter().collect();
+    let td_attrs = ["align"].into_iter().collect::<HashSet<&str>>();
     tag_attributes.insert("td", td_attrs.clone());
     tag_attributes.insert("th", td_attrs);
 
@@ -445,7 +458,10 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
     builder.add_generic_attributes(["style", "class"]);
 
     // Allow certain URL schemes
-    let url_schemes: HashSet<&str> = ["https", "http", "mailto", "data"].into_iter().collect();
+    let url_schemes = ["https", "http", "mailto", "data"]
+        .into_iter()
+        .collect::<HashSet<&str>>();
+
     builder.url_schemes(url_schemes);
 
     // Use attribute filter to preserve SVG xlink:href fragment references (like #glyph123)
@@ -471,9 +487,25 @@ fn sanitize_html(html: &str) -> String {
     SANITIZER.clean(html).to_string()
 }
 
+/// Regex to match </code></pre> sequences that follow code-block-wrapper structure.
+/// We look for </code></pre> which is the closing pattern for our syntax-highlighted code blocks.
+/// This is more specific than just </pre> to avoid affecting other pre tags.
+static CODE_BLOCK_CLOSE_REGEX: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"</code></pre>").unwrap());
+
+/// Post-process HTML to close code-block-wrapper divs.
+/// The SyntaxHighlighterAdapter trait only provides hooks for opening tags,
+/// so we need to close the wrapper div after each </pre> tag that belongs to a code block.
+fn close_code_block_wrappers(html: &str) -> String {
+    CODE_BLOCK_CLOSE_REGEX
+        .replace_all(html, "</code></pre></div>")
+        .into_owned()
+}
+
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: Themes) -> String {
     let html = markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS[theme.to_str()]);
+    let html = close_code_block_wrappers(&html);
 
     #[cfg(feature = "sanitize")]
     {
