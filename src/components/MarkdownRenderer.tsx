@@ -11,6 +11,8 @@ import {
 } from "solid-js";
 import { render } from "solid-js/web";
 
+export type { Themes } from "markdown-renderer";
+
 // Icon size constant
 const ICON_SIZE = 16;
 
@@ -97,7 +99,6 @@ export interface MarkdownRendererProps {
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
-  const { theme = "one-dark" } = props;
   const [renderedHtml, setRenderedHtml] = createSignal("");
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
@@ -308,9 +309,15 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   });
 
   createEffect(() => {
-    if (!loadingWasm()) {
+    // Track reactive dependencies at top level
+    const markdown = props.markdown;
+    const theme = props.theme ?? "one-dark";
+    const isLoading = loadingWasm();
+
+    if (!isLoading) {
       const startTime = performance.now();
-      const result = render_md(props.markdown, theme);
+      console.log("[MarkdownRenderer] Rendering with theme:", theme);
+      const result = render_md(markdown, theme);
 
       // Extract iframes and replace with placeholders
       const { html, iframes } = extractIframes(result);
