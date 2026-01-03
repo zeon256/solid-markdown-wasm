@@ -11,10 +11,12 @@ wasm-bindgen = "0.2.105"
 comrak = { git = "https://github.com/DoublePrecision/comrak.git", branch = "feat/math-renderer", default-features = false }
 syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"]}
 mini-moka = { version = "0.10.3", optional = true }
+ammonia = { version = "4.1.2", optional = true }
 
 [features]
 default = ["mini-moka"]
 cached-code = ["mini-moka"]
+sanitize = ["ammonia"]
 
 [profile.release]
 opt-level = 's'

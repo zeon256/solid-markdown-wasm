@@ -17,7 +17,7 @@ export default defineConfig({
       buildStart: () => {
         return new Promise((resolve, reject) => {
           exec(
-            "cd markdown-renderer && wasm-pack build --target web --release && cd .. && bun process_wasm_pkg.js",
+            "cd markdown-renderer && wasm-pack build --target web --release --features sanitize && cd .. && bun process_wasm_pkg.js",
             (err, stdout, stderr) => {
               if (err) {
                 console.log("Stdout:", stdout);
