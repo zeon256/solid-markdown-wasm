@@ -105,6 +105,10 @@ You are using [solid-markdown-wasm](https://github.com/zeon256/solid-markdown-wa
 | left bar      | right bar     |
 | left baz      | right baz     |
 
+## Iframes
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/7chBqP8W60M?si=E6RrZfaeuMmZtosb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Inline code
 
 This web site is using `solid-markdown-wasm`.

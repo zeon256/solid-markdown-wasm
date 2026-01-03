@@ -149,10 +149,31 @@ impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAda
     ) -> Result<(), fmt::Error> {
         let fallback_syntax = "Plain Text";
 
+        let lang_label = lang.filter(|s| !s.is_empty()).unwrap_or("Code");
+
         let lang: &str = match lang {
             Some(l) if !l.is_empty() => l,
             _ => fallback_syntax,
         };
+
+        // Write a hidden span with data-lang attribute for JavaScript to pick up
+        // This survives HTML sanitization unlike script tags
+        output.write_str("<span class=\"code-lang-data\" data-lang=\"")?;
+        // HTML-escape the lang label for safety in attribute context
+        for c in lang_label.chars() {
+            match c {
+                '"' => output.write_str("&quot;")?,
+                '&' => output.write_str("&amp;")?,
+                '<' => output.write_str("&lt;")?,
+                '>' => output.write_str("&gt;")?,
+                _ => output.write_char(c)?,
+            }
+        }
+        output.write_str("\" hidden></span>")?;
+
+        if lang == fallback_syntax {
+            return output.write_str(code);
+        }
 
         let syntax = self
             .syntax_set
@@ -174,6 +195,13 @@ impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAda
         output: &mut dyn Write,
         attributes: HashMap<&'static str, Cow<'_, str>>,
     ) -> Result<(), fmt::Error> {
+        output.write_str(concat!(
+            r#"<div class="code-block-wrapper">"#,
+            r#"<div class="code-block-header">"#,
+            r#"<span class="code-block-language">Code</span>"#,
+            r#"</div>"#,
+        ))?;
+
         match &self.theme {
             Some(theme) => {
                 let theme = &self.theme_set.themes[theme];

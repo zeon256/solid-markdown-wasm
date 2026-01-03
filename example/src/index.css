@@ -57,7 +57,7 @@
     --fgColor-default: #f0f6fc;
     --fgColor-muted: #9198a1;
     --fgColor-accent: #4493f8;
-    --fgColor-success: #3fb950;
+    --fgColor-success: #14b8a6;
     --fgColor-attention: #d29922;
     --fgColor-danger: #f85149;
     --fgColor-done: #ab7df8;
@@ -69,7 +69,7 @@
     --borderColor-muted: #3d444db3;
     --borderColor-neutral-muted: #3d444db3;
     --borderColor-accent-emphasis: #1f6feb;
-    --borderColor-success-emphasis: #238636;
+    --borderColor-success-emphasis: #0d9488;
     --borderColor-attention-emphasis: #9e6a03;
     --borderColor-danger-emphasis: #da3633;
     --borderColor-done-emphasis: #8957e5;
@@ -114,7 +114,7 @@
     --fgColor-default: #1f2328;
     --fgColor-muted: #59636e;
     --fgColor-accent: #0969da;
-    --fgColor-success: #1a7f37;
+    --fgColor-success: #0d9488;
     --fgColor-attention: #9a6700;
     --fgColor-danger: #d1242f;
     --fgColor-done: #8250df;
@@ -126,7 +126,7 @@
     --borderColor-muted: #d1d9e0b3;
     --borderColor-neutral-muted: #d1d9e0b3;
     --borderColor-accent-emphasis: #0969da;
-    --borderColor-success-emphasis: #1a7f37;
+    --borderColor-success-emphasis: #0d9488;
     --borderColor-attention-emphasis: #9a6700;
     --borderColor-danger-emphasis: #cf222e;
     --borderColor-done-emphasis: #8250df;
@@ -1296,4 +1296,174 @@
 
 .markdown-body .highlight pre:has(+ .zeroclipboard-container) {
   min-height: 52px;
+}
+
+/* Code block wrapper styling */
+.markdown-body .code-block-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.markdown-body .code-block-wrapper pre {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.markdown-body .code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--bgColor-muted, #151b23);
+  border-bottom: 1px solid var(--borderColor-muted, #3d444db3);
+}
+
+.markdown-body .code-block-language {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--fgColor-muted, #9198a1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.markdown-body .code-block-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.markdown-body .code-block-copy,
+.markdown-body .code-block-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--fgColor-muted, #9198a1);
+  background: transparent;
+  border: 1px solid var(--borderColor-muted, #3d444db3);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-body .code-block-copy:hover,
+.markdown-body .code-block-collapse:hover {
+  color: var(--fgColor-default, #f0f6fc);
+  background-color: var(--bgColor-neutral-muted, #656c7633);
+  border-color: var(--borderColor-default, #3d444d);
+}
+
+.markdown-body .code-block-copy:active,
+.markdown-body .code-block-collapse:active {
+  transform: scale(0.95);
+}
+
+.markdown-body .code-block-copy svg,
+.markdown-body .code-block-collapse svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Hide the language data span (it's only for JS to read) */
+.markdown-body .code-lang-data {
+  display: none;
+}
+
+/* Collapsed state for code blocks */
+.markdown-body .code-block-wrapper.collapsed pre {
+  display: none;
+}
+
+/* Copy button success state */
+.markdown-body .code-block-copy.copied {
+  color: var(--fgColor-success, #14b8a6);
+  border-color: var(--fgColor-success, #14b8a6);
+}
+
+.markdown-body .code-block-copy.copied:hover {
+  color: var(--fgColor-success, #14b8a6);
+  border-color: var(--fgColor-success, #14b8a6);
+}
+
+/* Light mode adjustments */
+@media (prefers-color-scheme: light) {
+  .markdown-body .code-block-header {
+    background-color: var(--bgColor-muted, #f6f8fa);
+    border-bottom-color: var(--borderColor-muted, #d1d9e0b3);
+  }
+
+  .markdown-body .code-block-language {
+    color: var(--fgColor-muted, #59636e);
+  }
+
+  .markdown-body .code-block-copy,
+  .markdown-body .code-block-collapse {
+    color: var(--fgColor-muted, #59636e);
+    border-color: var(--borderColor-muted, #d1d9e0b3);
+  }
+
+  .markdown-body .code-block-copy:hover,
+  .markdown-body .code-block-collapse:hover {
+    color: var(--fgColor-default, #1f2328);
+    background-color: var(--bgColor-neutral-muted, #818b981f);
+    border-color: var(--borderColor-default, #d1d9e0);
+  }
+
+  .markdown-body .code-block-copy.copied {
+    color: var(--fgColor-success, #14b8a6);
+    border-color: var(--fgColor-success, #14b8a6);
+  }
+
+  .markdown-body .code-block-copy.copied:hover {
+    color: var(--fgColor-success, #14b8a6);
+    border-color: var(--fgColor-success, #14b8a6);
+  }
+}
+
+/* Iframe placeholder styles - these reserve space for the overlay iframes */
+.markdown-body .iframe-placeholder {
+  /* Default dimensions if not specified inline */
+  width: 100%;
+  min-height: 300px;
+  /* Allow inline styles to override */
+  box-sizing: border-box;
+  background: transparent;
+  border-radius: 6px;
+  position: relative;
+  /* Margins for proper spacing */
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* When iframe has explicit dimensions via inline style, don't force min-height */
+.markdown-body .iframe-placeholder[style*="height"] {
+  min-height: unset;
+}
+
+.markdown-body .iframe-placeholder[style*="width"] {
+  width: unset;
+}
+
+/* Iframe overlay wrapper styles */
+.iframe-overlay-wrapper {
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.iframe-overlay-wrapper iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .markdown-body .iframe-placeholder {
+    background: var(--bgColor-muted, #161b22);
+    border-color: var(--borderColor-default, #30363d);
+  }
 }

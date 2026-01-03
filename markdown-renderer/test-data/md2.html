@@ -31,7 +31,7 @@
 <p>Partition using classic PDF techniques and export each one.</p>
 <h2>Stage 1: Routing</h2>
 <p>Use the following prompt to decide the section.</p>
-<pre style="background-color:#282c34;"><code class="language-markdown"><span style="color:#dcdfe4;">You are an expert PC hardware category classifier for Singapore/Malaysia PC shops (Sim Lim Square style).
+<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-markdown"><span class="code-lang-data" data-lang="markdown" hidden></span><span style="color:#dcdfe4;">You are an expert PC hardware category classifier for Singapore/Malaysia PC shops (Sim Lim Square style).
 </span><span style="color:#dcdfe4;">
 </span><span style="color:#61afef;">## YOUR JOB:
 </span><span style="color:#dcdfe4;">Given a </span><span style="color:#c678dd;">**single extracted PDF section/box**</span><span style="color:#dcdfe4;">, classify it into </span><span style="color:#c678dd;">**EXACTLY ONE**</span><span style="color:#dcdfe4;"> PC hardware category.
@@ -94,7 +94,7 @@
 </span><span style="color:#dcdfe4;">  </span><span style="color:#98c379;">&quot;reasoning&quot;</span><span style="color:#dcdfe4;">: </span><span style="color:#98c379;">&quot;Brief explanation (1 sentence)&quot;
 </span><span style="color:#dcdfe4;">}
 </span></code></pre>
-<pre style="background-color:#282c34;"><code class="language-markdown"><span style="color:#dcdfe4;">You are an expert PC hardware price extractor for Singapore PC shops (Sim Lim Square style).
+<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-markdown"><span class="code-lang-data" data-lang="markdown" hidden></span><span style="color:#dcdfe4;">You are an expert PC hardware price extractor for Singapore PC shops (Sim Lim Square style).
 </span><span style="color:#dcdfe4;">
 </span><span style="color:#61afef;">## IMPORTANT: CATEGORY-SPECIFIC EXTRACTION MODE
 </span><span style="color:#dcdfe4;">
@@ -161,7 +161,7 @@
 </span><span style="color:#dcdfe4;">]
 </span></code></pre>
 <h2>Data format</h2>
-<pre style="background-color:#282c34;"><code class="language-typescript"><span style="color:#c678dd;">type </span><span style="color:#dcdfe4;">Category </span><span style="color:#c678dd;">=
+<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-typescript"><span class="code-lang-data" data-lang="typescript" hidden></span><span style="color:#c678dd;">type </span><span style="color:#dcdfe4;">Category </span><span style="color:#c678dd;">=
 </span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;CPU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;GPU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Motherboard&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;RAM&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;SSD&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;HDD&quot;
 </span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;PSU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Cooler&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Case&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Monitor&quot;
 </span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Keyboard&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Mouse&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;KeyboardMouseCombo&quot;

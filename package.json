@@ -17,6 +17,7 @@
   },
   "files": ["dist", "package.json", "README.md", "LICENSE.md"],
   "dependencies": {
+    "lucide-solid": "^0.562.0",
     "markdown-renderer": "file:./markdown-renderer/pkg/"
   },
   "peerDependencies": {
