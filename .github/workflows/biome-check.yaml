@@ -2,7 +2,7 @@ name: Quality Checks
 
 on:
   pull_request:
-    branches: [main] 
+    branches: [main]
 
 jobs:
   check:
@@ -19,6 +19,8 @@ jobs:
         run: cd markdown-renderer && cargo check
       - name: Run Clippy
         run: cd markdown-renderer && cargo clippy -- -D warnings
+      - name: Run Tests
+        run: cd markdown-renderer && cargo test
   biome:
     name: Run BiomeJS
     runs-on: ubuntu-latest
