@@ -1,8 +1,14 @@
-import { type Component, createSignal, onCleanup, onMount, For } from "solid-js";
+import {
+  type Component,
+  For,
+  createSignal,
+  onCleanup,
+  onMount,
+} from "solid-js";
 import { MarkdownRenderer, type Themes } from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
-import initialMarkdown from "../src/assets/markdown_preview.md?raw";
 import haxiomLogo from "../src/assets/haxiom.svg";
+import initialMarkdown from "../src/assets/markdown_preview.md?raw";
 
 // All available themes from the Rust lib.rs (matches the Themes type)
 const CODE_THEMES: Themes[] = [
@@ -70,10 +76,14 @@ const App: Component = () => {
     window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   const [codeTheme, setCodeTheme] = createSignal<Themes>(
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu-dark" : "ayu-light"
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "ayu-dark"
+      : "ayu-light",
   );
   const [editorTheme, setEditorTheme] = createSignal<string>(
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "vs-dark" : "vs"
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "vs-dark"
+      : "vs",
   );
   let timeoutId: number | NodeJS.Timeout | undefined;
 
@@ -154,12 +164,37 @@ const App: Component = () => {
       >
         {/* Left side - Logo and project name */}
         <div class="flex items-center gap-3">
-          <img src={haxiomLogo} alt="Haxiom" class="h-6 w-6" classList={{ "invert": isDarkMode() }} />
-          <span class="font-semibold" classList={{ "text-white": isDarkMode(), "text-gray-900": !isDarkMode() }}>
+          <img
+            src={haxiomLogo}
+            alt="Haxiom"
+            class="h-6 w-6"
+            classList={{ invert: isDarkMode() }}
+          />
+          <span
+            class="font-semibold"
+            classList={{
+              "text-white": isDarkMode(),
+              "text-gray-900": !isDarkMode(),
+            }}
+          >
             Haxiom
           </span>
-          <span classList={{ "text-gray-500": isDarkMode(), "text-gray-400": !isDarkMode() }}>/</span>
-          <span classList={{ "text-gray-400": isDarkMode(), "text-gray-500": !isDarkMode() }}>solid-markdown-wasm</span>
+          <span
+            classList={{
+              "text-gray-500": isDarkMode(),
+              "text-gray-400": !isDarkMode(),
+            }}
+          >
+            /
+          </span>
+          <span
+            classList={{
+              "text-gray-400": isDarkMode(),
+              "text-gray-500": !isDarkMode(),
+            }}
+          >
+            solid-markdown-wasm
+          </span>
         </div>
 
         {/* Right side - Theme selectors and Try Haxiom */}
@@ -168,7 +203,10 @@ const App: Component = () => {
             {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label
               class="text-sm font-medium"
-              classList={{ "text-gray-300": isDarkMode(), "text-gray-700": !isDarkMode() }}
+              classList={{
+                "text-gray-300": isDarkMode(),
+                "text-gray-700": !isDarkMode(),
+              }}
             >
               Editor Theme:
             </label>
@@ -187,7 +225,10 @@ const App: Component = () => {
             {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label
               class="text-sm font-medium"
-              classList={{ "text-gray-300": isDarkMode(), "text-gray-700": !isDarkMode() }}
+              classList={{
+                "text-gray-300": isDarkMode(),
+                "text-gray-700": !isDarkMode(),
+              }}
             >
               Code Block Theme:
             </label>
@@ -196,16 +237,18 @@ const App: Component = () => {
               value={codeTheme()}
               onChange={(e) => setCodeTheme(e.currentTarget.value as Themes)}
             >
-              <For each={CODE_THEMES}>{(theme) => <option value={theme}>{theme}</option>}</For>
+              <For each={CODE_THEMES}>
+                {(theme) => <option value={theme}>{theme}</option>}
+              </For>
             </select>
           </div>
           {/* Try Haxiom link */}
           <a
-          href="https://haxiom.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-sm font-medium px-3 py-1.5 rounded transition-colors text-black hover:opacity-80"
-          style={{ "background-color": "#6fffe9" }}
+            href="https://haxiom.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm font-medium px-3 py-1.5 rounded transition-colors text-black hover:opacity-80"
+            style={{ "background-color": "#6fffe9" }}
           >
             Try Haxiom
           </a>
@@ -226,7 +269,10 @@ const App: Component = () => {
         </div>
         <div
           class="w-1/2 flex flex-col"
-          classList={{ "bg-[#0d1117]": isDarkMode(), "bg-white": !isDarkMode() }}
+          classList={{
+            "bg-[#0d1117]": isDarkMode(),
+            "bg-white": !isDarkMode(),
+          }}
         >
           <div class="m-0 h-full shadow-sm overflow-y-auto p-4 px-6">
             <MarkdownRenderer

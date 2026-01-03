@@ -1,5 +1,5 @@
-import init, { render_md, type Themes } from "markdown-renderer";
 import { Check, ChevronsDownUp, ChevronsUpDown, Copy } from "lucide-solid";
+import init, { render_md, type Themes } from "markdown-renderer";
 import {
   type Component,
   type JSX,
