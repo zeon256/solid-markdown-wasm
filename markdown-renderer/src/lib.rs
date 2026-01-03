@@ -138,7 +138,7 @@ static ADAPTERS: LazyLock<HashMap<&'static str, SyntectAdapterCached>> = LazyLoc
 });
 
 static PLUGINS: LazyLock<HashMap<&'static str, Plugins<'static>>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity(6);
+    let mut map = HashMap::with_capacity(THEMES.len());
 
     for (theme, adapter) in ADAPTERS.iter() {
         let mut plugins = Plugins::default();
@@ -159,8 +159,44 @@ mod test {
     use std::{io::Write, sync::LazyLock};
 
     use super::*;
+    use crate::syntect_plugin::{SyntectAdapterUncached, SyntectAdapterUncachedBuilder};
 
-    #[ignore]
+    /// Uncached adapters for generating deterministic ground truth test data.
+    static UNCACHED_ADAPTERS: LazyLock<HashMap<&'static str, SyntectAdapterUncached>> =
+        LazyLock::new(|| {
+            let mut map = HashMap::with_capacity(THEMES.len());
+
+            for theme in THEMES.iter() {
+                let adapter = SyntectAdapterUncachedBuilder::new()
+                    .theme(theme)
+                    .syntax_set(&SYNTAX_SET)
+                    .theme_set(&THEME_SET)
+                    .build();
+                map.insert(*theme, adapter);
+            }
+
+            map
+        });
+
+    static UNCACHED_PLUGINS: LazyLock<HashMap<&'static str, Plugins<'static>>> =
+        LazyLock::new(|| {
+            let mut map = HashMap::with_capacity(THEMES.len());
+
+            for (theme, adapter) in UNCACHED_ADAPTERS.iter() {
+                let mut plugins = Plugins::default();
+                plugins.render.codefence_syntax_highlighter = Some(adapter);
+                map.insert(*theme, plugins);
+            }
+
+            map
+        });
+
+    /// Render markdown without caching - used for generating ground truth test data.
+    fn render_md_uncached(markdown: &str, theme: &str) -> String {
+        markdown_to_html_with_plugins(markdown, &OPTIONS, &UNCACHED_PLUGINS[theme])
+    }
+
+    #[ignore = "Run manually to see all themes: cargo test print_all_themes -- --ignored"]
     #[test]
     fn print_all_themes() {
         static THEME_SET: LazyLock<ThemeSet> =
@@ -172,7 +208,7 @@ mod test {
         }
     }
 
-    #[ignore]
+    #[ignore = "Run manually to see all default themes: cargo test print_default_themes -- --ignored"]
     #[test]
     fn print_default_themes() {
         let themes = ThemeSet::load_defaults();
@@ -182,7 +218,7 @@ mod test {
         }
     }
 
-    #[ignore]
+    #[ignore = "Run manually to see all default syntaxes: cargo test print_default_syntaxes -- --ignored"]
     #[test]
     fn print_default_syntaxes() {
         let syntaxes = SyntaxSet::load_defaults_newlines();
@@ -192,7 +228,7 @@ mod test {
         }
     }
 
-    #[ignore]
+    #[ignore = "Run manually to see all syntaxes and their file extensions: cargo test print_all_syntaxes -- --ignored"]
     #[test]
     fn print_all_syntaxes() {
         let syntaxes: SyntaxSet =
@@ -209,7 +245,7 @@ mod test {
         }
     }
 
-    // #[ignore]
+    #[ignore = "Run manually to regenerate ground truth: cargo test generate_ground_truth_test_data -- --ignored"]
     #[test]
     fn generate_ground_truth_test_data() {
         let md0 = include_str!("../sample-data/md0.md");
@@ -217,61 +253,14 @@ mod test {
         let md2 = include_str!("../sample-data/md2.md");
 
         use std::fs::File;
-        let mut file0 = File::create("test-data/md0_cached.html").unwrap();
-        let mut file1 = File::create("test-data/md1_cached.html").unwrap();
-        let mut file2 = File::create("test-data/md2_cached.html").unwrap();
+        let mut file0 = File::create("test-data/md0.html").unwrap();
+        let mut file1 = File::create("test-data/md1.html").unwrap();
+        let mut file2 = File::create("test-data/md2.html").unwrap();
 
-        let _ = file0.write(render_md_cached_syntax(md0, Themes::OneHalfDark).as_bytes());
-        let _ = file1.write(render_md_cached_syntax(md1, Themes::OneHalfDark).as_bytes());
-        let _ = file2.write(render_md_cached_syntax(md2, Themes::OneHalfDark).as_bytes());
-    }
-
-    // #[test]
-    // fn test_output() {
-    //     let expected_md0 = include_str!("../test-data/md0.html");
-    //     let expected_md1 = include_str!("../test-data/md1.html");
-    //     let expected_md2 = include_str!("../test-data/md2.html");
-
-    //     let md0 = include_str!("../sample-data/md0.md");
-    //     let md1 = include_str!("../sample-data/md1.md");
-    //     let md2 = include_str!("../sample-data/md2.md");
-
-    //     assert_eq!(expected_md0, render_md(md0, Themes::OneHalfDark));
-    //     assert_eq!(expected_md1, render_md(md1, Themes::OneHalfDark));
-    //     assert_eq!(expected_md2, render_md(md2, Themes::OneHalfDark));
-    // }
-
-    /// Normalize SVG glyph IDs to make them deterministic for testing
-    fn normalize_svg_ids(html: &str) -> String {
-        use std::collections::HashMap;
-        let mut id_map = HashMap::new();
-        let mut counter = 0;
-
-        // Replace all glyph IDs with normalized ones
-        let id_regex = regex::Regex::new(r#"(id|xlink:href)="(#?)g[A-F0-9]{32}""#).unwrap();
-
-        id_regex
-            .replace_all(html, |caps: &regex::Captures| {
-                let attr = &caps[1];
-                let hash = &caps[2];
-                let full_id = &caps[0];
-
-                // Extract the actual ID (without # if present)
-                let id = if hash == "#" {
-                    &full_id[full_id.find("#g").unwrap() + 1..full_id.len() - 1]
-                } else {
-                    &full_id[full_id.find("g").unwrap()..full_id.len() - 1]
-                };
-
-                let normalized = id_map.entry(id.to_string()).or_insert_with(|| {
-                    let new_id = format!("gNORM{:04}", counter);
-                    counter += 1;
-                    new_id
-                });
-
-                format!(r#"{}="{}{}""#, attr, hash, normalized)
-            })
-            .to_string()
+        // Use uncached rendering for deterministic output
+        let _ = file0.write(render_md_uncached(md0, "OneHalfDark").as_bytes());
+        let _ = file1.write(render_md_uncached(md1, "OneHalfDark").as_bytes());
+        let _ = file2.write(render_md_uncached(md2, "OneHalfDark").as_bytes());
     }
 
     #[test]
@@ -284,17 +273,8 @@ mod test {
         let md1 = include_str!("../sample-data/md1.md");
         let md2 = include_str!("../sample-data/md2.md");
 
-        assert_eq!(
-            normalize_svg_ids(expected_md0),
-            normalize_svg_ids(&render_md_cached_syntax(md0, Themes::OneHalfDark))
-        );
-        assert_eq!(
-            normalize_svg_ids(expected_md1),
-            normalize_svg_ids(&render_md_cached_syntax(md1, Themes::OneHalfDark))
-        );
-        assert_eq!(
-            normalize_svg_ids(expected_md2),
-            normalize_svg_ids(&render_md_cached_syntax(md2, Themes::OneHalfDark))
-        );
+        assert_eq!(expected_md0, render_md(md0, Themes::OneHalfDark));
+        assert_eq!(expected_md1, render_md(md1, Themes::OneHalfDark));
+        assert_eq!(expected_md2, render_md(md2, Themes::OneHalfDark));
     }
 }
