@@ -3,6 +3,9 @@ use std::{collections::HashMap, sync::LazyLock};
 use syntect::{dumps::from_binary, highlighting::ThemeSet, parsing::SyntaxSet};
 use wasm_bindgen::prelude::*;
 
+#[cfg(feature = "sanitize")]
+use std::collections::HashSet;
+
 use crate::syntect_plugin::{SyntectAdapterCached, SyntectAdapterCachedBuilder};
 
 mod syntect_plugin;
@@ -106,6 +109,7 @@ pub static SYNTAX_SET: LazyLock<SyntaxSet> =
 pub static THEME_SET: LazyLock<ThemeSet> =
     LazyLock::new(|| from_binary(include_bytes!("../sublime/themes/all.themedump")));
 
+#[cfg(feature = "sanitize")]
 static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     let mut options = Options::default();
     options.extension.table = true;
@@ -118,6 +122,25 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options.extension.math_code = true;
     options.extension.math_dollars = true;
     options.extension.front_matter_delimiter = Some("---".into());
+    options.render.r#unsafe = true;
+
+    options
+});
+
+#[cfg(not(feature = "sanitize"))]
+static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
+    let mut options = Options::default();
+    options.extension.table = true;
+    options.extension.tasklist = true;
+    options.extension.alerts = true;
+    options.extension.underline = true;
+    options.extension.strikethrough = true;
+    options.extension.spoiler = true;
+    options.extension.superscript = true;
+    options.extension.math_code = true;
+    options.extension.math_dollars = true;
+    options.extension.front_matter_delimiter = Some("---".into());
+    options.render.r#unsafe = true;
 
     options
 });
@@ -149,9 +172,318 @@ static PLUGINS: LazyLock<HashMap<&'static str, Plugins<'static>>> = LazyLock::ne
     map
 });
 
+#[cfg(feature = "sanitize")]
+static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
+    let mut builder = ammonia::Builder::default();
+
+    // Get default tags and add iframe + SVG elements
+    let mut tags = HashSet::new();
+    // Standard HTML tags from ammonia defaults
+    for tag in [
+        "a",
+        "abbr",
+        "acronym",
+        "area",
+        "article",
+        "aside",
+        "b",
+        "bdi",
+        "bdo",
+        "blockquote",
+        "br",
+        "caption",
+        "center",
+        "cite",
+        "code",
+        "col",
+        "colgroup",
+        "data",
+        "dd",
+        "del",
+        "details",
+        "dfn",
+        "div",
+        "dl",
+        "dt",
+        "em",
+        "figcaption",
+        "figure",
+        "footer",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "header",
+        "hgroup",
+        "hr",
+        "i",
+        "img",
+        "ins",
+        "kbd",
+        "li",
+        "map",
+        "mark",
+        "menu",
+        "nav",
+        "ol",
+        "p",
+        "pre",
+        "q",
+        "rp",
+        "rt",
+        "rtc",
+        "ruby",
+        "s",
+        "samp",
+        "small",
+        "span",
+        "strike",
+        "strong",
+        "sub",
+        "summary",
+        "sup",
+        "table",
+        "tbody",
+        "td",
+        "tfoot",
+        "th",
+        "thead",
+        "time",
+        "tr",
+        "tt",
+        "u",
+        "ul",
+        "var",
+        "wbr",
+        // Additional tags for our use case
+        "iframe",
+        "input",
+        // SVG elements
+        "svg",
+        "g",
+        "path",
+        "use",
+        "defs",
+        "symbol",
+        "circle",
+        "ellipse",
+        "line",
+        "polygon",
+        "polyline",
+        "rect",
+        "text",
+        "tspan",
+        "clipPath",
+        "mask",
+        "linearGradient",
+        "radialGradient",
+        "stop",
+        "filter",
+        "feGaussianBlur",
+        "feOffset",
+        "feBlend",
+        "feMerge",
+        "feMergeNode",
+        "image",
+        "foreignObject",
+        "title",
+        "desc",
+    ] {
+        tags.insert(tag);
+    }
+    builder.tags(tags);
+
+    // Allow necessary attributes for various elements
+    let mut tag_attributes: HashMap<&str, HashSet<&str>> = HashMap::new();
+
+    // iframe attributes
+    let iframe_attrs: HashSet<&str> = [
+        "src",
+        "width",
+        "height",
+        "frameborder",
+        "allow",
+        "allowfullscreen",
+        "loading",
+        "title",
+        "sandbox",
+        "referrerpolicy",
+    ]
+    .into_iter()
+    .collect();
+    tag_attributes.insert("iframe", iframe_attrs);
+
+    // SVG attributes - common attributes used across many SVG elements
+    let svg_common_attrs: HashSet<&str> = [
+        "id",
+        "class",
+        "style",
+        "transform",
+        "fill",
+        "fill-rule",
+        "fill-opacity",
+        "stroke",
+        "stroke-width",
+        "stroke-linecap",
+        "stroke-linejoin",
+        "stroke-opacity",
+        "stroke-dasharray",
+        "stroke-dashoffset",
+        "opacity",
+        "clip-path",
+        "clip-rule",
+        "mask",
+        "filter",
+        "x",
+        "y",
+        "width",
+        "height",
+        "rx",
+        "ry",
+        "cx",
+        "cy",
+        "r",
+        "d",
+        "points",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "href",
+        "xlink:href",
+        "overflow",
+        "viewBox",
+        "preserveAspectRatio",
+        "xmlns",
+        "xmlns:xlink",
+        "xmlns:h5",
+        "version",
+        "dx",
+        "dy",
+        "text-anchor",
+        "dominant-baseline",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "font-style",
+        "offset",
+        "stop-color",
+        "stop-opacity",
+        "gradientUnits",
+        "gradientTransform",
+        "spreadMethod",
+        "fx",
+        "fy",
+        "stdDeviation",
+        "result",
+        "in",
+        "in2",
+        "mode",
+        "requiredFeatures",
+        "systemLanguage",
+    ]
+    .into_iter()
+    .collect();
+
+    // Apply common SVG attributes to all SVG elements
+    for svg_tag in [
+        "svg",
+        "g",
+        "path",
+        "use",
+        "defs",
+        "symbol",
+        "circle",
+        "ellipse",
+        "line",
+        "polygon",
+        "polyline",
+        "rect",
+        "text",
+        "tspan",
+        "clipPath",
+        "mask",
+        "linearGradient",
+        "radialGradient",
+        "stop",
+        "filter",
+        "feGaussianBlur",
+        "feOffset",
+        "feBlend",
+        "feMerge",
+        "feMergeNode",
+        "image",
+        "foreignObject",
+    ] {
+        tag_attributes.insert(svg_tag, svg_common_attrs.clone());
+    }
+
+    // Input attributes (for tasklists)
+    let input_attrs: HashSet<&str> = ["type", "checked", "disabled"].into_iter().collect();
+    tag_attributes.insert("input", input_attrs);
+
+    // Image attributes
+    let img_attrs: HashSet<&str> = ["src", "alt", "title", "width", "height"]
+        .into_iter()
+        .collect();
+    tag_attributes.insert("img", img_attrs);
+
+    // Link attributes (note: 'rel' is managed by ammonia automatically)
+    let a_attrs: HashSet<&str> = ["href", "title"].into_iter().collect();
+    tag_attributes.insert("a", a_attrs);
+
+    // Table alignment
+    let td_attrs: HashSet<&str> = ["align"].into_iter().collect();
+    tag_attributes.insert("td", td_attrs.clone());
+    tag_attributes.insert("th", td_attrs);
+
+    builder.tag_attributes(tag_attributes);
+
+    // Allow style and class on all elements
+    builder.add_generic_attributes(["style", "class"]);
+
+    // Allow certain URL schemes
+    let url_schemes: HashSet<&str> = ["https", "http", "mailto", "data"].into_iter().collect();
+    builder.url_schemes(url_schemes);
+
+    // Use attribute filter to preserve SVG xlink:href fragment references (like #glyph123)
+    // which ammonia would otherwise strip as they don't match URL schemes
+    builder.attribute_filter(|_element, attribute, value| {
+        // Preserve xlink:href attributes with fragment references in SVG elements
+        if attribute == "xlink:href" && value.starts_with('#') {
+            Some(value.into())
+        } else if attribute == "href" && value.starts_with('#') {
+            // Also preserve regular href with fragments (for SVG 2.0 compatibility)
+            Some(value.into())
+        } else {
+            // Pass through all other attributes unchanged
+            Some(value.into())
+        }
+    });
+
+    builder
+});
+
+#[cfg(feature = "sanitize")]
+fn sanitize_html(html: &str) -> String {
+    SANITIZER.clean(html).to_string()
+}
+
 #[wasm_bindgen]
 pub fn render_md(markdown: &str, theme: Themes) -> String {
-    markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS[theme.to_str()])
+    let html = markdown_to_html_with_plugins(markdown, &OPTIONS, &PLUGINS[theme.to_str()]);
+
+    #[cfg(feature = "sanitize")]
+    {
+        sanitize_html(&html)
+    }
+
+    #[cfg(not(feature = "sanitize"))]
+    {
+        html
+    }
 }
 
 #[cfg(test)]
@@ -298,7 +630,111 @@ mod test {
             .to_string()
     }
 
+    /// Test that XSS attacks are blocked when sanitize feature is enabled
     #[test]
+    #[cfg(feature = "sanitize")]
+    fn test_xss_protection() {
+        // Test onerror XSS
+        let xss_input = r#"<img src="x" onerror="alert('XSS via onerror')">"#;
+        let result = render_md(xss_input, Themes::OneHalfDark);
+        assert!(
+            !result.contains("onerror"),
+            "onerror attribute should be stripped: {}",
+            result
+        );
+        assert!(
+            !result.contains("alert"),
+            "alert should be stripped: {}",
+            result
+        );
+
+        // Test onclick XSS
+        let xss_input2 = r#"<div onclick="alert('XSS')">Click me</div>"#;
+        let result2 = render_md(xss_input2, Themes::OneHalfDark);
+        assert!(
+            !result2.contains("onclick"),
+            "onclick attribute should be stripped: {}",
+            result2
+        );
+
+        // Test javascript: URL
+        let xss_input3 = r#"<a href="javascript:alert('XSS')">Click</a>"#;
+        let result3 = render_md(xss_input3, Themes::OneHalfDark);
+        assert!(
+            !result3.contains("javascript:"),
+            "javascript: URL should be stripped: {}",
+            result3
+        );
+
+        // Test script tag
+        let xss_input4 = r#"<script>alert('XSS')</script>"#;
+        let result4 = render_md(xss_input4, Themes::OneHalfDark);
+        assert!(
+            !result4.contains("<script>"),
+            "script tag should be stripped: {}",
+            result4
+        );
+
+        // Verify iframe is still allowed
+        let iframe_input = r#"<iframe src="https://www.youtube.com/embed/test" width="560" height="315"></iframe>"#;
+        let result5 = render_md(iframe_input, Themes::OneHalfDark);
+        assert!(
+            result5.contains("<iframe"),
+            "iframe should be preserved: {}",
+            result5
+        );
+        assert!(
+            result5.contains("https://www.youtube.com/embed/test"),
+            "iframe src should be preserved: {}",
+            result5
+        );
+    }
+
+    /// Test that SVG math content is preserved when sanitize feature is enabled
+    #[test]
+    #[cfg(feature = "sanitize")]
+    fn test_svg_math_preserved() {
+        let math_markdown = r#"$$x = 3y + 2$$"#;
+        let result = render_md(math_markdown, Themes::OneHalfDark);
+
+        // SVG element should be preserved
+        assert!(
+            result.contains("<svg"),
+            "SVG element should be preserved: {}",
+            result
+        );
+
+        // SVG should have viewBox attribute
+        assert!(
+            result.contains("viewBox"),
+            "SVG viewBox should be preserved: {}",
+            result
+        );
+
+        // Path elements should be preserved (used for glyphs)
+        assert!(
+            result.contains("<path") || result.contains("<symbol"),
+            "SVG path/symbol elements should be preserved: {}",
+            result
+        );
+
+        // Use elements with xlink:href should be preserved
+        assert!(
+            result.contains("<use") || result.contains("xlink:href"),
+            "SVG use/xlink:href should be preserved: {}",
+            result
+        );
+
+        // Defs section should be preserved
+        assert!(
+            result.contains("<defs"),
+            "SVG defs should be preserved: {}",
+            result
+        );
+    }
+
+    #[test]
+    #[cfg_attr(feature = "sanitize", ignore = "Sanitization modifies HTML output")]
     fn test_cached_syntax_highlighting() {
         let expected_md0 = include_str!("../test-data/md0.html");
         let expected_md1 = include_str!("../test-data/md1.html");

@@ -3,7 +3,7 @@ name: Deploy Example to GitHub Pages
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
   deploy:
@@ -28,7 +28,7 @@ jobs:
         run: cargo install wasm-pack
 
       - name: Build Rust project
-        run: cd markdown-renderer && wasm-pack build --target web --release
+        run: cd markdown-renderer && wasm-pack build --target web --features sanitize
 
       - name: Post-process wasm package
         run: bun process_wasm_pkg.js
@@ -43,11 +43,11 @@ jobs:
         run: cd example && bun install
 
       - name: Build example
-        run: cd example && bun run build 
+        run: cd example && bun run build
 
       - name: Deploy to GitHub Pages
         uses: jamesives/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: example/dist 
+          folder: example/dist
