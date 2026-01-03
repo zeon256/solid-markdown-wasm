@@ -20,7 +20,7 @@ jobs:
       - name: Run Clippy
         run: cd markdown-renderer && cargo clippy -- -D warnings
       - name: Run Tests
-        run: cd markdown-renderer && cargo test
+        run: cd markdown-renderer && cargo test --features sanitize
   biome:
     name: Run BiomeJS
     runs-on: ubuntu-latest

@@ -99,7 +99,10 @@ impl HighlightStrategy for Cached {
         }
 
         LRU.with_borrow_mut(|lru| {
-            let key = Box::<str>::from(code);
+            // Include theme and syntax name in cache key to avoid returning
+            // cached results from different themes or syntaxes
+            let theme_str = theme.map(|s| s.as_str()).unwrap_or("");
+            let key = Box::<str>::from(format!("{}:{}:{}", theme_str, syntax.name, code));
 
             if let Some(html) = lru.get(&key) {
                 return Ok(html.clone());
