@@ -85,6 +85,7 @@ const App: Component = () => {
       ? "vs-dark"
       : "vs",
   );
+  const [immediateMermaid, setImmediateMermaid] = createSignal(false);
   let timeoutId: number | NodeJS.Timeout | undefined;
 
   const debouncedSetMarkdown = (value: string) => {
@@ -242,6 +243,25 @@ const App: Component = () => {
               </For>
             </select>
           </div>
+
+          <div class="flex items-center gap-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+            <label
+              class="text-sm font-medium"
+              classList={{
+                "text-gray-300": isDarkMode(),
+                "text-gray-700": !isDarkMode(),
+              }}
+            >
+              Auto-render Mermaid:
+            </label>
+            <input
+              type="checkbox"
+              checked={immediateMermaid()}
+              onChange={(e) => setImmediateMermaid(e.currentTarget.checked)}
+              class="cursor-pointer"
+            />
+          </div>
           {/* Try Haxiom link */}
           <a
             href="https://haxiom.io"
@@ -281,6 +301,7 @@ const App: Component = () => {
               class="markdown-body"
               fallback={<LoadingFallback />}
               onLoaded={() => console.log("WASM Loaded")}
+              immediateRenderMermaid={immediateMermaid()}
             />
           </div>
         </div>

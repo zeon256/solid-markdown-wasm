@@ -18,6 +18,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -105,6 +106,7 @@
     --color-prettylights-syntax-sublimelinter-gutter-mark: #3d444d;
   }
 }
+
 @media (prefers-color-scheme: light) {
   .markdown-body,
   [data-theme="light"] {
@@ -1563,4 +1565,65 @@
 .markdown-body .math-display:active,
 .markdown-body .math-inline:active {
   scrollbar-width: thin;
+}
+
+/* Mermaid Diagrams */
+.markdown-body pre:has(code.language-mermaid),
+.markdown-body pre[data-mermaid-processed="true"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 1rem 0;
+}
+
+.markdown-body pre:has(code.language-mermaid) svg,
+.markdown-body pre[data-mermaid-processed="true"] svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-render-btn {
+  padding: 0.5rem 1rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.mermaid-render-btn:hover {
+  background: #4f46e5;
+}
+
+.mermaid-render-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.mermaid-loading {
+  padding: 1rem;
+  color: var(--fgColor-muted, #6b7280);
+  text-align: center;
+}
+
+.mermaid-error {
+  color: var(--fgColor-danger, #f85149);
+  padding: 1rem;
+  border: 1px solid var(--borderColor-danger-emphasis, #da3633);
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+@media (prefers-color-scheme: light) {
+  .mermaid-error {
+    color: var(--fgColor-danger, #d1242f);
+    border-color: var(--borderColor-danger-emphasis, #cf222e);
+  }
 }
