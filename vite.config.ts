@@ -1,4 +1,5 @@
 import { exec } from "node:child_process";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
@@ -15,7 +16,17 @@ export default defineConfig({
     {
       name: "cargo-build",
       buildStart: () => {
-        return new Promise((resolve, reject) => {
+        const wasmPath = resolve(
+          __dirname,
+          "markdown-renderer/pkg/markdown_renderer_bg.wasm",
+        );
+        if (existsSync(wasmPath)) {
+          console.log("✓ WASM already built, skipping cargo build.");
+          return;
+        }
+
+        return new Promise((resolvePromise, reject) => {
+          console.log("Building WASM...");
           exec(
             "cd markdown-renderer && wasm-pack build --target web --release --features sanitize && cd .. && bun process_wasm_pkg.js",
             (err, stdout, stderr) => {
@@ -25,7 +36,7 @@ export default defineConfig({
                 reject(err);
               } else {
                 console.log(stdout);
-                resolve();
+                resolvePromise();
               }
             },
           );
