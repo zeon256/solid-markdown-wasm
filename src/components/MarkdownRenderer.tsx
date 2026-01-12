@@ -1,4 +1,11 @@
-import { Check, ChevronsDownUp, ChevronsUpDown, Copy } from "lucide-solid";
+import {
+  Check,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Copy,
+  Maximize,
+  X,
+} from "lucide-solid";
 import init, { render_md, type Themes } from "markdown-renderer";
 import {
   type Component,
@@ -104,9 +111,10 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   const [renderedHtml, setRenderedHtml] = createSignal("");
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
+  const [fullScreenSvg, setFullScreenSvg] = createSignal<string | null>(null);
 
   // Initialize Mermaid renderer
-  const { processBlocks } = useMermaidRenderer(
+  const { processBlocks, renderMermaid } = useMermaidRenderer(
     props.immediateRenderMermaid ?? false,
   );
 
@@ -171,6 +179,24 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
       const buttonContainer = document.createElement("div");
       buttonContainer.className = "code-block-buttons";
 
+      // Add maximize button ONLY for Mermaid diagrams
+      const wrapper = header.closest(".code-block-wrapper");
+      const isMermaid =
+        wrapper?.querySelector(".language-mermaid") ||
+        wrapper
+          ?.querySelector(".code-lang-data")
+          ?.getAttribute("data-lang")
+          ?.toLowerCase() === "mermaid";
+
+      if (isMermaid) {
+        const maxBtn = document.createElement("button");
+        maxBtn.className = "code-block-maximize";
+        maxBtn.setAttribute("aria-label", "Show preview");
+        const maxDispose = render(() => <Maximize size={ICON_SIZE} />, maxBtn);
+        iconDisposeCallbacks.push(maxDispose);
+        buttonContainer.appendChild(maxBtn);
+      }
+
       // Create collapse/expand button
       const collapseBtn = document.createElement("button");
       collapseBtn.className = "code-block-collapse";
@@ -230,6 +256,63 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         iconDisposeCallbacks.push(dispose);
         collapseBtn.setAttribute("aria-label", "Collapse code");
       }
+      return;
+    }
+
+    // Handle maximize button
+    const maxBtn = target.closest(
+      ".code-block-maximize",
+    ) as HTMLButtonElement | null;
+    if (maxBtn) {
+      e.stopPropagation();
+      const wrapper = maxBtn.closest(".code-block-wrapper");
+      if (!wrapper) return;
+
+      // 1. Try to find an existing SVG inside the Mermaid pre container
+      // This avoids picking up the Maximize icon SVG
+      const mermaidPre =
+        wrapper.querySelector("pre[data-mermaid-source]") ||
+        wrapper.querySelector("pre.language-mermaid");
+
+      const svg = mermaidPre?.querySelector("svg");
+      if (svg) {
+        setFullScreenSvg(svg.outerHTML);
+        return;
+      }
+
+      // 2. If no SVG, it might be a Mermaid block that hasn't been rendered yet
+      const code = mermaidPre?.getAttribute("data-mermaid-source");
+
+      if (code) {
+        // We have the source! Let's render it specifically for the preview
+        const renderAndPreview = async () => {
+          try {
+            const svgMarkup = await renderMermaid(code);
+            setFullScreenSvg(svgMarkup);
+          } catch (err) {
+            console.error("Failed to render Mermaid for preview:", err);
+          }
+        };
+        renderAndPreview();
+      } else {
+        // Final fallback: try to find the code tag
+        const codeEl =
+          wrapper.querySelector("code.language-mermaid") ||
+          wrapper.querySelector("code");
+        if (codeEl?.textContent) {
+          renderMermaid(codeEl.textContent.trim()).then(setFullScreenSvg);
+        }
+      }
+      return;
+    }
+
+    // Handle clicking directly on the Mermaid diagram
+    const mermaidSvg = target.closest(
+      'pre[data-mermaid-processed="true"] svg',
+    ) as SVGElement | null;
+    if (mermaidSvg) {
+      e.stopPropagation();
+      setFullScreenSvg(mermaidSvg.outerHTML);
       return;
     }
 
@@ -463,7 +546,45 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             ref={contentRef}
             innerHTML={renderedHtml()}
             style={{ position: "relative" }}
+            classList={{ "mermaid-clickable": true }}
           />
+        </div>
+      </Show>
+
+      {/* Full Screen Preview Modal */}
+      <Show when={fullScreenSvg()}>
+        <div
+          class="mermaid-preview-overlay"
+          onClick={() => setFullScreenSvg(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setFullScreenSvg(null);
+          }}
+          role="presentation"
+          tabIndex={-1}
+        >
+          <div
+            class="mermaid-preview-content"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setFullScreenSvg(null);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setFullScreenSvg(null);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            innerHTML={fullScreenSvg() ?? ""}
+          />
+          <button
+            class="mermaid-preview-close"
+            type="button"
+            onClick={() => setFullScreenSvg(null)}
+          >
+            <X size={24} />
+          </button>
         </div>
       </Show>
     </div>

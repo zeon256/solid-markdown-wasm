@@ -204,6 +204,69 @@ The default styles use CSS variables that you can override:
 | `--borderColor-default` | Hover border color | `#3d444d` |
 | `--fgColor-success` | Success state color | `#5eeed8` |
 
+## Mermaid Diagrams
+
+`solid-markdown-wasm` has built-in support for rendering [Mermaid](https://mermaid.js.org/) diagrams. By default, diagrams are lazy-loaded and require a user click to render, but this can be configured.
+
+### Props
+
+| Prop | Type | Description | Default |
+|------|------|-------------|---------|
+| `immediateRenderMermaid` | `boolean` | If true, diagrams render immediately on page load. | `false` |
+
+### Customizing Mermaid Styles
+
+You can customize the appearance of Mermaid diagrams and the full-screen preview modal using the following CSS classes.
+
+| Class | Description |
+|-------|-------------|
+| `.mermaid-render-btn` | The button shown when `immediateRenderMermaid` is `false`. |
+| `.mermaid-clickable` | Applied to the container when diagrams are clickable for preview. |
+| `.code-block-maximize` | The maximize button in the code block header for Mermaid diagrams. |
+| `.mermaid-preview-overlay` | The full-screen modal backdrop for the preview. |
+| `.mermaid-preview-content` | Container for the SVG in the full-screen preview. |
+| `.mermaid-preview-close` | The close button in the full-screen preview. |
+
+> **Tip:** In addition to the maximize button, users can also click directly on a rendered Mermaid diagram to open the full-screen preview.
+
+### Example CSS for Mermaid
+
+```css
+/* Customise the render button */
+.mermaid-render-btn {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.5rem 1rem;
+  background: #238636;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Customise the full-screen preview */
+.mermaid-preview-overlay {
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+/* Make the diagram interactive */
+.mermaid-clickable pre[data-mermaid-processed="true"] {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.mermaid-clickable pre[data-mermaid-processed="true"]:hover {
+  opacity: 0.9;
+}
+
+/* Ensure the SVG scales correctly in preview */
+.mermaid-preview-content svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+```
+
 ## Available Themes and supported Languages
 
 For a list of available themes and languages, please refer to [THEMES_AND_LANGS.md](./THEMES_AND_LANGS.md). Autocomplete is also supported via your IDE as the themes are exported as unions of string literals.
