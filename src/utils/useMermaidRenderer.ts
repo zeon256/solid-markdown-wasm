@@ -1,40 +1,88 @@
-import mermaid from "mermaid";
+import mermaid, { type MermaidConfig } from "mermaid";
 import { onMount } from "solid-js";
 
-const CACHE_KEY = "mermaid-cache";
+const CACHE_KEY = "mermaid-cache-v3";
 const MAX_CACHE_SIZE = 50;
 
+// Current version of our styling to invalidate cache when we change these variables
+const STYLE_VERSION = "v7";
+
+export type MermaidConfigFn = (theme: "dark" | "default") => MermaidConfig;
+
+export const DEFAULT_MERMAID_CONFIG: MermaidConfigFn = (theme) => {
+  const isDark = theme === "dark";
+  const haxiomAccent = isDark ? "rgb(111, 255, 233)" : "#4f46e5";
+  const haxiomFg = isDark ? "#000000" : "#ffffff";
+  const textColor = isDark ? "#c9d1d9" : "#24292f";
+  const bkgColor = isDark ? "#0d1117" : "#ffffff";
+
+  return {
+    startOnLoad: false,
+    theme: "base" as const,
+    securityLevel: "loose" as const,
+    fontFamily: "arial",
+    themeVariables: {
+      // Core colors
+      primaryColor: haxiomAccent,
+      primaryTextColor: haxiomFg,
+      primaryBorderColor: haxiomAccent,
+      lineColor: isDark ? haxiomAccent : "#444444",
+      secondaryColor: haxiomAccent,
+      tertiaryColor: isDark ? "#222222" : "#eeeeee",
+
+      // Backgrounds and Text
+      mainBkg: bkgColor,
+      nodeBkg: haxiomAccent,
+      textColor: textColor,
+      nodeBorder: haxiomAccent,
+      clusterBkg: isDark ? "#161b22" : "#f6f8fa",
+      clusterBorder: isDark ? "#30363d" : "#d0d7de",
+      defaultLinkColor: isDark ? "#8b949e" : "#57606a",
+      titleColor: haxiomAccent,
+      edgeLabelBackground: isDark ? "#161b22" : "#ffffff",
+
+      fontFamily: "arial",
+      fontSize: "14px",
+
+      // Gantt specific variables
+      taskBkgColor: haxiomAccent,
+      taskTextColor: haxiomFg,
+      taskBorderColor: haxiomAccent,
+      activeTaskBkgColor: haxiomAccent,
+      activeTaskTextColor: haxiomFg,
+      doneTaskBkgColor: isDark ? "#333333" : "#d1d5db",
+      doneTaskTextColor: isDark ? "#888888" : "#4b5563",
+      critBkgColor: "#f87171",
+      critTextColor: "#ffffff",
+      todayLineColor: "#f87171",
+      gridColor: isDark ? "#30363d" : "#d0d7de",
+      sectionBkgColor: isDark ? "#161b22" : "#f6f8fa",
+      sectionBkgColor2: isDark ? "#0d1117" : "#ffffff",
+    },
+    gantt: {
+      useMaxWidth: true,
+      htmlLabels: false,
+    },
+  };
+};
+
 // Detect if user prefers dark mode
-const getPreferredTheme = (): "dark" | "default" => {
+const getSystemTheme = (): "dark" | "default" => {
   if (typeof window !== "undefined") {
+    // Check for data-theme attribute first (set by our App)
+    const attr = document
+      .querySelector("[data-theme]")
+      ?.getAttribute("data-theme");
+    if (attr === "dark") return "dark";
+    if (attr === "light") return "default";
+
+    // Fallback to system preference
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "default";
   }
   return "default";
 };
-
-// Initialize Mermaid with theme based on system preference
-mermaid.initialize({
-  startOnLoad: false,
-  theme: getPreferredTheme(),
-  securityLevel: "loose",
-  fontFamily: "inherit",
-});
-
-// Re-initialize when color scheme changes
-if (typeof window !== "undefined") {
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", (e) => {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: e.matches ? "dark" : "default",
-        securityLevel: "loose",
-        fontFamily: "inherit",
-      });
-    });
-}
 
 // Simple hash function to generate stable keys from Mermaid source
 function simpleHash(str: string): string {
@@ -78,7 +126,10 @@ function evictOldest(cache: Map<string, string>): Map<string, string> {
   return new Map(entries);
 }
 
-export function useMermaidRenderer(immediateRender = false) {
+export function useMermaidRenderer(
+  immediateRender = false,
+  configFn: MermaidConfigFn = DEFAULT_MERMAID_CONFIG,
+) {
   let mermaidCache = loadCache();
 
   // Save cache periodically
@@ -93,10 +144,18 @@ export function useMermaidRenderer(immediateRender = false) {
   const expandedHashes = new Set<string>();
 
   // Render a single Mermaid diagram
-  const renderMermaid = async (code: string): Promise<string> => {
-    // Include theme in cache key so theme changes trigger re-render
-    const theme = getPreferredTheme();
-    const hash = simpleHash(`${code}_${theme}`);
+  const renderMermaid = async (
+    code: string,
+    currentConfigFn: MermaidConfigFn = configFn,
+  ): Promise<string> => {
+    const theme = getSystemTheme();
+
+    // Always re-init to ensure theme is correct before rendering
+    mermaid.initialize(currentConfigFn(theme));
+
+    // Include config source in hash to invalidate cache when styling changes
+    const configHash = simpleHash(currentConfigFn.toString());
+    const hash = simpleHash(`${code}_${theme}_${STYLE_VERSION}_${configHash}`);
 
     // Check cache first
     const cached = mermaidCache.get(hash);
@@ -105,8 +164,9 @@ export function useMermaidRenderer(immediateRender = false) {
     }
 
     try {
-      // Render directly on main thread
-      const { svg } = await mermaid.render(`mermaid-${hash}`, code);
+      // Create a unique ID for this render
+      const id = `mermaid-${hash}`;
+      const { svg } = await mermaid.render(id, code);
 
       // Update cache
       mermaidCache.set(hash, svg);
@@ -133,7 +193,11 @@ export function useMermaidRenderer(immediateRender = false) {
   };
 
   // Process all Mermaid code blocks in the document
-  const processBlocks = async (rootElement?: HTMLElement) => {
+  const processBlocks = async (
+    rootElement?: HTMLElement,
+    currentImmediateRender = immediateRender,
+    currentConfigFn = configFn,
+  ) => {
     // Find all Mermaid code blocks within the root elements
     const root = rootElement || document;
     const blocks = root.querySelectorAll("pre code.language-mermaid");
@@ -145,16 +209,26 @@ export function useMermaidRenderer(immediateRender = false) {
       const container = block.parentElement as HTMLElement;
       if (!container) continue;
 
-      // Skip if already processed
-      if (container.dataset.mermaidProcessed === "true") continue;
+      // Skip if already processed UNLESS the code/theme/config changed
+      const theme = getSystemTheme();
+      const configHash = simpleHash(currentConfigFn.toString());
+      const hash = simpleHash(
+        `${code}_${theme}_${STYLE_VERSION}_${configHash}`,
+      );
+
+      if (
+        container.dataset.mermaidProcessed === "true" &&
+        container.dataset.mermaidHash === hash
+      ) {
+        continue;
+      }
+
       container.dataset.mermaidProcessed = "true";
       container.dataset.mermaidSource = code;
-
-      const theme = getPreferredTheme();
-      const hash = simpleHash(`${code}_${theme}`);
+      container.dataset.mermaidHash = hash;
 
       // If immediate render mode or if this specific hash was previously expanded by the user
-      const shouldRender = immediateRender || expandedHashes.has(hash);
+      const shouldRender = currentImmediateRender || expandedHashes.has(hash);
 
       if (!shouldRender) {
         // Create render button for lazy loading
@@ -168,7 +242,7 @@ export function useMermaidRenderer(immediateRender = false) {
           // Record that the user manually expanded this diagram
           expandedHashes.add(hash);
 
-          const svg = await renderMermaid(code);
+          const svg = await renderMermaid(code, currentConfigFn);
           container.innerHTML = svg;
         };
 
@@ -178,7 +252,7 @@ export function useMermaidRenderer(immediateRender = false) {
         // Render immediately
         container.innerHTML =
           '<div class="mermaid-loading">⏳ Rendering diagram...</div>';
-        const svg = await renderMermaid(code);
+        const svg = await renderMermaid(code, currentConfigFn);
         container.innerHTML = svg;
       }
     }
