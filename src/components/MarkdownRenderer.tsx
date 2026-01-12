@@ -10,6 +10,7 @@ import {
   onMount,
 } from "solid-js";
 import { render } from "solid-js/web";
+import { useMermaidRenderer } from "../utils/useMermaidRenderer";
 
 export type { Themes } from "markdown-renderer";
 
@@ -96,12 +97,18 @@ export interface MarkdownRendererProps {
   theme?: Themes;
   fallback?: JSX.Element;
   onLoaded?: () => void;
+  immediateRenderMermaid?: boolean;
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   const [renderedHtml, setRenderedHtml] = createSignal("");
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
+
+  // Initialize Mermaid renderer
+  const { processBlocks } = useMermaidRenderer(
+    props.immediateRenderMermaid ?? false,
+  );
 
   // Store iframe data: element, wrapper, source, and dimensions
   const iframeCache = new Map<
@@ -237,10 +244,13 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
       if (!wrapper) return;
 
       const codeEl = wrapper.querySelector("code");
-      if (!codeEl) return;
+      const preEl = wrapper.querySelector("pre");
 
       // Get raw code from textContent (strips all HTML formatting)
-      const rawCode = codeEl.textContent || "";
+      // If codeEl is missing (e.g. Mermaid replaced it with SVG), check preEl's dataset
+      const rawCode = codeEl?.textContent || preEl?.dataset.mermaidSource || "";
+
+      if (!rawCode) return;
 
       navigator.clipboard
         .writeText(rawCode)
@@ -402,6 +412,9 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
         // Inject copy buttons into code block headers
         injectCopyButtons();
+
+        // Process Mermaid diagrams
+        processBlocks(contentRef);
 
         // Observe content for size changes
         if (resizeObserver && contentRef) {

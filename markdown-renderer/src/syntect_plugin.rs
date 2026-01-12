@@ -81,6 +81,11 @@ impl HighlightStrategy for Uncached {
         code: &str,
         syntax: &SyntaxReference,
     ) -> Result<String, Error> {
+        // ignore mermaid, just return as is
+        if syntax.name == "mermaid" {
+            return Ok(code.to_string());
+        }
+
         do_highlight(theme, theme_set, syntax_set, code, syntax)
     }
 }
@@ -96,6 +101,11 @@ impl HighlightStrategy for Cached {
         thread_local! {
             static LRU: RefCell<Cache<Box<str>, String>> =
                 RefCell::new(Cache::builder().max_capacity(1024).build());
+        }
+
+        // ignore mermaid, just return as is
+        if syntax.name == "mermaid" {
+            return Ok(code.to_string());
         }
 
         LRU.with_borrow_mut(|lru| {
@@ -174,7 +184,7 @@ impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAda
         }
         output.write_str("\" hidden></span>")?;
 
-        if lang == fallback_syntax {
+        if lang == fallback_syntax || lang == "mermaid" {
             return output.write_str(code);
         }
 

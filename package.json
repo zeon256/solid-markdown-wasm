@@ -18,7 +18,8 @@
   "files": ["dist", "package.json", "README.md", "LICENSE.md"],
   "dependencies": {
     "lucide-solid": "^0.562.0",
-    "markdown-renderer": "file:./markdown-renderer/pkg/"
+    "markdown-renderer": "file:./markdown-renderer/pkg/",
+    "mermaid": "^11.12.2"
   },
   "peerDependencies": {
     "solid-js": "^1.9.5"
