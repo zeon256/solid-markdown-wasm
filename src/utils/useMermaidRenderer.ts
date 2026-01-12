@@ -231,24 +231,9 @@ export function useMermaidRenderer(
       const shouldRender = currentImmediateRender || expandedHashes.has(hash);
 
       if (!shouldRender) {
-        // Create render button for lazy loading
-        const button = document.createElement("button");
-        button.className = "mermaid-render-btn";
-        button.textContent = "📊 Render Mermaid Diagram";
-        button.onclick = async () => {
-          button.disabled = true;
-          button.textContent = "⏳ Rendering...";
-
-          // Record that the user manually expanded this diagram
-          expandedHashes.add(hash);
-
-          const svg = await renderMermaid(code, currentConfigFn);
-          container.innerHTML = svg;
-        };
-
-        container.innerHTML = "";
-        container.appendChild(button);
+        container.dataset.mermaidStatus = "unrendered";
       } else {
+        container.dataset.mermaidStatus = "rendered";
         // Render immediately
         container.innerHTML =
           '<div class="mermaid-loading">⏳ Rendering diagram...</div>';

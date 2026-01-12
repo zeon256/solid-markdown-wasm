@@ -2,8 +2,10 @@ import {
   Check,
   ChevronsDownUp,
   ChevronsUpDown,
+  Code,
   Copy,
   Maximize,
+  Play,
   X,
 } from "lucide-solid";
 import init, { render_md, type Themes } from "markdown-renderer";
@@ -194,12 +196,40 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           ?.toLowerCase() === "mermaid";
 
       if (isMermaid) {
+        // Set initial status on wrapper if not already set
+        const initialStatus = props.immediateRenderMermaid
+          ? "rendered"
+          : "unrendered";
+        const wrapperHtml = wrapper as HTMLElement;
+        if (wrapperHtml && !wrapperHtml.dataset.mermaidStatus) {
+          wrapperHtml.dataset.mermaidStatus = initialStatus;
+        }
+
         const maxBtn = document.createElement("button");
         maxBtn.className = "code-block-maximize";
         maxBtn.setAttribute("aria-label", "Show preview");
         const maxDispose = render(() => <Maximize size={ICON_SIZE} />, maxBtn);
         iconDisposeCallbacks.push(maxDispose);
         buttonContainer.appendChild(maxBtn);
+
+        // Create play/code toggle button
+        const playBtn = document.createElement("button");
+        playBtn.className = "code-block-play";
+        playBtn.setAttribute(
+          "aria-label",
+          initialStatus === "rendered" ? "Show code" : "Render diagram",
+        );
+        const playDispose = render(
+          () =>
+            initialStatus === "rendered" ? (
+              <Code size={ICON_SIZE} />
+            ) : (
+              <Play size={ICON_SIZE} />
+            ),
+          playBtn,
+        );
+        iconDisposeCallbacks.push(playDispose);
+        buttonContainer.appendChild(playBtn);
       }
 
       // Create collapse/expand button
@@ -260,6 +290,75 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         );
         iconDisposeCallbacks.push(dispose);
         collapseBtn.setAttribute("aria-label", "Collapse code");
+      }
+      return;
+    }
+
+    // Handle play button (toggle between code and diagram)
+    const playBtn = target.closest(
+      ".code-block-play",
+    ) as HTMLButtonElement | null;
+    if (playBtn) {
+      e.stopPropagation();
+      const wrapper = playBtn.closest(".code-block-wrapper") as HTMLElement;
+      if (!wrapper) return;
+
+      const mermaidPre = wrapper.querySelector("pre") as HTMLElement;
+      const code =
+        mermaidPre?.dataset.mermaidSource ||
+        mermaidPre?.querySelector("code")?.textContent?.trim() ||
+        "";
+
+      if (code && mermaidPre) {
+        const currentStatus = wrapper.dataset.mermaidStatus;
+
+        if (currentStatus === "rendered") {
+          // Toggle to show code
+          mermaidPre.innerHTML = `<code>${code}</code>`;
+          wrapper.dataset.mermaidStatus = "code";
+          mermaidPre.dataset.mermaidStatus = "code";
+
+          // Update icon to Play
+          playBtn.textContent = "";
+          const playDispose = render(() => <Play size={ICON_SIZE} />, playBtn);
+          iconDisposeCallbacks.push(playDispose);
+          playBtn.setAttribute("aria-label", "Render diagram");
+          playBtn.dataset.iconSet = "play";
+        } else {
+          // Render or toggle back to diagram
+          playBtn.disabled = true;
+          // Show loading state
+          const originalContent = mermaidPre.innerHTML;
+          mermaidPre.innerHTML =
+            '<div class="mermaid-loading">⏳ Rendering diagram...</div>';
+
+          renderMermaid(code)
+            .then((svg) => {
+              mermaidPre.innerHTML = svg;
+              wrapper.dataset.mermaidStatus = "rendered";
+              mermaidPre.dataset.mermaidStatus = "rendered";
+              mermaidPre.dataset.mermaidProcessed = "true";
+              if (!mermaidPre.dataset.mermaidSource) {
+                mermaidPre.dataset.mermaidSource = code;
+              }
+
+              // Update icon to Code
+              playBtn.textContent = "";
+              const codeDispose = render(
+                () => <Code size={ICON_SIZE} />,
+                playBtn,
+              );
+              iconDisposeCallbacks.push(codeDispose);
+              playBtn.setAttribute("aria-label", "Show code");
+              playBtn.dataset.iconSet = "code";
+              playBtn.disabled = false;
+            })
+            .catch((err) => {
+              console.error("Manual Mermaid render error:", err);
+              mermaidPre.innerHTML = originalContent;
+              playBtn.disabled = false;
+            });
+        }
       }
       return;
     }
@@ -506,7 +605,38 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           contentRef,
           props.immediateRenderMermaid ?? false,
           props.mermaidConfig,
-        );
+        ).then(() => {
+          // Sync wrapper status with pre status after block processing
+          if (contentRef) {
+            const pres = contentRef.querySelectorAll(
+              "pre[data-mermaid-status]",
+            );
+            for (const pre of pres) {
+              const wrapper = pre.closest(".code-block-wrapper") as HTMLElement;
+              if (wrapper) {
+                const status = (pre as HTMLElement).dataset.mermaidStatus;
+                wrapper.dataset.mermaidStatus = status;
+
+                // Update toggle button icon if it exists
+                if (status === "rendered") {
+                  const toggleBtn = wrapper.querySelector(
+                    ".code-block-play",
+                  ) as HTMLButtonElement;
+                  if (toggleBtn && toggleBtn.dataset.iconSet !== "code") {
+                    toggleBtn.textContent = "";
+                    const codeDispose = render(
+                      () => <Code size={ICON_SIZE} />,
+                      toggleBtn,
+                    );
+                    iconDisposeCallbacks.push(codeDispose);
+                    toggleBtn.setAttribute("aria-label", "Show code");
+                    toggleBtn.dataset.iconSet = "code";
+                  }
+                }
+              }
+            }
+          }
+        });
 
         // Observe content for size changes
         if (resizeObserver && contentRef) {

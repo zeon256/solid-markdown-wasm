@@ -1349,7 +1349,8 @@
 
 .markdown-body .code-block-copy,
 .markdown-body .code-block-collapse,
-.markdown-body .code-block-maximize {
+.markdown-body .code-block-maximize,
+.markdown-body .code-block-play {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1365,21 +1366,40 @@
 
 .markdown-body .code-block-copy:hover,
 .markdown-body .code-block-collapse:hover,
-.markdown-body .code-block-maximize:hover {
+.markdown-body .code-block-maximize:hover,
+.markdown-body .code-block-play:hover {
   color: var(--fgColor-default, #f0f6fc);
   background-color: var(--bgColor-neutral-muted, #656c7633);
   border-color: var(--borderColor-default, #3d444d);
 }
 
 .markdown-body .code-block-copy:active,
-.markdown-body .code-block-collapse:active {
+.markdown-body .code-block-collapse:active,
+.markdown-body .code-block-play:active {
   transform: scale(0.95);
 }
 
 .markdown-body .code-block-copy svg,
-.markdown-body .code-block-collapse svg {
+.markdown-body .code-block-collapse svg,
+.markdown-body .code-block-maximize svg,
+.markdown-body .code-block-play svg {
   width: 1rem;
   height: 1rem;
+}
+
+/* Visibility logic for Mermaid buttons */
+.markdown-body
+  .code-block-wrapper[data-mermaid-status="unrendered"]
+  .code-block-maximize,
+.markdown-body
+  .code-block-wrapper[data-mermaid-status="code"]
+  .code-block-maximize {
+  display: none;
+}
+
+/* Hide play button for non-mermaid blocks (which don't have data-mermaid-status) */
+.markdown-body .code-block-wrapper:not([data-mermaid-status]) .code-block-play {
+  display: none;
 }
 
 /* Hide the language data span (it's only for JS to read) */
@@ -1416,14 +1436,16 @@
 
   .markdown-body .code-block-copy,
   .markdown-body .code-block-collapse,
-  .markdown-body .code-block-maximize {
+  .markdown-body .code-block-maximize,
+  .markdown-body .code-block-play {
     color: var(--fgColor-muted, #59636e);
     border-color: var(--borderColor-muted, #d1d9e0b3);
   }
 
   .markdown-body .code-block-copy:hover,
   .markdown-body .code-block-collapse:hover,
-  .markdown-body .code-block-maximize:hover {
+  .markdown-body .code-block-maximize:hover,
+  .markdown-body .code-block-play:hover {
     color: var(--fgColor-default, #1f2328);
     background-color: var(--bgColor-neutral-muted, #818b981f);
     border-color: var(--borderColor-default, #d1d9e0);
@@ -1582,8 +1604,7 @@
 }
 
 /* Mermaid Diagrams */
-.markdown-body pre:has(code.language-mermaid),
-.markdown-body pre[data-mermaid-processed="true"] {
+.markdown-body pre[data-mermaid-status="rendered"] {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1594,33 +1615,11 @@
   overflow-x: auto;
 }
 
-.markdown-body pre:has(code.language-mermaid) svg,
-.markdown-body pre[data-mermaid-processed="true"] svg {
+.markdown-body pre[data-mermaid-status="rendered"] svg {
   display: block;
   margin: 0 auto;
   max-width: 100%;
   height: auto;
-}
-
-.mermaid-render-btn {
-  padding: 0.5rem 1rem;
-  background: var(--haxiom-accent-color);
-  color: var(--haxiom-fg-color);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.mermaid-render-btn:hover {
-  background: var(--haxiom-accent-color-hover);
-}
-
-.mermaid-render-btn:disabled {
-  background: var(--haxiom-accent-color-disabled);
-  cursor: not-allowed;
 }
 
 .mermaid-loading {
