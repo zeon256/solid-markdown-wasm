@@ -17,7 +17,10 @@ import {
   onMount,
 } from "solid-js";
 import { render } from "solid-js/web";
-import { useMermaidRenderer } from "../utils/useMermaidRenderer";
+import {
+  type MermaidConfigFn,
+  useMermaidRenderer,
+} from "../utils/useMermaidRenderer";
 
 export type { Themes } from "markdown-renderer";
 
@@ -105,6 +108,7 @@ export interface MarkdownRendererProps {
   fallback?: JSX.Element;
   onLoaded?: () => void;
   immediateRenderMermaid?: boolean;
+  mermaidConfig?: MermaidConfigFn;
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
@@ -116,6 +120,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   // Initialize Mermaid renderer
   const { processBlocks, renderMermaid } = useMermaidRenderer(
     props.immediateRenderMermaid ?? false,
+    props.mermaidConfig,
   );
 
   // Store iframe data: element, wrapper, source, and dimensions
@@ -497,7 +502,11 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         injectCopyButtons();
 
         // Process Mermaid diagrams
-        processBlocks(contentRef);
+        processBlocks(
+          contentRef,
+          props.immediateRenderMermaid ?? false,
+          props.mermaidConfig,
+        );
 
         // Observe content for size changes
         if (resizeObserver && contentRef) {

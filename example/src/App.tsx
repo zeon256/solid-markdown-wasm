@@ -5,7 +5,11 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
-import { MarkdownRenderer, type Themes } from "solid-markdown-wasm";
+import {
+  DEFAULT_MERMAID_CONFIG,
+  MarkdownRenderer,
+  type Themes,
+} from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
 import haxiomLogo from "../src/assets/haxiom.svg";
 import initialMarkdown from "../src/assets/markdown_preview.md?raw";
@@ -153,6 +157,7 @@ const App: Component = () => {
   return (
     <div
       class="flex flex-col w-screen h-screen"
+      data-theme={isDarkMode() ? "dark" : "light"}
       classList={{ "bg-[#1e1e1e]": isDarkMode(), "bg-white": !isDarkMode() }}
     >
       {/* Toolbar */}
@@ -267,8 +272,7 @@ const App: Component = () => {
             href="https://haxiom.io"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm font-medium px-3 py-1.5 rounded transition-colors text-black hover:opacity-80"
-            style={{ "background-color": "#6fffe9" }}
+            class="text-sm font-medium px-3 py-1.5 rounded transition-colors hover:opacity-80 bg-(--haxiom-accent-color) text-(--haxiom-fg-color)"
           >
             Try Haxiom
           </a>
@@ -302,6 +306,27 @@ const App: Component = () => {
               fallback={<LoadingFallback />}
               onLoaded={() => console.log("WASM Loaded")}
               immediateRenderMermaid={immediateMermaid()}
+              mermaidConfig={(theme) => {
+                const isDark = theme === "dark";
+                const textColor = isDark ? "#c9d1d9" : "#24292f";
+                const nodeBkg = isDark ? "#BB2528" : "#fee2e2"; // Dark red vs light red
+                const nodeText = isDark ? "#ffffff" : "#991b1b"; // White vs dark red
+
+                return {
+                  ...DEFAULT_MERMAID_CONFIG(theme),
+                  themeVariables: {
+                    ...DEFAULT_MERMAID_CONFIG(theme).themeVariables,
+                    primaryColor: nodeBkg,
+                    nodeBkg: nodeBkg,
+                    primaryTextColor: nodeText,
+                    nodeTextColor: nodeText,
+                    textColor: textColor,
+                    lineColor: "#FF0000",
+                    secondaryColor: "#006100",
+                    tertiaryColor: isDark ? "#222222" : "#eeeeee",
+                  },
+                };
+              }}
             />
           </div>
         </div>

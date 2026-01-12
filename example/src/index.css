@@ -50,10 +50,15 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  :root,
   .markdown-body,
   [data-theme="dark"] {
     /* dark */
     color-scheme: dark;
+    --haxiom-accent-color: rgb(111, 255, 233);
+    --haxiom-accent-color-hover: rgb(111, 255, 233);
+    --haxiom-accent-color-disabled: rgb(111, 255, 233);
+    --haxiom-fg-color: black;
     --focus-outlineColor: #1f6feb;
     --fgColor-default: #f0f6fc;
     --fgColor-muted: #9198a1;
@@ -108,10 +113,15 @@
 }
 
 @media (prefers-color-scheme: light) {
+  :root,
   .markdown-body,
   [data-theme="light"] {
     /* light */
     color-scheme: light;
+    --haxiom-accent-color: #4f46e5;
+    --haxiom-accent-color-hover: #4f46e5;
+    --haxiom-accent-color-disabled: #4f46e5;
+    --haxiom-fg-color: white;
     --focus-outlineColor: #0969da;
     --fgColor-default: #1f2328;
     --fgColor-muted: #59636e;
@@ -1580,6 +1590,8 @@
   background: transparent;
   border: none;
   padding: 1rem 0;
+  min-width: 600px;
+  overflow-x: auto;
 }
 
 .markdown-body pre:has(code.language-mermaid) svg,
@@ -1592,8 +1604,8 @@
 
 .mermaid-render-btn {
   padding: 0.5rem 1rem;
-  background: #6366f1;
-  color: white;
+  background: var(--haxiom-accent-color);
+  color: var(--haxiom-fg-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -1603,11 +1615,11 @@
 }
 
 .mermaid-render-btn:hover {
-  background: #4f46e5;
+  background: var(--haxiom-accent-color-hover);
 }
 
 .mermaid-render-btn:disabled {
-  background: #9ca3af;
+  background: var(--haxiom-accent-color-disabled);
   cursor: not-allowed;
 }
 
@@ -1632,18 +1644,13 @@
   }
 }
 
-.mermaid-clickable pre[data-mermaid-processed="true"] {
-  cursor: pointer;
-  transition: opacity 0.2s, background-color 0.2s;
+.mermaid-clickable .language-mermaid {
+  cursor: zoom-in;
+  transition: opacity 0.2s;
 }
 
-.mermaid-clickable pre[data-mermaid-processed="true"]:hover {
+.mermaid-clickable .language-mermaid:hover {
   opacity: 0.9;
-  background-color: var(--bgColor-neutral-muted, #818b981f);
-}
-
-.mermaid-clickable pre[data-mermaid-processed="true"] svg {
-  cursor: pointer;
 }
 
 .mermaid-preview-content svg {
@@ -1690,4 +1697,8 @@
   color: white;
   cursor: pointer;
   padding: 10px;
+}
+
+.mermaid-preview-overlay .mermaid-preview-content svg {
+  background-color: var(--bgColor-default);
 }
