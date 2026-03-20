@@ -3,9 +3,6 @@ use std::{collections::HashMap, sync::LazyLock};
 use syntect::{dumps::from_binary, highlighting::ThemeSet, parsing::SyntaxSet};
 use wasm_bindgen::prelude::*;
 
-#[cfg(feature = "sanitize")]
-use std::collections::HashSet;
-
 use crate::syntect_plugin::{SyntectAdapterCached, SyntectAdapterCachedBuilder};
 
 mod syntect_plugin;
@@ -761,6 +758,95 @@ mod test {
         assert!(
             result.contains("<defs"),
             "SVG defs should be preserved: {}",
+            result
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "sanitize")]
+    fn test_code_fences_escape_html_like_text() {
+        let markdown = concat!(
+            "```\n",
+            "<HTA:APplication applicationname=\"System\" />\n",
+            "<script>moveTo(-16906,-10134)</script>\n",
+            "<sCRipT laNguAgE='vBsCRIPT'>MsgBox \"hello\"</sCRipT>\n",
+            "```\n",
+        );
+        let result = render_md(markdown, Themes::OneHalfDark);
+
+        assert!(
+            result.contains("&lt;HTA:APplication applicationname=\"System\" /&gt;"),
+            "HTA-like tag should remain escaped inside code fences: {}",
+            result
+        );
+        assert!(
+            result.contains("&lt;script&gt;moveTo(-16906,-10134)&lt;/script&gt;"),
+            "script tag text should remain escaped inside code fences: {}",
+            result
+        );
+        assert!(
+            result.contains(
+                "&lt;sCRipT laNguAgE='vBsCRIPT'&gt;MsgBox \"hello\"&lt;/sCRipT&gt;",
+            ),
+            "mixed-case script tag text should remain escaped inside code fences: {}",
+            result
+        );
+        assert!(
+            !result.contains("<script>"),
+            "script tag should not survive as markup inside code fences: {}",
+            result
+        );
+        assert!(
+            !result.contains("<HTA:APplication"),
+            "HTA-like tag should not survive as markup inside code fences: {}",
+            result
+        );
+        assert!(
+            !result.contains("<sCRipT"),
+            "mixed-case script tag should not survive as markup inside code fences: {}",
+            result
+        );
+        assert!(
+            result.contains("</code></pre></div>"),
+            "code fence wrapper should remain structurally intact: {}",
+            result
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "sanitize")]
+    fn test_mermaid_code_fences_escape_html_like_text() {
+        let markdown = concat!(
+            "```mermaid\n",
+            "<script>graph TD; A-->B;</script>\n",
+            "<HTA:APplication applicationname=\"Mermaid\" />\n",
+            "```\n",
+        );
+        let result = render_md(markdown, Themes::OneHalfDark);
+
+        assert!(
+            result.contains("data-lang=\"mermaid\""),
+            "mermaid code fence metadata should be preserved: {}",
+            result
+        );
+        assert!(
+            result.contains("&lt;script&gt;graph TD; A--&gt;B;&lt;/script&gt;"),
+            "mermaid source should keep script text escaped: {}",
+            result
+        );
+        assert!(
+            result.contains("&lt;HTA:APplication applicationname=\"Mermaid\" /&gt;"),
+            "mermaid source should keep HTA-like text escaped: {}",
+            result
+        );
+        assert!(
+            !result.contains("<script>"),
+            "mermaid source should not render script tags as markup: {}",
+            result
+        );
+        assert!(
+            !result.contains("<HTA:APplication"),
+            "mermaid source should not render HTA-like tags as markup: {}",
             result
         );
     }

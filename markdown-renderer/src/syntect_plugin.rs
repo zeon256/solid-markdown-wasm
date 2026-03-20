@@ -72,6 +72,19 @@ fn do_highlight(
     }
 }
 
+fn write_escaped_text(output: &mut dyn Write, text: &str) -> Result<(), fmt::Error> {
+    for c in text.chars() {
+        match c {
+            '&' => output.write_str("&amp;")?,
+            '<' => output.write_str("&lt;")?,
+            '>' => output.write_str("&gt;")?,
+            _ => output.write_char(c)?,
+        }
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 impl HighlightStrategy for Uncached {
     fn highlight(
@@ -185,7 +198,7 @@ impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAda
         output.write_str("\" hidden></span>")?;
 
         if lang == fallback_syntax || lang == "mermaid" {
-            return output.write_str(code);
+            return write_escaped_text(output, code);
         }
 
         let syntax = self
@@ -199,7 +212,7 @@ impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAda
 
         match self.highlight_html(code, syntax) {
             Ok(highlighted_code) => output.write_str(&highlighted_code),
-            Err(_) => output.write_str(code),
+            Err(_) => write_escaped_text(output, code),
         }
     }
 
