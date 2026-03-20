@@ -313,8 +313,11 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         const currentStatus = wrapper.dataset.mermaidStatus;
 
         if (currentStatus === "rendered") {
-          // Toggle to show code
-          mermaidPre.innerHTML = `<code>${code}</code>`;
+          // Toggle to show code without reparsing source text as HTML.
+          const codeEl = document.createElement("code");
+          codeEl.className = "language-mermaid";
+          codeEl.textContent = code;
+          mermaidPre.replaceChildren(codeEl);
           wrapper.dataset.mermaidStatus = "code";
           mermaidPre.dataset.mermaidStatus = "code";
 
