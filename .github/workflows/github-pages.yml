@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Set up Bun.js
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
         with:
           bun-version: latest
 
       - name: Cache wasm-pack
         id: cache-wasm-pack
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.cargo/bin/wasm-pack
           key: wasm-pack-${{ runner.os }}
@@ -46,7 +46,7 @@ jobs:
         run: cd example && bun run build
 
       - name: Deploy to GitHub Pages
-        uses: jamesives/github-pages-deploy-action@v4
+        uses: jamesives/github-pages-deploy-action@36ee275936a1c16fb4dedae090a06396849f07c0 # v4.7.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages

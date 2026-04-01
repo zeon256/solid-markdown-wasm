@@ -6,6 +6,8 @@
 	<img alt="GitHub License" src="https://img.shields.io/github/license/zeon256/solid-markdown-wasm">
 	<img alt="NPM Version" src="https://img.shields.io/npm/v/solid-markdown-wasm">
 	<a href="https://deepwiki.com/zeon256/solid-markdown-wasm"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+	<img alt="GitHub Actions SHA Pinned" src="https://img.shields.io/badge/SHA_Pinned-Actions-blue?style=flat&logo=githubactions">
+	<img alt="NPM Provenance" src="https://img.shields.io/badge/NPM-Provenance-blue?style=flat&logo=npm">
 </p>
 
 # solid-markdown-wasm
@@ -278,7 +280,16 @@ which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website").
 
 ## Security
 
-Since this library uses [comrak](https://github.com/kivikakk/comrak "comrak github") compiled to WebAssembly for Markdown rendering. By default, `solid-markdown-wasm` adheres to a safe-by-default approach, mirroring comrak's behavior of scrubbing raw HTML and potentially dangerous links.
+`solid-markdown-wasm` prioritizes security through multiple layers of protection:
+
+### Supply Chain Security
+- **SHA-pinned GitHub Actions**: All 14 CI/CD actions are pinned to immutable commit SHAs, preventing supply chain attacks from compromised action tags. [Verify with `bun verify-actions.ts`]
+- **NPM Trusted Publishing**: Uses OIDC instead of long-lived tokens, with cryptographic provenance attestations for every release
+
+### Runtime Security
+- **Safe-by-default rendering**: Raw HTML and dangerous links are sanitized using the [ammonia](https://github.com/rust-ammonia/ammonia) library
+- **WebAssembly sandbox**: Markdown rendering is isolated in a WASM sandbox with no direct system access
+- **No unsafe options**: We don't expose comrak's "unsafe" rendering options
 
 > [!IMPORTANT]
 > This library does not expose or utilize any "unsafe" options provided by comrak. Therefore, you can be assured that the rendered output will have potentially harmful HTML and links removed by the underlying comrak library
@@ -290,6 +301,8 @@ Since this library uses [comrak](https://github.com/kivikakk/comrak "comrak gith
 
 **Email**: Send an email to <me+security@inve.rs>.
 Please provide as much detail as possible about the potential vulnerability, including steps to reproduce it. We will acknowledge your report promptly and work to address the issue as quickly as possible.
+
+For more details, see [SECURITY.md](./SECURITY.md).
 
 ## Compiling From Source
 
