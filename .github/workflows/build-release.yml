@@ -53,12 +53,14 @@ jobs:
             README.md
             LICENSE.md
             prepare_package.cjs
-      - name: Publish Library to NPM (dry run) # Keeping the name for context, but it's now Bun
+      - name: Setup Node.js for NPM OIDC
+        uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish Library to NPM (dry run) # Keeping the name for context, but it's now npm
         continue-on-error: true
         # Only run if the commit is tagged with v<version>
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Bun can also use NPM tokens
-        run: bun publish --dry-run
+        run: npm publish --dry-run
 
   # job depends on the build job
   release:
@@ -86,8 +88,11 @@ jobs:
           bun-version: latest
       - name: Install semantic-release and plugins
         run: bun install -g semantic-release@24.2.9 @semantic-release/git@10.0.1 @semantic-release/changelog@6.0.3 @semantic-release/npm@13.0.0 @semantic-release/github@11.0.6 @semantic-release/commit-analyzer@13.0.1 @semantic-release/release-notes-generator@14.1.0
+      - name: Setup Node.js for NPM OIDC
+        uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: cd release-package && bun prepare_package.cjs && bunx semantic-release
+        run: cd release-package && bun prepare_package.cjs && npx semantic-release
