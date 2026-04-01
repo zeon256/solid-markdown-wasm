@@ -141,4 +141,4 @@ We thank the following for responsible disclosure:
 - [GitHub Security Lab](https://securitylab.github.com/)
 - [SLSA Framework](https://slsa.dev/)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [NPM Security Best Practices](https://docs.npmjs.com/security)
+- [NPM Security Best Practices](https://cheatsheetseries.owasp.org/cheatsheets/NPM_Security_Cheat_Sheet.html)
