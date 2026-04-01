@@ -52,7 +52,24 @@ The Markdown renderer runs in a WebAssembly sandbox, providing:
 
 ### 3. Development Security
 
-#### Dependency Management
+#### Dependency Installation Security (Bun)
+We use Bun's `minimumReleaseAge` feature in `bunfig.toml` to mitigate supply chain attacks:
+
+```toml
+[install]
+# Only install package versions published at least 7 days ago
+minimumReleaseAge = 604800
+
+# Packages that bypass the age requirement
+minimumReleaseAgeExcludes = ["@types/bun", "typescript"]
+```
+
+**Benefits:**
+- Prevents installation of newly-published malicious packages (typosquatting attacks)
+- Allows time for security researchers and the community to identify compromised packages
+- Excludes select packages that need rapid updates
+
+#### Dependency Locking & Auditing
 - `package-lock.json` / `bun.lockb` committed for reproducible installs
 - Biome.js used for linting and formatting (security-focused rules)
 - Regular dependency audits via `npm audit` / `bun audit`
@@ -111,6 +128,7 @@ To customize sanitization (not recommended), you would need to fork the underlyi
 |------|--------|---------|
 | 2026-04-01 | Implemented SHA pinning | All 14 GitHub Actions pinned to immutable SHAs |
 | 2026-04-01 | Enabled NPM Trusted Publishing | Removed NPM_TOKEN, using OIDC with provenance |
+| 2026-04-01 | Added Bun release age protection | `bunfig.toml` configured with 7-day minimum release age |
 
 ## Acknowledgments
 
