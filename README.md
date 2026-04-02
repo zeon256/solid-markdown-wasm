@@ -28,9 +28,17 @@
 - [Haxiom](https://haxiom.io)
 - Using this project and want your company/project here? Feel free to open a PR!
 
-## Example
+## Examples
 
-You can visit [live-preview.inve.rs](https://live-preview.inve.rs "live-preview") to see the [example](./example) folder deployed. It uses [solid-monaco](https://github.com/alxnddr/solid-monaco "solid-monaco") + [tailwind](https://tailwindcss.com/ "tailwindcss") + [solidjs](https://www.solidjs.com/ "solidjs") and this library to showcase what is possible.
+- **SolidJS example (`./example`)**: Visit [live-preview.inve.rs](https://live-preview.inve.rs "live-preview") to see the deployed SolidJS demo. It uses [solid-monaco](https://github.com/alxnddr/solid-monaco "solid-monaco") + [tailwind](https://tailwindcss.com/ "tailwindcss") + [solidjs](https://www.solidjs.com/ "solidjs").
+- **React example (`./example-react`)**: A React + Monaco demo showcasing the same WASM markdown renderer APIs in a React app.
+
+Run them locally from the repository root:
+
+```bash
+bun run example:dev
+bun run example-react:dev
+```
 
 ## Installation
 
