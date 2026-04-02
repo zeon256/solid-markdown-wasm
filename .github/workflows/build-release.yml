@@ -43,6 +43,8 @@ jobs:
         run: bun install
       - name: Build library
         run: bun run build
+      - name: Build React example
+        run: bun run example-react:build
       - name: Upload artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

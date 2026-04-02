@@ -5,13 +5,15 @@
   "type": "module",
   "module": "./dist/solid-markdown-wasm.es.js",
   "types": "./dist/solid-markdown-wasm.es.d.ts",
-  "workspaces": ["example"],
+  "workspaces": ["example", "example-react"],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "example:dev": "cd example && bun run dev",
     "example:build": "cd example && bun run build",
+    "example-react:dev": "cd example-react && bun run dev",
+    "example-react:build": "cd example-react && bun run build",
     "fmt": "./node_modules/@biomejs/biome/bin/biome format --write .",
     "check": "./node_modules/@biomejs/biome/bin/biome check"
   },
