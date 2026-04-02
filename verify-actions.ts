@@ -45,11 +45,19 @@ const ACTION_REGEX =
 const ACTION_WITH_COMMENT_REGEX =
   /uses:\s*([^/]+)\/([^@\s]+)@([a-f0-9]{40})\s+#\s*(v?\d+(?:\.\d+)*(?:-[\w.]+)?)/gi;
 
+const actionShaCache = new Map<string, string | null>();
+const fetchedActionKeys = new Set<string>();
+
 async function fetchLatestSha(
   owner: string,
   repo: string,
   version: string,
 ): Promise<string | null> {
+  const cacheKey = `${owner}/${repo}@${version}`.toLowerCase();
+  if (fetchedActionKeys.has(cacheKey)) {
+    return actionShaCache.get(cacheKey) ?? null;
+  }
+
   try {
     // Remove 'v' prefix if present for API call
     const tagVersion = version.startsWith("v") ? version : `v${version}`;
@@ -74,6 +82,8 @@ async function fetchLatestSha(
 
     // Handle both direct commits and annotated tags
     if (data.object.type === "commit") {
+      fetchedActionKeys.add(cacheKey);
+      actionShaCache.set(cacheKey, data.object.sha);
       return data.object.sha;
     }
 
@@ -91,15 +101,21 @@ async function fetchLatestSha(
       }
 
       const tagData = await tagResponse.json();
+      fetchedActionKeys.add(cacheKey);
+      actionShaCache.set(cacheKey, tagData.object.sha);
       return tagData.object.sha;
     }
 
+    fetchedActionKeys.add(cacheKey);
+    actionShaCache.set(cacheKey, null);
     return null;
   } catch (error) {
     console.error(
       `  ❌ Error fetching SHA for ${owner}/${repo}@${version}:`,
       error,
     );
+    fetchedActionKeys.add(cacheKey);
+    actionShaCache.set(cacheKey, null);
     return null;
   }
 }
@@ -267,7 +283,7 @@ async function updateWorkflowFile(filePath: string): Promise<void> {
       // Try alternative pattern (version tag -> SHA)
       const newLine2 = oldLine.replace(
         new RegExp(
-          `uses:\s*${action.owner}/${action.repo}@${action.version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\s*#)`,
+          `uses:\\s*${action.owner}/${action.repo}@${action.version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\s*#)`,
           "i",
         ),
         `uses: ${action.owner}/${action.repo}@${expectedSha} # ${action.version}`,
@@ -309,7 +325,7 @@ async function main() {
   }
 
   // Find all workflow files
-  const workflowFiles = await glob(".github/workflows/*.yml");
+  const workflowFiles = await glob(".github/workflows/**/*.{yml,yaml}");
 
   if (workflowFiles.length === 0) {
     console.log("❌ No workflow files found in .github/workflows/");
