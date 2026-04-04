@@ -1,37 +1,23 @@
+import {
+  Check,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Code,
+  Copy,
+  Maximize,
+  Play,
+} from "lucide-react";
 import mermaid, { type MermaidConfig } from "mermaid";
+import { createElement } from "react";
+import { createRoot } from "react-dom/client";
 
 const CACHE_KEY = "example-react-mermaid-cache-v1";
 const MAX_CACHE_SIZE = 50;
 const STYLE_VERSION = "v1";
 
+const ICON_SIZE = 16;
+
 type MermaidTheme = "dark" | "default";
-
-type IconName =
-  | "check"
-  | "code"
-  | "collapse"
-  | "copy"
-  | "expand"
-  | "maximize"
-  | "play";
-
-const ICON_PATHS: Record<IconName, string[]> = {
-  check: ["M20 6 9 17l-5-5"],
-  code: ["m18 16 4-4-4-4", "m6 8-4 4 4 4", "m14.5 4-5 16"],
-  collapse: ["m7 20 5-5 5 5", "m7 4 5 5 5-5", "m19 9-7 7-7-7"],
-  copy: [
-    "M16 4H8a2 2 0 0 0-2 2v12",
-    "M20 8H12a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z",
-  ],
-  expand: ["m7 15 5 5 5-5", "m7 9 5-5 5 5", "m5 15 7-7 7 7"],
-  maximize: [
-    "M8 3H5a2 2 0 0 0-2 2v3",
-    "M21 8V5a2 2 0 0 0-2-2h-3",
-    "M3 16v3a2 2 0 0 0 2 2h3",
-    "M16 21h3a2 2 0 0 0 2-2v-3",
-  ],
-  play: ["M6 4v16l13-8z"],
-};
 
 const copyResetTimers = new WeakMap<HTMLButtonElement, number>();
 const expandedMermaidSources = new Set<string>();
@@ -157,27 +143,22 @@ function rememberMermaidSvg(key: string, svg: string): void {
   saveCache(mermaidCache);
 }
 
-function createIcon(name: IconName): SVGSVGElement {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "2");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  svg.setAttribute("aria-hidden", "true");
+type IconComponent =
+  | typeof Check
+  | typeof ChevronsDownUp
+  | typeof ChevronsUpDown
+  | typeof Code
+  | typeof Copy
+  | typeof Maximize
+  | typeof Play;
 
-  for (const pathValue of ICON_PATHS[name]) {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", pathValue);
-    svg.appendChild(path);
-  }
-
-  return svg;
-}
-
-function setButtonIcon(button: HTMLButtonElement, name: IconName): void {
-  button.replaceChildren(createIcon(name));
+function setButtonIcon(button: HTMLButtonElement, Icon: IconComponent): void {
+  const root = createRoot(button);
+  root.render(
+    createElement(Icon, {
+      size: ICON_SIZE,
+    }),
+  );
 }
 
 function ensureButton(
@@ -260,23 +241,7 @@ function updateWrapperButtons(
   }
   const controls = buttonContainer;
 
-  const collapseButton = ensureButton(controls, "code-block-collapse");
-  collapseButton.setAttribute(
-    "aria-label",
-    wrapper.classList.contains("collapsed") ? "Expand code" : "Collapse code",
-  );
-  setButtonIcon(
-    collapseButton,
-    wrapper.classList.contains("collapsed") ? "expand" : "collapse",
-  );
-
-  const copyButton = ensureButton(controls, "code-block-copy");
-  copyButton.setAttribute("aria-label", "Copy code");
-  setButtonIcon(
-    copyButton,
-    copyButton.classList.contains("copied") ? "check" : "copy",
-  );
-
+  // Check if this is a mermaid block first to determine button order
   const isMermaid = getWrapperLanguage(wrapper).toLowerCase() === "mermaid";
   wrapper.classList.toggle("mermaid-clickable", isMermaid);
 
@@ -284,11 +249,30 @@ function updateWrapperButtons(
   const existingMaximize = controls.querySelector(".code-block-maximize");
 
   if (!isMermaid) {
+    // Non-mermaid blocks: remove mermaid buttons, keep collapse + copy
     existingPlay?.remove();
     existingMaximize?.remove();
     delete wrapper.dataset.mermaidStatus;
+
+    // Create collapse and copy buttons in order
+    const collapseButton = ensureButton(controls, "code-block-collapse");
+    collapseButton.setAttribute(
+      "aria-label",
+      wrapper.classList.contains("collapsed") ? "Expand code" : "Collapse code",
+    );
+    setButtonIcon(
+      collapseButton,
+      wrapper.classList.contains("collapsed") ? ChevronsUpDown : ChevronsDownUp,
+    );
+
+    const copyButton = ensureButton(controls, "code-block-copy");
+    copyButton.setAttribute("aria-label", "Copy code");
+    setButtonIcon(copyButton, Copy);
     return;
   }
+
+  // For mermaid blocks, buttons should be in order: maximize, play, collapse, copy
+  // This way play appears first when maximize is hidden by CSS
 
   if (!wrapper.dataset.mermaidStatus) {
     wrapper.dataset.mermaidStatus = immediateRenderMermaid
@@ -296,18 +280,34 @@ function updateWrapperButtons(
       : "unrendered";
   }
 
-  const playButton = ensureButton(controls, "code-block-play");
-  const maximizeButton = ensureButton(controls, "code-block-maximize");
   const rendered = wrapper.dataset.mermaidStatus === "rendered";
 
+  // Create mermaid buttons first (maximize, then play)
+  const maximizeButton = ensureButton(controls, "code-block-maximize");
+  maximizeButton.setAttribute("aria-label", "Open Mermaid preview");
+  setButtonIcon(maximizeButton, Maximize);
+
+  const playButton = ensureButton(controls, "code-block-play");
   playButton.setAttribute(
     "aria-label",
     rendered ? "Show code" : "Render diagram",
   );
-  setButtonIcon(playButton, rendered ? "code" : "play");
+  setButtonIcon(playButton, rendered ? Code : Play);
 
-  maximizeButton.setAttribute("aria-label", "Open Mermaid preview");
-  setButtonIcon(maximizeButton, "maximize");
+  // Then create the standard buttons (collapse, copy)
+  const collapseButton = ensureButton(controls, "code-block-collapse");
+  collapseButton.setAttribute(
+    "aria-label",
+    wrapper.classList.contains("collapsed") ? "Expand code" : "Collapse code",
+  );
+  setButtonIcon(
+    collapseButton,
+    wrapper.classList.contains("collapsed") ? ChevronsUpDown : ChevronsDownUp,
+  );
+
+  const copyButton = ensureButton(controls, "code-block-copy");
+  copyButton.setAttribute("aria-label", "Copy code");
+  setButtonIcon(copyButton, Copy);
 }
 
 function renderSvgMarkup(markup: string): DocumentFragment {
@@ -450,11 +450,11 @@ function flashCopySuccess(button: HTMLButtonElement): void {
   }
 
   button.classList.add("copied");
-  setButtonIcon(button, "check");
+  setButtonIcon(button, Check);
 
   const timeoutId = window.setTimeout(() => {
     button.classList.remove("copied");
-    setButtonIcon(button, "copy");
+    setButtonIcon(button, Copy);
     copyResetTimers.delete(button);
   }, 2000);
 
