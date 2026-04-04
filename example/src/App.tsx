@@ -2,8 +2,8 @@ import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
 import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
 import {
   CODE_THEMES,
-  DEFAULT_MERMAID_CONFIG,
   EDITOR_THEMES,
+  EXAMPLE_MERMAID_CONFIG,
   type Themes,
 } from "@solid-markdown-wasm/example-shared/constants";
 import {
@@ -255,27 +255,7 @@ const App: Component = () => {
               fallback={<LoadingFallback />}
               onLoaded={() => console.log("WASM Loaded")}
               immediateRenderMermaid={immediateMermaid()}
-              mermaidConfig={(theme) => {
-                const isDark = theme === "dark";
-                const textColor = isDark ? "#c9d1d9" : "#24292f";
-                const nodeBkg = isDark ? "#BB2528" : "#fee2e2"; // Dark red vs light red
-                const nodeText = isDark ? "#ffffff" : "#991b1b"; // White vs dark red
-
-                return {
-                  ...DEFAULT_MERMAID_CONFIG(theme),
-                  themeVariables: {
-                    ...DEFAULT_MERMAID_CONFIG(theme).themeVariables,
-                    primaryColor: nodeBkg,
-                    nodeBkg: nodeBkg,
-                    primaryTextColor: nodeText,
-                    nodeTextColor: nodeText,
-                    textColor: textColor,
-                    lineColor: "#FF0000",
-                    secondaryColor: "#006100",
-                    tertiaryColor: isDark ? "#222222" : "#eeeeee",
-                  },
-                };
-              }}
+              mermaidConfig={EXAMPLE_MERMAID_CONFIG}
             />
           </div>
         </div>
