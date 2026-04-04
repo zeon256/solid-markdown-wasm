@@ -3,8 +3,8 @@ import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
 import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
 import {
   CODE_THEMES,
-  DEFAULT_MERMAID_CONFIG,
   EDITOR_THEMES,
+  EXAMPLE_MERMAID_CONFIG,
   type EditorTheme,
   type Themes,
   getDefaultCodeTheme,
@@ -155,7 +155,7 @@ function App() {
       try {
         await applyPreviewEnhancements(preview, {
           immediateRenderMermaid,
-          mermaidConfig: DEFAULT_MERMAID_CONFIG,
+          mermaidConfig: EXAMPLE_MERMAID_CONFIG,
         });
       } catch (error) {
         if (!disposed) {
@@ -179,7 +179,7 @@ function App() {
 
     const handleClick = (event: MouseEvent) => {
       void handlePreviewInteraction(preview, event, {
-        mermaidConfig: DEFAULT_MERMAID_CONFIG,
+        mermaidConfig: EXAMPLE_MERMAID_CONFIG,
         onOpenMermaidPreview: setFullScreenSvg,
       });
     };

@@ -9,17 +9,18 @@ import {
 } from "lucide-react";
 import mermaid, { type MermaidConfig } from "mermaid";
 import { createElement } from "react";
-import { createRoot } from "react-dom/client";
+import { type Root, createRoot } from "react-dom/client";
 
 const CACHE_KEY = "example-react-mermaid-cache-v1";
 const MAX_CACHE_SIZE = 50;
-const STYLE_VERSION = "v1";
+const STYLE_VERSION = "v2";
 
 const ICON_SIZE = 16;
 
 type MermaidTheme = "dark" | "default";
 
 const copyResetTimers = new WeakMap<HTMLButtonElement, number>();
+const iconRoots = new WeakMap<HTMLButtonElement, Root>();
 const expandedMermaidSources = new Set<string>();
 
 export type MermaidConfigFn = (theme: MermaidTheme) => MermaidConfig;
@@ -153,7 +154,11 @@ type IconComponent =
   | typeof Play;
 
 function setButtonIcon(button: HTMLButtonElement, Icon: IconComponent): void {
-  const root = createRoot(button);
+  const existingRoot = iconRoots.get(button);
+  const root = existingRoot ?? createRoot(button);
+  if (!existingRoot) {
+    iconRoots.set(button, root);
+  }
   root.render(
     createElement(Icon, {
       size: ICON_SIZE,

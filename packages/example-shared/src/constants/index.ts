@@ -166,6 +166,33 @@ export const DEFAULT_MERMAID_CONFIG: MermaidConfigFn = (theme) => {
   };
 };
 
+/**
+ * Mermaid configuration used by both example apps.
+ * Matches the previous Solid example styling (red links, stronger contrast).
+ */
+export const EXAMPLE_MERMAID_CONFIG: MermaidConfigFn = (theme) => {
+  const isDark = theme === "dark";
+  const baseConfig = DEFAULT_MERMAID_CONFIG(theme);
+  const nodeBkg = isDark ? "#BB2528" : "#fee2e2";
+  const nodeText = isDark ? "#ffffff" : "#991b1b";
+  const textColor = isDark ? "#c9d1d9" : "#24292f";
+
+  return {
+    ...baseConfig,
+    themeVariables: {
+      ...baseConfig.themeVariables,
+      primaryColor: nodeBkg,
+      nodeBkg,
+      primaryTextColor: nodeText,
+      nodeTextColor: nodeText,
+      textColor,
+      lineColor: "#FF0000",
+      secondaryColor: "#006100",
+      tertiaryColor: isDark ? "#222222" : "#eeeeee",
+    },
+  };
+};
+
 /** Media query for detecting dark mode preference */
 export const DARK_MODE_MEDIA_QUERY = "(prefers-color-scheme: dark)";
 
