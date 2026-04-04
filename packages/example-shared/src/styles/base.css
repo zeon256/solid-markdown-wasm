@@ -56,11 +56,16 @@ samp {
 /* Theme Variables */
 [data-theme="dark"] {
   color-scheme: dark;
+  --base-size-8: 0.5rem;
+  --base-size-16: 1rem;
+  --base-text-weight-medium: 500;
   --haxiom-accent-color: rgb(111, 255, 233);
   --haxiom-fg-color: black;
   --fgColor-default: #f0f6fc;
   --fgColor-muted: #9198a1;
   --fgColor-accent: #58a6ff;
+  --fgColor-done: #a371f7;
+  --fgColor-attention: #d29922;
   --fgColor-success: #3fb950;
   --fgColor-danger: #ff7b72;
   --bgColor-default: #0d1117;
@@ -69,8 +74,13 @@ samp {
   --bgColor-neutral-muted: #656c7633;
   --borderColor-default: #30363d;
   --borderColor-muted: #3d444db3;
+  --borderColor-accent-emphasis: #1f6feb;
+  --borderColor-done-emphasis: #8957e5;
+  --borderColor-attention-emphasis: #9e6a03;
   --borderColor-success: #238636;
+  --borderColor-success-emphasis: #238636;
   --borderColor-danger: #f85149;
+  --borderColor-danger-emphasis: #da3633;
   --blockquote-border: #3d444d;
   --table-stripe: rgba(240, 246, 252, 0.02);
   --inline-code-bg: rgba(110, 118, 129, 0.4);
@@ -79,11 +89,16 @@ samp {
 
 [data-theme="light"] {
   color-scheme: light;
+  --base-size-8: 0.5rem;
+  --base-size-16: 1rem;
+  --base-text-weight-medium: 500;
   --haxiom-accent-color: #4f46e5;
   --haxiom-fg-color: white;
   --fgColor-default: #1f2328;
   --fgColor-muted: #59636e;
   --fgColor-accent: #0969da;
+  --fgColor-done: #8250df;
+  --fgColor-attention: #9a6700;
   --fgColor-success: #1a7f37;
   --fgColor-danger: #cf222e;
   --bgColor-default: #ffffff;
@@ -92,8 +107,13 @@ samp {
   --bgColor-neutral-muted: #818b981f;
   --borderColor-default: #d1d9e0;
   --borderColor-muted: #d1d9e0b3;
+  --borderColor-accent-emphasis: #0969da;
+  --borderColor-done-emphasis: #8250df;
+  --borderColor-attention-emphasis: #bf8700;
   --borderColor-success: #1f883d;
+  --borderColor-success-emphasis: #1f883d;
   --borderColor-danger: #cf222e;
+  --borderColor-danger-emphasis: #cf222e;
   --blockquote-border: #d0d7de;
   --table-stripe: rgba(31, 35, 40, 0.02);
   --inline-code-bg: rgba(175, 184, 193, 0.2);

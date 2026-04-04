@@ -15,7 +15,25 @@
   overflow-x: auto;
 }
 
+.markdown-body .code-block-wrapper[data-mermaid-status="rendered"] pre {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 600px;
+  padding: 1rem 0;
+  background: transparent;
+  border: 0;
+  overflow-x: auto;
+}
+
 .markdown-body pre[data-mermaid-status="rendered"] svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-body .code-block-wrapper[data-mermaid-status="rendered"] pre svg {
   display: block;
   margin: 0 auto;
   max-width: 100%;
