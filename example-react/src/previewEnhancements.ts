@@ -258,6 +258,10 @@ function updateWrapperButtons(
     existingPlay?.remove();
     existingMaximize?.remove();
     delete wrapper.dataset.mermaidStatus;
+    const pre = wrapper.querySelector("pre");
+    if (pre instanceof HTMLElement) {
+      delete pre.dataset.mermaidStatus;
+    }
 
     // Create collapse and copy buttons in order
     const collapseButton = ensureButton(controls, "code-block-collapse");
@@ -283,6 +287,10 @@ function updateWrapperButtons(
     wrapper.dataset.mermaidStatus = immediateRenderMermaid
       ? "rendered"
       : "unrendered";
+  }
+  const pre = wrapper.querySelector("pre");
+  if (pre instanceof HTMLElement && !pre.dataset.mermaidStatus) {
+    pre.dataset.mermaidStatus = wrapper.dataset.mermaidStatus;
   }
 
   const rendered = wrapper.dataset.mermaidStatus === "rendered";
@@ -387,12 +395,14 @@ async function renderMermaidIntoWrapper(
     pre.replaceChildren(renderSvgMarkup(svg));
     pre.dataset.mermaidSource = source;
     pre.dataset.mermaidProcessed = "true";
+    pre.dataset.mermaidStatus = "rendered";
     wrapper.dataset.mermaidStatus = "rendered";
     expandedMermaidSources.add(sourceKey);
   } catch (error) {
     if (!pre.isConnected || !root.contains(pre)) {
       return;
     }
+    pre.dataset.mermaidStatus = "unrendered";
     wrapper.dataset.mermaidStatus = "unrendered";
     setMermaidError(
       pre,
@@ -420,6 +430,7 @@ function showMermaidSource(wrapper: HTMLElement): void {
   pre.replaceChildren(code);
   pre.dataset.mermaidSource = source;
   pre.dataset.mermaidProcessed = "false";
+  pre.dataset.mermaidStatus = "code";
   wrapper.dataset.mermaidStatus = "code";
   expandedMermaidSources.delete(simpleHash(source));
   updateWrapperButtons(wrapper, false);
@@ -505,6 +516,10 @@ export async function applyPreviewEnhancements(
 
     if (!wrapper.dataset.mermaidStatus) {
       wrapper.dataset.mermaidStatus = "unrendered";
+    }
+    const pre = wrapper.querySelector("pre");
+    if (pre instanceof HTMLElement) {
+      pre.dataset.mermaidStatus = "unrendered";
     }
     updateWrapperButtons(wrapper, options.immediateRenderMermaid);
   }
