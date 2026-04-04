@@ -84,17 +84,18 @@ jobs:
         with:
           name: release-artifact
           path: release-package
-      - name: Set up Bun.js
-        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
-        with:
-          bun-version: latest
-      - name: Install semantic-release and plugins
-        run: bun install -g semantic-release@24.2.9 @semantic-release/git@10.0.1 @semantic-release/changelog@6.0.3 @semantic-release/npm@13.0.0 @semantic-release/github@11.0.6 @semantic-release/commit-analyzer@13.0.1 @semantic-release/release-notes-generator@14.1.0
       - name: Setup Node.js for NPM OIDC
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
+          node-version: 22.14.0
           registry-url: 'https://registry.npmjs.org'
+      - name: Install semantic-release toolchain
+        run: npm --prefix release-package install --no-save semantic-release@24.2.9 @semantic-release/npm@13.1.5 @semantic-release/github@11.0.6 @semantic-release/commit-analyzer@13.0.1 @semantic-release/release-notes-generator@14.1.0 @semantic-release/git@10.0.1 @semantic-release/changelog@6.0.3
+      - name: Prepare release package
+        working-directory: release-package
+        run: node prepare_package.cjs
       - name: Release
+        working-directory: release-package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd release-package && bun prepare_package.cjs && npx semantic-release
+        run: npx --no-install semantic-release
