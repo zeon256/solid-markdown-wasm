@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
     "markdown-renderer": "file:../markdown-renderer/pkg/",
     "mermaid": "^11.12.2",
     "monaco-editor": "^0.48.0",

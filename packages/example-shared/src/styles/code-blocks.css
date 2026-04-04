@@ -1,0 +1,128 @@
+/**
+ * Code block wrapper and header styles
+ * Enhanced code blocks with language labels and action buttons
+ */
+
+/* Code block wrapper styling */
+.markdown-body .code-block-wrapper {
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid var(--borderColor-default);
+  border-radius: 0.75rem;
+  background: var(--bgColor-subtle);
+  box-shadow: var(--shadow-elevated);
+}
+
+.markdown-body .code-block-wrapper pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Code block header */
+.markdown-body .code-block-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--borderColor-default);
+  background: var(--bgColor-muted);
+}
+
+.markdown-body .code-block-language {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fgColor-muted);
+}
+
+/* Button container */
+.markdown-body .code-block-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Action buttons */
+.markdown-body .code-block-copy,
+.markdown-body .code-block-collapse,
+.markdown-body .code-block-maximize,
+.markdown-body .code-block-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  color: var(--fgColor-muted);
+  background: transparent;
+  border: 1px solid var(--borderColor-muted);
+  border-radius: 0.35rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-body .code-block-copy:hover,
+.markdown-body .code-block-collapse:hover,
+.markdown-body .code-block-maximize:hover,
+.markdown-body .code-block-play:hover {
+  color: var(--fgColor-default);
+  background: var(--bgColor-neutral-muted);
+  border-color: var(--borderColor-default);
+}
+
+.markdown-body .code-block-copy:active,
+.markdown-body .code-block-collapse:active,
+.markdown-body .code-block-maximize:active,
+.markdown-body .code-block-play:active {
+  transform: scale(0.95);
+}
+
+.markdown-body .code-block-copy:disabled,
+.markdown-body .code-block-collapse:disabled,
+.markdown-body .code-block-maximize:disabled,
+.markdown-body .code-block-play:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Button icons */
+.markdown-body .code-block-copy svg,
+.markdown-body .code-block-collapse svg,
+.markdown-body .code-block-maximize svg,
+.markdown-body .code-block-play svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Hidden language data element */
+.markdown-body .code-lang-data {
+  display: none;
+}
+
+/* Collapsed state */
+.markdown-body .code-block-wrapper.collapsed pre {
+  display: none;
+}
+
+/* Copy success state */
+.markdown-body .code-block-copy.copied,
+.markdown-body .code-block-copy.copied:hover {
+  color: var(--fgColor-success);
+  border-color: var(--borderColor-success);
+}
+
+/* Mermaid button visibility logic */
+.markdown-body
+  .code-block-wrapper[data-mermaid-status="unrendered"]
+  .code-block-maximize,
+.markdown-body
+  .code-block-wrapper[data-mermaid-status="code"]
+  .code-block-maximize,
+.markdown-body .code-block-wrapper:not([data-mermaid-status]) .code-block-play,
+.markdown-body
+  .code-block-wrapper:not([data-mermaid-status])
+  .code-block-maximize {
+  display: none;
+}

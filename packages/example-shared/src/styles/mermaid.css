@@ -1,0 +1,113 @@
+/**
+ * Mermaid diagram styles and preview overlay
+ * Styles for rendered Mermaid diagrams and the fullscreen preview
+ */
+
+/* Rendered mermaid container */
+.markdown-body pre[data-mermaid-status="rendered"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 600px;
+  padding: 1rem 0;
+  background: transparent;
+  border: 0;
+  overflow-x: auto;
+}
+
+.markdown-body pre[data-mermaid-status="rendered"] svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Loading and error states */
+.mermaid-loading {
+  padding: 1rem;
+  color: var(--fgColor-muted);
+  text-align: center;
+}
+
+.mermaid-error {
+  padding: 1rem;
+  color: var(--fgColor-danger);
+  background: transparent;
+  border: 1px solid var(--borderColor-danger);
+  border-radius: 0.5rem;
+}
+
+/* Clickable mermaid diagrams */
+.mermaid-clickable pre[data-mermaid-processed="true"] svg {
+  cursor: zoom-in;
+}
+
+/* Fullscreen preview overlay */
+dialog.mermaid-preview-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 40px;
+  border: none;
+  background: rgba(0, 0, 0, 0.85);
+  box-sizing: border-box;
+  backdrop-filter: blur(8px);
+}
+
+dialog.mermaid-preview-overlay[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+dialog.mermaid-preview-overlay::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.mermaid-preview-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.mermaid-preview-content > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.mermaid-preview-content svg {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  background: var(--bgColor-default);
+}
+
+/* Close button for overlay */
+.mermaid-preview-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.mermaid-preview-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+}

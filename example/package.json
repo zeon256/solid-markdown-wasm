@@ -17,6 +17,7 @@
     "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
+    "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
     "@tailwindcss/vite": "^4.1.7",
     "solid-js": "^1.9.5",
     "solid-markdown-wasm": "file:..",

@@ -1,3 +1,10 @@
+import {
+  OPTIMIZE_DEPS_EXCLUDE,
+  SHARED_ASSETS_INCLUDE,
+  SHARED_ASSETS_INLINE_LIMIT,
+  getAssetFileNames,
+  getManualChunks,
+} from "@solid-markdown-wasm/example-shared/vite-config";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
@@ -11,26 +18,14 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/solid-monaco")) {
-            return "solid-monaco";
-          }
-        },
-        assetFileNames: (assetInfo) => {
-          // Keep .wasm files with their original names
-          if (assetInfo.name?.endsWith(".wasm")) {
-            return "assets/[name][extname]";
-          }
-          return "assets/[name]-[hash][extname]";
-        },
+        manualChunks: getManualChunks("solid-monaco"),
+        assetFileNames: getAssetFileNames(),
       },
     },
-    assetsInlineLimit: 0, // Disable inlining of assets (prevents base64 encoding)
+    assetsInlineLimit: SHARED_ASSETS_INLINE_LIMIT,
   },
-  // Ensure .wasm files are treated as assets, not modules
-  assetsInclude: ["**/*.wasm"],
-  // Tell Vite to exclude .wasm from being processed as JavaScript
+  assetsInclude: SHARED_ASSETS_INCLUDE,
   optimizeDeps: {
-    exclude: ["markdown-renderer"],
+    exclude: OPTIMIZE_DEPS_EXCLUDE,
   },
 });

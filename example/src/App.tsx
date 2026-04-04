@@ -1,3 +1,11 @@
+import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
+import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
+import {
+  CODE_THEMES,
+  DEFAULT_MERMAID_CONFIG,
+  EDITOR_THEMES,
+  type Themes,
+} from "@solid-markdown-wasm/example-shared/constants";
 import {
   type Component,
   For,
@@ -5,67 +13,8 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
-import {
-  DEFAULT_MERMAID_CONFIG,
-  MarkdownRenderer,
-  type Themes,
-} from "solid-markdown-wasm";
+import { MarkdownRenderer } from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
-import haxiomLogo from "../src/assets/haxiom.svg";
-import initialMarkdown from "../src/assets/markdown_preview.md?raw";
-
-// All available themes from the Rust lib.rs (matches the Themes type)
-const CODE_THEMES: Themes[] = [
-  "1337",
-  "OneHalfDark",
-  "OneHalfLight",
-  "Tomorrow",
-  "agola-dark",
-  "ascetic-white",
-  "axar",
-  "ayu-dark",
-  "ayu-light",
-  "ayu-mirage",
-  "base16-atelierdune-light",
-  "base16-ocean-dark",
-  "base16-ocean-light",
-  "bbedit",
-  "boron",
-  "charcoal",
-  "cheerfully-light",
-  "classic-modified",
-  "demain",
-  "dimmed-fluid",
-  "dracula",
-  "gray-matter-dark",
-  "green",
-  "gruvbox-dark",
-  "gruvbox-light",
-  "idle",
-  "inspired-github",
-  "ir-white",
-  "kronuz",
-  "material-dark",
-  "material-light",
-  "monokai",
-  "nord",
-  "nyx-bold",
-  "one-dark",
-  "railsbase16-green-screen-dark",
-  "solarized-dark",
-  "solarized-light",
-  "subway-madrid",
-  "subway-moscow",
-  "two-dark",
-  "visual-studio-dark",
-  "zenburn",
-];
-
-const EDITOR_THEMES = [
-  { value: "vs", label: "Light" },
-  { value: "vs-dark", label: "Dark" },
-  { value: "hc-black", label: "High Contrast" },
-] as const;
 
 const LoadingFallback = () => (
   <div class="flex justify-center items-center h-full">

@@ -1,3 +1,10 @@
+import {
+  OPTIMIZE_DEPS_EXCLUDE,
+  SHARED_ASSETS_INCLUDE,
+  SHARED_ASSETS_INLINE_LIMIT,
+  getAssetFileNames,
+  getManualChunks,
+} from "@solid-markdown-wasm/example-shared/vite-config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -8,23 +15,14 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/monaco-editor")) {
-            return "monaco-editor";
-          }
-        },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith(".wasm")) {
-            return "assets/[name][extname]";
-          }
-          return "assets/[name]-[hash][extname]";
-        },
+        manualChunks: getManualChunks("monaco-editor"),
+        assetFileNames: getAssetFileNames(),
       },
     },
-    assetsInlineLimit: 0,
+    assetsInlineLimit: SHARED_ASSETS_INLINE_LIMIT,
   },
-  assetsInclude: ["**/*.wasm"],
+  assetsInclude: SHARED_ASSETS_INCLUDE,
   optimizeDeps: {
-    exclude: ["markdown-renderer"],
+    exclude: OPTIMIZE_DEPS_EXCLUDE,
   },
 });
