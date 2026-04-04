@@ -3,6 +3,10 @@
   "private": false,
   "version": "1.5.1",
   "type": "module",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
   "module": "./dist/solid-markdown-wasm.es.js",
   "types": "./dist/solid-markdown-wasm.es.d.ts",
   "workspaces": ["example", "example-react", "packages/*"],
