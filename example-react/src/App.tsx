@@ -1,75 +1,24 @@
 import Editor from "@monaco-editor/react";
+import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
+import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
+import {
+  CODE_THEMES,
+  DEFAULT_MERMAID_CONFIG,
+  EDITOR_THEMES,
+  type EditorTheme,
+  type Themes,
+  getDefaultCodeTheme,
+  getDefaultEditorTheme,
+  getPrefersDark,
+} from "@solid-markdown-wasm/example-shared/constants";
+import init, { render_md } from "markdown-renderer";
 import { useEffect, useMemo, useRef, useState } from "react";
-import init, { render_md, type Themes } from "markdown-renderer";
-import haxiomLogo from "./assets/haxiom.svg";
-import initialMarkdown from "./assets/markdown_preview.md?raw";
 import {
   applyPreviewEnhancements,
-  DEFAULT_MERMAID_CONFIG,
   handlePreviewInteraction,
 } from "./previewEnhancements";
 
 const MEDIA_QUERY = "(prefers-color-scheme: dark)";
-
-const CODE_THEMES: Themes[] = [
-  "1337",
-  "OneHalfDark",
-  "OneHalfLight",
-  "Tomorrow",
-  "agola-dark",
-  "ascetic-white",
-  "axar",
-  "ayu-dark",
-  "ayu-light",
-  "ayu-mirage",
-  "base16-atelierdune-light",
-  "base16-ocean-dark",
-  "base16-ocean-light",
-  "bbedit",
-  "boron",
-  "charcoal",
-  "cheerfully-light",
-  "classic-modified",
-  "demain",
-  "dimmed-fluid",
-  "dracula",
-  "gray-matter-dark",
-  "green",
-  "gruvbox-dark",
-  "gruvbox-light",
-  "idle",
-  "inspired-github",
-  "ir-white",
-  "kronuz",
-  "material-dark",
-  "material-light",
-  "monokai",
-  "nord",
-  "nyx-bold",
-  "one-dark",
-  "railsbase16-green-screen-dark",
-  "solarized-dark",
-  "solarized-light",
-  "subway-madrid",
-  "subway-moscow",
-  "two-dark",
-  "visual-studio-dark",
-  "zenburn",
-];
-
-const EDITOR_THEMES = [
-  { value: "vs", label: "Light" },
-  { value: "vs-dark", label: "Dark" },
-  { value: "hc-black", label: "High Contrast" },
-] as const;
-
-type EditorTheme = (typeof EDITOR_THEMES)[number]["value"];
-
-const getPrefersDark = () => window.matchMedia(MEDIA_QUERY).matches;
-const getDefaultCodeTheme = (isDark: boolean): Themes =>
-  isDark ? "ayu-dark" : "ayu-light";
-const getDefaultEditorTheme = (isDark: boolean): EditorTheme =>
-  isDark ? "vs-dark" : "vs";
 
 function LoadingFallback() {
   return (

@@ -5,7 +5,7 @@
   "type": "module",
   "module": "./dist/solid-markdown-wasm.es.js",
   "types": "./dist/solid-markdown-wasm.es.d.ts",
-  "workspaces": ["example", "example-react"],
+  "workspaces": ["example", "example-react", "packages/*"],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

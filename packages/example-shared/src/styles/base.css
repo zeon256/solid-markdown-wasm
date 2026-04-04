@@ -1,0 +1,101 @@
+/**
+ * Shared base styles for solid-markdown-wasm examples
+ * Includes spinner animation, root variables, and base typography
+ */
+
+@import "tailwindcss";
+
+:root {
+  color: #111827;
+  background: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: ui-monospace, Iosevka, SFMono-Regular, Consolas,
+    "Liberation Mono", Menlo, monospace;
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 20px auto;
+  border: 4px solid rgba(148, 163, 184, 0.25);
+  border-top-color: rgb(14, 165, 233);
+  border-radius: 9999px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Theme Variables */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --haxiom-accent-color: rgb(111, 255, 233);
+  --haxiom-fg-color: black;
+  --fgColor-default: #f0f6fc;
+  --fgColor-muted: #9198a1;
+  --fgColor-accent: #58a6ff;
+  --fgColor-success: #3fb950;
+  --fgColor-danger: #ff7b72;
+  --bgColor-default: #0d1117;
+  --bgColor-muted: #161b22;
+  --bgColor-subtle: #11161d;
+  --bgColor-neutral-muted: #656c7633;
+  --borderColor-default: #30363d;
+  --borderColor-muted: #3d444db3;
+  --borderColor-success: #238636;
+  --borderColor-danger: #f85149;
+  --blockquote-border: #3d444d;
+  --table-stripe: rgba(240, 246, 252, 0.02);
+  --inline-code-bg: rgba(110, 118, 129, 0.4);
+  --shadow-elevated: 0 16px 40px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --haxiom-accent-color: #4f46e5;
+  --haxiom-fg-color: white;
+  --fgColor-default: #1f2328;
+  --fgColor-muted: #59636e;
+  --fgColor-accent: #0969da;
+  --fgColor-success: #1a7f37;
+  --fgColor-danger: #cf222e;
+  --bgColor-default: #ffffff;
+  --bgColor-muted: #f6f8fa;
+  --bgColor-subtle: #f8fafc;
+  --bgColor-neutral-muted: #818b981f;
+  --borderColor-default: #d1d9e0;
+  --borderColor-muted: #d1d9e0b3;
+  --borderColor-success: #1f883d;
+  --borderColor-danger: #cf222e;
+  --blockquote-border: #d0d7de;
+  --table-stripe: rgba(31, 35, 40, 0.02);
+  --inline-code-bg: rgba(175, 184, 193, 0.2);
+  --shadow-elevated: 0 16px 40px rgba(15, 23, 42, 0.08);
+}

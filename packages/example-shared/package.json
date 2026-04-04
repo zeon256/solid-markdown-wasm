@@ -1,0 +1,22 @@
+{
+  "name": "@solid-markdown-wasm/example-shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./assets/*": "./src/assets/*",
+    "./styles/*": "./src/styles/*",
+    "./constants": "./src/constants/index.ts",
+    "./vite-config": {
+      "import": "./vite/shared-config.js",
+      "types": "./vite/shared-config.d.ts"
+    }
+  },
+  "devDependencies": {
+    "mermaid": "^11.12.2",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "@tailwindcss/vite": "^4.1.7"
+  }
+}
