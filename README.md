@@ -1,3 +1,5 @@
+
+
 ![solid-markdown-wasm](https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20)
 
 <p align="center">
@@ -319,11 +321,7 @@ You will need the following tools to compile from source
 - [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack")
 - [NodeJS/Bun](https://bun.sh/ "bun runtime")
 
-Then run the following
-
-```bash
-bun run build
-```
+To compile the WASM runtime, run `wasm-pack build --target web --release` in the `markdown-renderer` directory. To build the JavaScript wrapper and bundle the package, run `bun run build` in the repository root.
 
 ## Performance Optimizations
 
