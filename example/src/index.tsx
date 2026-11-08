@@ -12,5 +12,5 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-// biome-ignore lint/style/noNonNullAssertion: this is safe, from solidjs templates
+// Non-null is safe: index.html always ships #root (checked in dev above).
 render(() => <App />, root!);

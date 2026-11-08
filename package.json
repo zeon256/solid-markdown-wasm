@@ -18,8 +18,10 @@
     "example:build": "cd example && bun run build",
     "example-react:dev": "cd example-react && bun run dev",
     "example-react:build": "cd example-react && bun run build",
-    "fmt": "./node_modules/@biomejs/biome/bin/biome format --write .",
-    "check": "./node_modules/@biomejs/biome/bin/biome check"
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint",
+    "check": "oxfmt --check && oxlint"
   },
   "files": ["dist", "package.json", "README.md", "LICENSE.md"],
   "dependencies": {
@@ -31,7 +33,8 @@
     "solid-js": "^1.9.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0",
     "solid-js": "^1.9.5",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",

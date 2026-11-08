@@ -406,6 +406,8 @@ function App() {
       </div>
 
       {fullScreenSvg ? (
+        // Backdrop clicks close the modal; Escape is handled natively via onCancel.
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
         <dialog
           open
           className="mermaid-preview-overlay"
@@ -429,6 +431,7 @@ function App() {
           </button>
           <div
             className="mermaid-preview-content"
+            role="presentation"
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div ref={overlayContentRef} />
