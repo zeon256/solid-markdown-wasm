@@ -219,10 +219,19 @@ impl<S: HighlightStrategy + Send + Sync> SyntaxHighlighterAdapter for SyntectAda
     fn write_pre_tag(
         &self,
         output: &mut dyn Write,
-        attributes: HashMap<&'static str, Cow<'_, str>>,
+        mut attributes: HashMap<&'static str, Cow<'_, str>>,
     ) -> Result<(), fmt::Error> {
+        // The wrapper (header + pre) is the block that occupies the fence's source
+        // lines, so it carries the sourcepos instead of the inner <pre>.
+        output.write_str(r#"<div class="code-block-wrapper""#)?;
+
+        if let Some(sourcepos) = attributes.remove("data-sourcepos") {
+            // Sourcepos is `L:C-L:C`; digits, ':' and '-' need no escaping.
+            write!(output, r#" data-sourcepos="{sourcepos}""#)?;
+        }
+
         output.write_str(concat!(
-            r#"<div class="code-block-wrapper">"#,
+            r#">"#,
             r#"<div class="code-block-header">"#,
             r#"<span class="code-block-language">Code</span>"#,
             r#"</div>"#,

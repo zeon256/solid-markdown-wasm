@@ -23,6 +23,15 @@ import {
   type MermaidConfigFn,
   useMermaidRenderer,
 } from "../utils/useMermaidRenderer";
+import {
+  type ScrollMap,
+  buildScrollMap,
+  countLines,
+  findScrollContainer,
+  lineToOffset,
+  offsetToLine,
+  scrollEventTarget,
+} from "../utils/scrollSync";
 
 export type { Themes } from "markdown-renderer";
 
@@ -116,6 +125,17 @@ const extractIframes = (html: string): ExtractedHtml => {
   return { html: newHtml, iframes };
 };
 
+/** Imperative handle for driving the preview from a source position. */
+export interface MarkdownScrollSync {
+  /**
+   * Scroll the preview so the 1-based source `line` (fractional values land
+   * proportionally inside a block) sits at the top of the scroll container.
+   * The position is kept as content re-renders or changes height (Mermaid
+   * diagrams, collapsed code, images) until the user scrolls the preview.
+   */
+  scrollToLine: (line: number) => void;
+}
+
 export interface MarkdownRendererProps {
   markdown: string;
   class?: string;
@@ -124,6 +144,22 @@ export interface MarkdownRendererProps {
   onLoaded?: () => void;
   immediateRenderMermaid?: boolean;
   mermaidConfig?: MermaidConfigFn;
+  /**
+   * Receives the scroll sync handle once. Providing this or `onScrollLine`
+   * enables scroll sync.
+   */
+  scrollSyncRef?: (sync: MarkdownScrollSync) => void;
+  /**
+   * Called with the 1-based (fractional) source line at the top of the
+   * preview when the user scrolls it. Not called for scrolls made through
+   * `scrollToLine`, so feeding it back into an editor does not loop.
+   */
+  onScrollLine?: (line: number) => void;
+  /**
+   * Element that scrolls the preview. Defaults to the nearest scrollable
+   * ancestor, or the document.
+   */
+  scrollContainer?: HTMLElement;
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
@@ -171,6 +207,83 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         cached.wrapper.style.display = "none";
       }
     }
+  };
+
+  // --- Scroll sync -------------------------------------------------------
+  // Source line the preview is pinned to; re-applied whenever layout changes.
+  // Null until the first sync so plain usage never touches scroll position.
+  let anchorLine: number | null = null;
+  // Lazily measured line <-> offset map; null means stale.
+  let scrollMap: ScrollMap | null = null;
+  let scroller: HTMLElement | null = null;
+  let lineCount = 1;
+  // scrollTop produced by our own scrollTo; its scroll event is not the user's.
+  let ignoreScrollTop: number | null = null;
+
+  const scrollSyncEnabled = () =>
+    Boolean(props.scrollSyncRef || props.onScrollLine);
+
+  const getScrollMap = (): ScrollMap | null => {
+    if (!scrollMap && contentRef && scroller) {
+      scrollMap = buildScrollMap(contentRef, scroller, lineCount);
+    }
+
+    return scrollMap;
+  };
+
+  const applyAnchorLine = () => {
+    if (anchorLine === null || !scroller) return;
+
+    const map = getScrollMap();
+
+    if (!map) return;
+
+    const before = scroller.scrollTop;
+    const target = lineToOffset(map, anchorLine);
+
+    if (Math.abs(before - target) < 1) return;
+
+    // Instant even if the container sets `scroll-behavior: smooth`; a smooth
+    // scroll would emit intermediate events indistinguishable from the user's.
+    scroller.scrollTo({ top: target, behavior: "instant" });
+
+    const after = scroller.scrollTop;
+
+    // Only expect an event if the (clamped) position actually moved.
+    if (after !== before) ignoreScrollTop = after;
+  };
+
+  const handlePreviewScroll = () => {
+    if (!scroller) return;
+
+    const top = scroller.scrollTop;
+
+    if (ignoreScrollTop !== null) {
+      const expected = ignoreScrollTop;
+      ignoreScrollTop = null;
+
+      if (Math.abs(top - expected) < 1) return;
+    }
+
+    const map = getScrollMap();
+
+    if (!map) return;
+
+    anchorLine = offsetToLine(map, top);
+    props.onScrollLine?.(anchorLine);
+  };
+
+  props.scrollSyncRef?.({
+    scrollToLine: (line) => {
+      anchorLine = line;
+      applyAnchorLine();
+    },
+  });
+
+  // Layout changed: offsets are stale, and the pinned line may have moved.
+  const handleLayoutChange = () => {
+    scrollMap = null;
+    applyAnchorLine();
   };
 
   // Track dispose functions for rendered icons
@@ -502,9 +615,10 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     // Set up click handler for code block buttons
     document.addEventListener("click", handleCodeBlockClick);
 
-    // Set up ResizeObserver for repositioning iframes
+    // Set up ResizeObserver for repositioning iframes and re-pinning scroll sync
     resizeObserver = new ResizeObserver(() => {
       repositionIframes();
+      handleLayoutChange();
     });
 
     // Observe window scroll for repositioning
@@ -537,6 +651,28 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     });
   });
 
+  // Track the preview's scroll container while scroll sync is in use.
+  createEffect(() => {
+    if (loadingWasm() || error() || !scrollSyncEnabled() || !containerRef) {
+      return;
+    }
+
+    const target = props.scrollContainer ?? findScrollContainer(containerRef);
+    const eventTarget = scrollEventTarget(target);
+
+    scroller = target;
+    scrollMap = null;
+    eventTarget.addEventListener("scroll", handlePreviewScroll, {
+      passive: true,
+    });
+
+    onCleanup(() => {
+      eventTarget.removeEventListener("scroll", handlePreviewScroll);
+      scroller = null;
+      scrollMap = null;
+    });
+  });
+
   createEffect(() => {
     // Track reactive dependencies at top level
     const markdown = props.markdown;
@@ -547,6 +683,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
       const startTime = performance.now();
       console.log("[MarkdownRenderer] Rendering with theme:", theme);
       const result = render_md(markdown, theme);
+      lineCount = countLines(markdown);
 
       // Extract iframes and replace with placeholders
       const { html, iframes } = extractIframes(result);
@@ -690,6 +827,9 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
         // Position iframes over their placeholders
         repositionIframes();
+
+        // New DOM: re-measure and keep the synced source line in place
+        handleLayoutChange();
 
         console.debug("[iframe-cache] Cache after update:", [
           ...iframeCache.keys(),

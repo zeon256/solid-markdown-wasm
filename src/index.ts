@@ -1,6 +1,9 @@
 export { MarkdownRenderer } from "./components/MarkdownRenderer";
 
-export type { MarkdownRendererProps } from "./components/MarkdownRenderer";
+export type {
+  MarkdownRendererProps,
+  MarkdownScrollSync,
+} from "./components/MarkdownRenderer";
 
 export {
   useMermaidRenderer,
