@@ -2,6 +2,10 @@
   "name": "solid-markdown-wasm",
   "version": "1.5.1",
   "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeon256/solid-markdown-wasm.git"
+  },
   "workspaces": [
     "example",
     "example-react",
