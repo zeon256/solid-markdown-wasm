@@ -21,8 +21,8 @@ jobs:
         run: cd markdown-renderer && cargo clippy -- -D warnings
       - name: Run Tests
         run: cd markdown-renderer && cargo test --features sanitize
-  biome:
-    name: Run BiomeJS
+  lint:
+    name: Run oxfmt + oxlint
     runs-on: ubuntu-latest
     needs: check
     steps:
@@ -53,5 +53,5 @@ jobs:
         run: bun install
       - name: Build React example
         run: bun run example-react:build
-      - name: Run Biome Check
+      - name: Run format + lint check
         run: bun run check

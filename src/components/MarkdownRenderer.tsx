@@ -711,18 +711,13 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
                 setFullScreenSvg(null);
               }
             }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                setFullScreenSvg(null);
-              }
-            }}
-            role="button"
-            tabIndex={0}
+            role="presentation"
             innerHTML={fullScreenSvg() ?? ""}
           />
           <button
             class="mermaid-preview-close"
             type="button"
+            aria-label="Close preview"
             onClick={() => setFullScreenSvg(null)}
           >
             <X size={24} />

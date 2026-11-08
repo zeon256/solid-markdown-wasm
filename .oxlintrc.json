@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "jsx-a11y"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    // Solid assigns `let ref!: T` bindings through `ref={ref}` at compile time.
+    "eslint/no-unassigned-vars": "off"
+  },
+  "ignorePatterns": ["markdown-renderer/**", "**/dist/**"]
+}

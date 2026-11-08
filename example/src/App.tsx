@@ -154,17 +154,14 @@ const App: Component = () => {
 
         {/* Right side - Theme selectors and Try Haxiom */}
         <div class="flex items-center gap-6">
-          <div class="flex items-center gap-2">
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label
-              class="text-sm font-medium"
-              classList={{
-                "text-gray-300": isDarkMode(),
-                "text-gray-700": !isDarkMode(),
-              }}
-            >
-              Editor Theme:
-            </label>
+          <label
+            class="flex items-center gap-2 text-sm font-medium"
+            classList={{
+              "text-gray-300": isDarkMode(),
+              "text-gray-700": !isDarkMode(),
+            }}
+          >
+            Editor Theme:
             <select
               class={selectClass()}
               value={editorTheme()}
@@ -174,19 +171,16 @@ const App: Component = () => {
                 {(theme) => <option value={theme.value}>{theme.label}</option>}
               </For>
             </select>
-          </div>
+          </label>
 
-          <div class="flex items-center gap-2">
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label
-              class="text-sm font-medium"
-              classList={{
-                "text-gray-300": isDarkMode(),
-                "text-gray-700": !isDarkMode(),
-              }}
-            >
-              Code Block Theme:
-            </label>
+          <label
+            class="flex items-center gap-2 text-sm font-medium"
+            classList={{
+              "text-gray-300": isDarkMode(),
+              "text-gray-700": !isDarkMode(),
+            }}
+          >
+            Code Block Theme:
             <select
               class={selectClass()}
               value={codeTheme()}
@@ -196,26 +190,23 @@ const App: Component = () => {
                 {(theme) => <option value={theme}>{theme}</option>}
               </For>
             </select>
-          </div>
+          </label>
 
-          <div class="flex items-center gap-2">
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label
-              class="text-sm font-medium"
-              classList={{
-                "text-gray-300": isDarkMode(),
-                "text-gray-700": !isDarkMode(),
-              }}
-            >
-              Auto-render Mermaid:
-            </label>
+          <label
+            class="flex items-center gap-2 text-sm font-medium"
+            classList={{
+              "text-gray-300": isDarkMode(),
+              "text-gray-700": !isDarkMode(),
+            }}
+          >
+            Auto-render Mermaid:
             <input
               type="checkbox"
               checked={immediateMermaid()}
               onChange={(e) => setImmediateMermaid(e.currentTarget.checked)}
               class="cursor-pointer"
             />
-          </div>
+          </label>
           {/* Try Haxiom link */}
           <a
             href="https://haxiom.io"

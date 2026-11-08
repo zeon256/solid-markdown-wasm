@@ -1,7 +1,7 @@
 ![solid-markdown-wasm](https://assets.solidjs.com/banner?type=solid-markdown-wasm&background=tiles&project=%20)
 
 <p align="center">
-	<a href="https://biomejs.dev"><img alt="Checked with Biome" src="https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome"></a>
+	<a href="https://oxc.rs"><img alt="Linted with oxlint" src="https://img.shields.io/badge/linted_with-oxlint-32f3e9?style=flat"></a>
 	<a href="https://github.com/zeon256/solid-markdown-wasm/actions/workflows/node.yml"><img alt="Node.js CI" src="https://github.com/zeon256/solid-markdown-wasm/actions/workflows/build-release.yml/badge.svg"></a>
 	<img alt="GitHub License" src="https://img.shields.io/github/license/zeon256/solid-markdown-wasm">
 	<img alt="NPM Version" src="https://img.shields.io/npm/v/solid-markdown-wasm">
