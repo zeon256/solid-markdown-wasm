@@ -1,5 +1,5 @@
 import Editor from "@monaco-editor/react";
-import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
+import logo from "@solid-markdown-wasm/example-shared/assets/logo.svg";
 import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
 import {
   CODE_THEMES,
@@ -260,8 +260,6 @@ function App() {
     ? "border-gray-700 bg-black"
     : "border-gray-200 bg-gray-100";
 
-  const mutedTextClass = isDarkMode ? "text-gray-400" : "text-gray-500";
-
   const labelClass = isDarkMode
     ? "text-sm font-medium text-gray-300"
     : "text-sm font-medium text-gray-700";
@@ -271,8 +269,8 @@ function App() {
     : "rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50";
 
   const bannerClass = isDarkMode
-    ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-100"
-    : "border-indigo-200 bg-indigo-50 text-indigo-900";
+    ? "border-blue-400/30 bg-blue-400/10 text-blue-100"
+    : "border-blue-200 bg-blue-50 text-blue-900";
 
   const errorClass = isDarkMode
     ? "border-red-500/40 bg-red-500/10 text-red-100"
@@ -292,11 +290,7 @@ function App() {
       <div className={`border-b px-6 py-3 ${toolbarClass}`}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img
-              src={haxiomLogo}
-              alt="Haxiom"
-              className={`h-6 w-6 ${isDarkMode ? "invert" : ""}`}
-            />
+            <img src={logo} alt="" className="h-6 w-6" />
             <span
               className={
                 isDarkMode
@@ -304,10 +298,8 @@ function App() {
                   : "font-semibold text-gray-900"
               }
             >
-              Haxiom
+              solid-markdown-wasm
             </span>
-            <span className={mutedTextClass}>/</span>
-            <span className={mutedTextClass}>solid-markdown-wasm</span>
             <span
               className={`rounded-full border px-2 py-0.5 text-xs uppercase tracking-[0.2em] ${bannerClass}`}
             >
@@ -371,17 +363,17 @@ function App() {
                 onChange={(event) =>
                   setImmediateRenderMermaid(event.currentTarget.checked)
                 }
-                className="h-4 w-4 cursor-pointer accent-cyan-500"
+                className="h-4 w-4 cursor-pointer accent-blue-600"
               />
             </div>
 
             <a
-              href="https://haxiom.io"
+              href="https://github.com/zeon256/solid-markdown-wasm"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded px-3 py-1.5 text-sm font-medium transition-colors hover:opacity-80 bg-(--haxiom-accent-color) text-(--haxiom-fg-color)"
+              className={selectClass}
             >
-              Try Haxiom
+              GitHub
             </a>
           </div>
         </div>

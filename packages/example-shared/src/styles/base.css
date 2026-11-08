@@ -60,8 +60,6 @@ samp {
   --base-size-8: 0.5rem;
   --base-size-16: 1rem;
   --base-text-weight-medium: 500;
-  --haxiom-accent-color: rgb(111, 255, 233);
-  --haxiom-fg-color: black;
   --fgColor-default: #f0f6fc;
   --fgColor-muted: #9198a1;
   --fgColor-accent: #58a6ff;
@@ -93,8 +91,6 @@ samp {
   --base-size-8: 0.5rem;
   --base-size-16: 1rem;
   --base-text-weight-medium: 500;
-  --haxiom-accent-color: #4f46e5;
-  --haxiom-fg-color: white;
   --fgColor-default: #1f2328;
   --fgColor-muted: #59636e;
   --fgColor-accent: #0969da;

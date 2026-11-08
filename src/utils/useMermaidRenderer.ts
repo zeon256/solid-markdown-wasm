@@ -5,16 +5,19 @@ const CACHE_KEY = "mermaid-cache-v3";
 const MAX_CACHE_SIZE = 50;
 
 // Current version of our styling to invalidate cache when we change these variables
-const STYLE_VERSION = "v7";
+const STYLE_VERSION = "v8";
 
 export type MermaidConfigFn = (theme: "dark" | "default") => MermaidConfig;
 
 export const DEFAULT_MERMAID_CONFIG: MermaidConfigFn = (theme) => {
   const isDark = theme === "dark";
-  const haxiomAccent = isDark ? "rgb(111, 255, 233)" : "#4f46e5";
-  const haxiomFg = isDark ? "#000000" : "#ffffff";
+  const accent = isDark ? "#58a6ff" : "#0969da";
+  const accentFg = isDark ? "#0d1117" : "#ffffff";
   const textColor = isDark ? "#c9d1d9" : "#24292f";
+  const mutedColor = isDark ? "#8b949e" : "#57606a";
   const bkgColor = isDark ? "#0d1117" : "#ffffff";
+  const surfaceColor = isDark ? "#161b22" : "#f6f8fa";
+  const borderColor = isDark ? "#30363d" : "#d0d7de";
 
   return {
     startOnLoad: false,
@@ -23,41 +26,41 @@ export const DEFAULT_MERMAID_CONFIG: MermaidConfigFn = (theme) => {
     fontFamily: "arial",
     themeVariables: {
       // Core colors
-      primaryColor: haxiomAccent,
-      primaryTextColor: haxiomFg,
-      primaryBorderColor: haxiomAccent,
-      lineColor: isDark ? haxiomAccent : "#444444",
-      secondaryColor: haxiomAccent,
+      primaryColor: surfaceColor,
+      primaryTextColor: textColor,
+      primaryBorderColor: accent,
+      lineColor: mutedColor,
+      secondaryColor: surfaceColor,
       tertiaryColor: isDark ? "#222222" : "#eeeeee",
 
       // Backgrounds and Text
       mainBkg: bkgColor,
-      nodeBkg: haxiomAccent,
+      nodeBkg: surfaceColor,
       textColor: textColor,
-      nodeBorder: haxiomAccent,
-      clusterBkg: isDark ? "#161b22" : "#f6f8fa",
-      clusterBorder: isDark ? "#30363d" : "#d0d7de",
-      defaultLinkColor: isDark ? "#8b949e" : "#57606a",
-      titleColor: haxiomAccent,
-      edgeLabelBackground: isDark ? "#161b22" : "#ffffff",
+      nodeBorder: accent,
+      clusterBkg: surfaceColor,
+      clusterBorder: borderColor,
+      defaultLinkColor: mutedColor,
+      titleColor: textColor,
+      edgeLabelBackground: bkgColor,
 
       fontFamily: "arial",
       fontSize: "14px",
 
       // Gantt specific variables
-      taskBkgColor: haxiomAccent,
-      taskTextColor: haxiomFg,
-      taskBorderColor: haxiomAccent,
-      activeTaskBkgColor: haxiomAccent,
-      activeTaskTextColor: haxiomFg,
+      taskBkgColor: accent,
+      taskTextColor: accentFg,
+      taskBorderColor: accent,
+      activeTaskBkgColor: accent,
+      activeTaskTextColor: accentFg,
       doneTaskBkgColor: isDark ? "#333333" : "#d1d5db",
       doneTaskTextColor: isDark ? "#888888" : "#4b5563",
       critBkgColor: "#f87171",
       critTextColor: "#ffffff",
       todayLineColor: "#f87171",
-      gridColor: isDark ? "#30363d" : "#d0d7de",
-      sectionBkgColor: isDark ? "#161b22" : "#f6f8fa",
-      sectionBkgColor2: isDark ? "#0d1117" : "#ffffff",
+      gridColor: borderColor,
+      sectionBkgColor: surfaceColor,
+      sectionBkgColor2: bkgColor,
     },
     gantt: {
       useMaxWidth: true,
