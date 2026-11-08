@@ -12,6 +12,7 @@ export function wasmExternal(): Plugin {
         __dirname,
         "../markdown-renderer/pkg/markdown_renderer_bg.wasm",
       );
+
       const wasmDest = resolve(
         __dirname,
         "dist/assets/markdown_renderer_bg.wasm",

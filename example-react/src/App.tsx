@@ -10,6 +10,8 @@ import {
   getDefaultCodeTheme,
   getDefaultEditorTheme,
   getPrefersDark,
+  parseCodeTheme,
+  parseEditorTheme,
 } from "@solid-markdown-wasm/example-shared/constants";
 import init, { render_md } from "markdown-renderer";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -32,12 +34,15 @@ function App() {
   const [markdown, setMarkdown] = useState("");
   const [debouncedMarkdown, setDebouncedMarkdown] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(() => getPrefersDark());
+
   const [codeTheme, setCodeTheme] = useState<Themes>(() =>
     getDefaultCodeTheme(getPrefersDark()),
   );
+
   const [editorTheme, setEditorTheme] = useState<EditorTheme>(() =>
     getDefaultEditorTheme(getPrefersDark()),
   );
+
   const [immediateRenderMermaid, setImmediateRenderMermaid] = useState(false);
   const [isInitializingWasm, setIsInitializingWasm] = useState(true);
   const [isWasmReady, setIsWasmReady] = useState(false);
@@ -62,18 +67,22 @@ function App() {
 
       try {
         await init();
+
         if (cancelled) {
           return;
         }
+
         setIsWasmReady(true);
       } catch (error) {
         if (cancelled) {
           return;
         }
+
         const message =
           error instanceof Error
             ? error.message
             : String(error ?? "Unknown error");
+
         setIsWasmReady(false);
         setInitError(`Failed to initialize WASM: ${message}`);
       } finally {
@@ -108,6 +117,7 @@ function App() {
 
   useEffect(() => {
     const debounceAmount = markdown.length > 100_000 ? 50 : 0;
+
     const timeoutId = window.setTimeout(() => {
       setDebouncedMarkdown(markdown);
     }, debounceAmount);
@@ -120,6 +130,7 @@ function App() {
   useEffect(() => {
     if (!isWasmReady || initError) {
       setRenderedHtml("");
+
       return;
     }
 
@@ -132,6 +143,7 @@ function App() {
         error instanceof Error
           ? error.message
           : String(error ?? "Unknown error");
+
       setRenderedHtml("");
       setRenderError(`Failed to render markdown: ${message}`);
     }
@@ -139,6 +151,7 @@ function App() {
 
   useEffect(() => {
     const preview = previewRef.current;
+
     if (!preview) {
       return;
     }
@@ -173,6 +186,7 @@ function App() {
 
   useEffect(() => {
     const preview = previewRef.current;
+
     if (!preview || !renderedHtml) {
       return;
     }
@@ -185,6 +199,7 @@ function App() {
     };
 
     preview.addEventListener("click", handleClick);
+
     return () => {
       preview.removeEventListener("click", handleClick);
     };
@@ -192,6 +207,7 @@ function App() {
 
   useEffect(() => {
     const overlayContent = overlayContentRef.current;
+
     if (!overlayContent) {
       return;
     }
@@ -218,6 +234,7 @@ function App() {
     };
 
     window.addEventListener("keydown", handleEscape);
+
     return () => {
       window.removeEventListener("keydown", handleEscape);
     };
@@ -238,22 +255,29 @@ function App() {
   const surfaceClass = isDarkMode
     ? "border-gray-700 bg-[#0d1117] text-gray-100"
     : "border-gray-200 bg-white text-gray-900";
+
   const toolbarClass = isDarkMode
     ? "border-gray-700 bg-black"
     : "border-gray-200 bg-gray-100";
+
   const mutedTextClass = isDarkMode ? "text-gray-400" : "text-gray-500";
+
   const labelClass = isDarkMode
     ? "text-sm font-medium text-gray-300"
     : "text-sm font-medium text-gray-700";
+
   const selectClass = isDarkMode
     ? "rounded border border-gray-600 bg-gray-700 px-3 py-1.5 text-sm font-medium text-gray-200 hover:bg-gray-600"
     : "rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50";
+
   const bannerClass = isDarkMode
     ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-100"
     : "border-indigo-200 bg-indigo-50 text-indigo-900";
+
   const errorClass = isDarkMode
     ? "border-red-500/40 bg-red-500/10 text-red-100"
     : "border-red-200 bg-red-50 text-red-800";
+
   const emptyStateClass = isDarkMode
     ? "border-dashed border-gray-700 bg-[#11161d] text-gray-300"
     : "border-dashed border-gray-200 bg-gray-50 text-gray-600";
@@ -300,9 +324,11 @@ function App() {
                 id="editor-theme"
                 className={selectClass}
                 value={editorTheme}
-                onChange={(event) =>
-                  setEditorTheme(event.currentTarget.value as EditorTheme)
-                }
+                onChange={(event) => {
+                  const theme = parseEditorTheme(event.currentTarget.value);
+
+                  if (theme) setEditorTheme(theme);
+                }}
               >
                 {EDITOR_THEMES.map((theme) => (
                   <option key={theme.value} value={theme.value}>
@@ -320,9 +346,11 @@ function App() {
                 id="code-theme"
                 className={selectClass}
                 value={codeTheme}
-                onChange={(event) =>
-                  setCodeTheme(event.currentTarget.value as Themes)
-                }
+                onChange={(event) => {
+                  const theme = parseCodeTheme(event.currentTarget.value);
+
+                  if (theme) setCodeTheme(theme);
+                }}
               >
                 {CODE_THEMES.map((theme) => (
                   <option key={theme} value={theme}>

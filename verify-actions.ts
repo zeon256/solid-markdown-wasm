@@ -54,6 +54,7 @@ async function fetchLatestSha(
   version: string,
 ): Promise<string | null> {
   const cacheKey = `${owner}/${repo}@${version}`.toLowerCase();
+
   if (fetchedActionKeys.has(cacheKey)) {
     return actionShaCache.get(cacheKey) ?? null;
   }
@@ -73,8 +74,10 @@ async function fetchLatestSha(
     if (!response.ok) {
       if (response.status === 404) {
         console.error(`  ⚠️  Tag ${tagVersion} not found in ${owner}/${repo}`);
+
         return null;
       }
+
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
@@ -84,6 +87,7 @@ async function fetchLatestSha(
     if (data.object.type === "commit") {
       fetchedActionKeys.add(cacheKey);
       actionShaCache.set(cacheKey, data.object.sha);
+
       return data.object.sha;
     }
 
@@ -103,11 +107,13 @@ async function fetchLatestSha(
       const tagData = await tagResponse.json();
       fetchedActionKeys.add(cacheKey);
       actionShaCache.set(cacheKey, tagData.object.sha);
+
       return tagData.object.sha;
     }
 
     fetchedActionKeys.add(cacheKey);
     actionShaCache.set(cacheKey, null);
+
     return null;
   } catch (error) {
     console.error(
@@ -116,6 +122,7 @@ async function fetchLatestSha(
     );
     fetchedActionKeys.add(cacheKey);
     actionShaCache.set(cacheKey, null);
+
     return null;
   }
 }
@@ -207,6 +214,7 @@ async function verifyWorkflowFile(
 
   if (actions.length === 0) {
     console.log("  ℹ️  No GitHub Actions found");
+
     return [];
   }
 
@@ -226,6 +234,7 @@ async function verifyWorkflowFile(
       console.log("✅");
     } else if (result.error) {
       console.log(`❌ ${result.error}`);
+
       if (result.expectedSha) {
         console.log(`     Expected: ${result.expectedSha}`);
         console.log(`     Got:      ${action.currentSha}`);
@@ -350,6 +359,7 @@ async function main() {
 
     const invalidCount = allResults.filter((r) => !r.isValid).length;
     const validCount = allResults.filter((r) => r.isValid).length;
+
     const notPinnedCount = allResults.filter(
       (r) => !r.isValid && r.error?.includes("Not pinned to SHA"),
     ).length;

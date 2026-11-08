@@ -32,18 +32,39 @@ const ICON_SIZE = 16;
 // Generate a stable hash from iframe src for consistent keys across renders
 const hashSrc = (src: string): string => {
   let hash = 0;
+
   for (let i = 0; i < src.length; i++) {
     const char = src.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
+
   return `iframe_${Math.abs(hash).toString(36)}`;
 };
 
+interface IframeDimensions {
+  width: string | null;
+  height: string | null;
+}
+
+interface ExtractedIframe extends IframeDimensions {
+  html: string;
+  src: string;
+}
+
+interface ExtractedHtml {
+  html: string;
+  iframes: Map<string, ExtractedIframe>;
+}
+
+interface CachedIframe extends IframeDimensions {
+  iframe: HTMLIFrameElement;
+  wrapper: HTMLDivElement;
+  src: string;
+}
+
 // Extract width/height attributes from iframe HTML
-const extractIframeDimensions = (
-  iframeHtml: string,
-): { width: string | null; height: string | null } => {
+const extractIframeDimensions = (iframeHtml: string): IframeDimensions => {
   const widthMatch = iframeHtml.match(/width=["']?(\d+(?:px|%)?)/i);
   const heightMatch = iframeHtml.match(/height=["']?(\d+(?:px|%)?)/i);
 
@@ -53,6 +74,7 @@ const extractIframeDimensions = (
       ? `${widthMatch[1]}px`
       : widthMatch[1]
     : null;
+
   const height = heightMatch
     ? /^\d+$/.test(heightMatch[1])
       ? `${heightMatch[1]}px`
@@ -63,19 +85,9 @@ const extractIframeDimensions = (
 };
 
 // Extract iframes from HTML and replace with placeholders using stable keys
-const extractIframes = (
-  html: string,
-): {
-  html: string;
-  iframes: Map<
-    string,
-    { html: string; src: string; width: string | null; height: string | null }
-  >;
-} => {
-  const iframes = new Map<
-    string,
-    { html: string; src: string; width: string | null; height: string | null }
-  >();
+const extractIframes = (html: string): ExtractedHtml => {
+  const iframes = new Map<string, ExtractedIframe>();
+
   const iframeRegex = /<iframe[^>]*src="([^"]*)"[^>]*>.*?<\/iframe>/gi;
   const srcCounts = new Map<string, number>();
 
@@ -97,6 +109,7 @@ const extractIframes = (
       .join(";");
 
     const styleAttr = style ? ` style="${style}"` : "";
+
     return `<div data-iframe-id="${id}" class="iframe-placeholder"${styleAttr}></div>`;
   });
 
@@ -126,16 +139,8 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
   );
 
   // Store iframe data: element, wrapper, source, and dimensions
-  const iframeCache = new Map<
-    string,
-    {
-      iframe: HTMLIFrameElement;
-      wrapper: HTMLDivElement;
-      src: string;
-      width: string | null;
-      height: string | null;
-    }
-  >();
+  const iframeCache = new Map<string, CachedIframe>();
+
   let contentRef: HTMLDivElement | undefined;
   let containerRef: HTMLDivElement | undefined;
   // Fixed overlay container for iframes - never moves in DOM
@@ -151,9 +156,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     const containerRect = containerRef.getBoundingClientRect();
 
     for (const [id, cached] of iframeCache) {
-      const placeholder = contentRef.querySelector(
-        `[data-iframe-id="${id}"]`,
-      ) as HTMLElement | null;
+      const placeholder = contentRef.querySelector(`[data-iframe-id="${id}"]`);
 
       if (placeholder) {
         const rect = placeholder.getBoundingClientRect();
@@ -178,6 +181,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     if (!contentRef) return;
 
     const headers = contentRef.querySelectorAll(".code-block-header");
+
     for (const header of headers) {
       // Skip if buttons already exist
       if (header.querySelector(".code-block-copy")) continue;
@@ -188,6 +192,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
       // Add maximize button ONLY for Mermaid diagrams
       const wrapper = header.closest(".code-block-wrapper");
+
       const isMermaid =
         wrapper?.querySelector(".language-mermaid") ||
         wrapper
@@ -200,9 +205,9 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         const initialStatus = props.immediateRenderMermaid
           ? "rendered"
           : "unrendered";
-        const wrapperHtml = wrapper as HTMLElement;
-        if (wrapperHtml && !wrapperHtml.dataset.mermaidStatus) {
-          wrapperHtml.dataset.mermaidStatus = initialStatus;
+
+        if (wrapper instanceof HTMLElement && !wrapper.dataset.mermaidStatus) {
+          wrapper.dataset.mermaidStatus = initialStatus;
         }
 
         const maxBtn = document.createElement("button");
@@ -219,6 +224,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           "aria-label",
           initialStatus === "rendered" ? "Show code" : "Render diagram",
         );
+
         const playDispose = render(
           () =>
             initialStatus === "rendered" ? (
@@ -228,6 +234,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             ),
           playBtn,
         );
+
         iconDisposeCallbacks.push(playDispose);
         buttonContainer.appendChild(playBtn);
       }
@@ -236,10 +243,12 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
       const collapseBtn = document.createElement("button");
       collapseBtn.className = "code-block-collapse";
       collapseBtn.setAttribute("aria-label", "Collapse code");
+
       const collapseDispose = render(
         () => <ChevronsDownUp size={ICON_SIZE} />,
         collapseBtn,
       );
+
       iconDisposeCallbacks.push(collapseDispose);
       buttonContainer.appendChild(collapseBtn);
 
@@ -257,30 +266,32 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
   // Single handler for all code block button clicks
   const handleCodeBlockClick = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
+    const target = e.target;
 
     // Must be within our contentRef
-    if (!contentRef?.contains(target)) return;
+    if (!(target instanceof Element) || !contentRef?.contains(target)) return;
 
     // Handle collapse button
-    const collapseBtn = target.closest(
-      ".code-block-collapse",
-    ) as HTMLButtonElement | null;
+    const collapseBtn = target.closest(".code-block-collapse");
+
     if (collapseBtn) {
       e.stopPropagation();
 
       const wrapper = collapseBtn.closest(".code-block-wrapper");
+
       if (!wrapper) return;
 
       const isCollapsed = wrapper.classList.toggle("collapsed");
 
       // Clear and re-render icon
       collapseBtn.textContent = "";
+
       if (isCollapsed) {
         const dispose = render(
           () => <ChevronsUpDown size={ICON_SIZE} />,
           collapseBtn,
         );
+
         iconDisposeCallbacks.push(dispose);
         collapseBtn.setAttribute("aria-label", "Expand code");
       } else {
@@ -288,22 +299,25 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           () => <ChevronsDownUp size={ICON_SIZE} />,
           collapseBtn,
         );
+
         iconDisposeCallbacks.push(dispose);
         collapseBtn.setAttribute("aria-label", "Collapse code");
       }
+
       return;
     }
 
     // Handle play button (toggle between code and diagram)
-    const playBtn = target.closest(
-      ".code-block-play",
-    ) as HTMLButtonElement | null;
-    if (playBtn) {
-      e.stopPropagation();
-      const wrapper = playBtn.closest(".code-block-wrapper") as HTMLElement;
-      if (!wrapper) return;
+    const playBtn = target.closest(".code-block-play");
 
-      const mermaidPre = wrapper.querySelector("pre") as HTMLElement;
+    if (playBtn instanceof HTMLButtonElement) {
+      e.stopPropagation();
+      const wrapper = playBtn.closest(".code-block-wrapper");
+
+      if (!(wrapper instanceof HTMLElement)) return;
+
+      const mermaidPre = wrapper.querySelector("pre");
+
       const code =
         mermaidPre?.dataset.mermaidSource ||
         mermaidPre?.querySelector("code")?.textContent?.trim() ||
@@ -341,16 +355,19 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
               wrapper.dataset.mermaidStatus = "rendered";
               mermaidPre.dataset.mermaidStatus = "rendered";
               mermaidPre.dataset.mermaidProcessed = "true";
+
               if (!mermaidPre.dataset.mermaidSource) {
                 mermaidPre.dataset.mermaidSource = code;
               }
 
               // Update icon to Code
               playBtn.textContent = "";
+
               const codeDispose = render(
                 () => <Code size={ICON_SIZE} />,
                 playBtn,
               );
+
               iconDisposeCallbacks.push(codeDispose);
               playBtn.setAttribute("aria-label", "Show code");
               playBtn.dataset.iconSet = "code";
@@ -363,16 +380,17 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             });
         }
       }
+
       return;
     }
 
     // Handle maximize button
-    const maxBtn = target.closest(
-      ".code-block-maximize",
-    ) as HTMLButtonElement | null;
+    const maxBtn = target.closest(".code-block-maximize");
+
     if (maxBtn) {
       e.stopPropagation();
       const wrapper = maxBtn.closest(".code-block-wrapper");
+
       if (!wrapper) return;
 
       // 1. Try to find an existing SVG inside the Mermaid pre container
@@ -382,8 +400,10 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         wrapper.querySelector("pre.language-mermaid");
 
       const svg = mermaidPre?.querySelector("svg");
+
       if (svg) {
         setFullScreenSvg(svg.outerHTML);
+
         return;
       }
 
@@ -400,37 +420,40 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             console.error("Failed to render Mermaid for preview:", err);
           }
         };
+
         renderAndPreview();
       } else {
         // Final fallback: try to find the code tag
         const codeEl =
           wrapper.querySelector("code.language-mermaid") ||
           wrapper.querySelector("code");
+
         if (codeEl?.textContent) {
           renderMermaid(codeEl.textContent.trim()).then(setFullScreenSvg);
         }
       }
+
       return;
     }
 
     // Handle clicking directly on the Mermaid diagram
-    const mermaidSvg = target.closest(
-      'pre[data-mermaid-processed="true"] svg',
-    ) as SVGElement | null;
+    const mermaidSvg = target.closest('pre[data-mermaid-processed="true"] svg');
+
     if (mermaidSvg) {
       e.stopPropagation();
       setFullScreenSvg(mermaidSvg.outerHTML);
+
       return;
     }
 
     // Handle copy button
-    const copyBtn = target.closest(
-      ".code-block-copy",
-    ) as HTMLButtonElement | null;
+    const copyBtn = target.closest(".code-block-copy");
+
     if (copyBtn) {
       e.stopPropagation();
 
       const wrapper = copyBtn.closest(".code-block-wrapper");
+
       if (!wrapper) return;
 
       const codeEl = wrapper.querySelector("code");
@@ -447,19 +470,23 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         .then(() => {
           // Visual feedback - swap icon to checkmark
           copyBtn.textContent = "";
+
           const checkDispose = render(
             () => <Check size={ICON_SIZE} />,
             copyBtn,
           );
+
           iconDisposeCallbacks.push(checkDispose);
           copyBtn.classList.add("copied");
 
           setTimeout(() => {
             copyBtn.textContent = "";
+
             const copyIconDispose = render(
               () => <Copy size={ICON_SIZE} />,
               copyBtn,
             );
+
             iconDisposeCallbacks.push(copyIconDispose);
             copyBtn.classList.remove("copied");
           }, 2000);
@@ -485,6 +512,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     window.addEventListener("scroll", handleScroll, true);
 
     setLoadingWasm(true);
+
     try {
       const initOutput = await init();
       console.debug(initOutput);
@@ -501,6 +529,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
       document.removeEventListener("click", handleCodeBlockClick);
       window.removeEventListener("scroll", handleScroll, true);
       resizeObserver?.disconnect();
+
       // Dispose all rendered icons
       for (const dispose of iconDisposeCallbacks) {
         dispose();
@@ -552,9 +581,9 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
             const temp = document.createElement("div");
             temp.innerHTML = data.html;
-            const iframe = temp.firstElementChild as HTMLIFrameElement;
+            const iframe = temp.firstElementChild;
 
-            if (iframe) {
+            if (iframe instanceof HTMLIFrameElement) {
               iframe.style.width = "100%";
               iframe.style.height = "100%";
               iframe.style.border = "none";
@@ -589,11 +618,14 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
         // Update language labels from hidden spans
         const codeBlocks = contentRef.querySelectorAll(".code-block-wrapper");
+
         for (const wrapper of codeBlocks) {
           const langDataSpan = wrapper.querySelector(".code-lang-data");
           const langLabel = wrapper.querySelector(".code-block-language");
+
           if (langDataSpan && langLabel) {
             const lang = langDataSpan.getAttribute("data-lang");
+
             if (lang) {
               langLabel.textContent = lang;
             }
@@ -614,23 +646,32 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             const pres = contentRef.querySelectorAll(
               "pre[data-mermaid-status]",
             );
+
             for (const pre of pres) {
-              const wrapper = pre.closest(".code-block-wrapper") as HTMLElement;
-              if (wrapper) {
-                const status = (pre as HTMLElement).dataset.mermaidStatus;
+              const wrapper = pre.closest(".code-block-wrapper");
+
+              if (
+                pre instanceof HTMLElement &&
+                wrapper instanceof HTMLElement
+              ) {
+                const status = pre.dataset.mermaidStatus;
                 wrapper.dataset.mermaidStatus = status;
 
                 // Update toggle button icon if it exists
                 if (status === "rendered") {
-                  const toggleBtn = wrapper.querySelector(
-                    ".code-block-play",
-                  ) as HTMLButtonElement;
-                  if (toggleBtn && toggleBtn.dataset.iconSet !== "code") {
+                  const toggleBtn = wrapper.querySelector(".code-block-play");
+
+                  if (
+                    toggleBtn instanceof HTMLButtonElement &&
+                    toggleBtn.dataset.iconSet !== "code"
+                  ) {
                     toggleBtn.textContent = "";
+
                     const codeDispose = render(
                       () => <Code size={ICON_SIZE} />,
                       toggleBtn,
                     );
+
                     iconDisposeCallbacks.push(codeDispose);
                     toggleBtn.setAttribute("aria-label", "Show code");
                     toggleBtn.dataset.iconSet = "code";
