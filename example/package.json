@@ -12,13 +12,14 @@
   },
   "dependencies": {
     "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
-    "@tailwindcss/vite": "^4.1.7",
+    "@stylexjs/stylex": "0.19.1",
+    "lucide-solid": "^0.562.0",
     "solid-js": "^1.9.5",
     "solid-markdown-wasm": "file:..",
-    "solid-monaco": "^0.3.0",
-    "tailwindcss": "^4.1.7"
+    "solid-monaco": "^0.3.0"
   },
   "devDependencies": {
+    "@stylexjs/unplugin": "0.19.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
     "vite-plugin-solid": "^2.11.6",

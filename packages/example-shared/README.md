@@ -11,7 +11,7 @@ Shared resources for the solid-markdown-wasm example applications. This package 
 
 ### Styles (`./styles/*`)
 
-- **`base.css`** - Tailwind imports, spinner animation, CSS variables for theming
+- **`base.css`** - Spinner animation, CSS variables for theming (light/dark tokens)
 - **`markdown.css`** - Base `.markdown-body` styles for rendered markdown content
 - **`code-blocks.css`** - Code block wrapper, header, and button styles
 - **`mermaid.css`** - Mermaid diagram rendering styles and preview overlay
@@ -107,5 +107,5 @@ export default defineConfig({
 
 - This package is marked as `private` and is only intended for use within the solid-markdown-wasm monorepo
 - The package uses TypeScript files directly (no build step required) since it's consumed within the monorepo
-- CSS files use Tailwind v4 `@import` syntax
+- CSS files are plain CSS (no framework); the Solid example styles its chrome with StyleX, the React example adds Tailwind on top
 - The vite-config is provided as JavaScript (not TypeScript) to avoid Node.js loader issues

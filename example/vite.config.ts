@@ -5,13 +5,15 @@ import {
   getAssetFileNames,
   getManualChunks,
 } from "@solid-markdown-wasm/example-shared/vite-config";
-import tailwindcss from "@tailwindcss/vite";
+import stylex from "@stylexjs/unplugin";
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-  plugins: [wasm(), solid(), tailwindcss()],
+  // StyleX must run before solid(): vite-plugin-solid only feeds JSX files to
+  // Babel, so `*.stylex.ts` modules would otherwise reach the browser uncompiled.
+  plugins: [stylex.vite({ useCSSLayers: true }), wasm(), solid()],
   resolve: {
     dedupe: ["solid-js"],
   },
