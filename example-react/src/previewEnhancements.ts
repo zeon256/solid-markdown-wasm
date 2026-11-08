@@ -1,4 +1,9 @@
 import {
+  DEFAULT_MERMAID_CONFIG,
+  type MermaidConfigFn,
+  type MermaidTheme,
+} from "@solid-markdown-wasm/example-shared/constants";
+import {
   Check,
   ChevronsDownUp,
   ChevronsUpDown,
@@ -7,23 +12,19 @@ import {
   Maximize,
   Play,
 } from "lucide-react";
-import mermaid, { type MermaidConfig } from "mermaid";
+import mermaid from "mermaid";
 import { createElement } from "react";
 import { type Root, createRoot } from "react-dom/client";
 
 const CACHE_KEY = "example-react-mermaid-cache-v1";
 const MAX_CACHE_SIZE = 50;
-const STYLE_VERSION = "v2";
+const STYLE_VERSION = "v3";
 
 const ICON_SIZE = 16;
-
-type MermaidTheme = "dark" | "default";
 
 const copyResetTimers = new WeakMap<HTMLButtonElement, number>();
 const iconRoots = new WeakMap<HTMLButtonElement, Root>();
 const expandedMermaidSources = new Set<string>();
-
-export type MermaidConfigFn = (theme: MermaidTheme) => MermaidConfig;
 
 export interface PreviewEnhancementOptions {
   immediateRenderMermaid: boolean;
@@ -34,57 +35,6 @@ export interface PreviewInteractionOptions {
   mermaidConfig?: MermaidConfigFn;
   onOpenMermaidPreview: (svgMarkup: string) => void;
 }
-
-export const DEFAULT_MERMAID_CONFIG: MermaidConfigFn = (theme) => {
-  const isDark = theme === "dark";
-  const haxiomAccent = isDark ? "rgb(111, 255, 233)" : "#4f46e5";
-  const haxiomFg = isDark ? "#000000" : "#ffffff";
-  const textColor = isDark ? "#c9d1d9" : "#24292f";
-  const bkgColor = isDark ? "#0d1117" : "#ffffff";
-
-  return {
-    startOnLoad: false,
-    theme: "base",
-    securityLevel: "loose",
-    fontFamily: "arial",
-    themeVariables: {
-      primaryColor: haxiomAccent,
-      primaryTextColor: haxiomFg,
-      primaryBorderColor: haxiomAccent,
-      lineColor: isDark ? haxiomAccent : "#444444",
-      secondaryColor: haxiomAccent,
-      tertiaryColor: isDark ? "#222222" : "#eeeeee",
-      mainBkg: bkgColor,
-      nodeBkg: haxiomAccent,
-      textColor,
-      nodeBorder: haxiomAccent,
-      clusterBkg: isDark ? "#161b22" : "#f6f8fa",
-      clusterBorder: isDark ? "#30363d" : "#d0d7de",
-      defaultLinkColor: isDark ? "#8b949e" : "#57606a",
-      titleColor: haxiomAccent,
-      edgeLabelBackground: isDark ? "#161b22" : "#ffffff",
-      fontFamily: "arial",
-      fontSize: "14px",
-      taskBkgColor: haxiomAccent,
-      taskTextColor: haxiomFg,
-      taskBorderColor: haxiomAccent,
-      activeTaskBkgColor: haxiomAccent,
-      activeTaskTextColor: haxiomFg,
-      doneTaskBkgColor: isDark ? "#333333" : "#d1d5db",
-      doneTaskTextColor: isDark ? "#888888" : "#4b5563",
-      critBkgColor: "#f87171",
-      critTextColor: "#ffffff",
-      todayLineColor: "#f87171",
-      gridColor: isDark ? "#30363d" : "#d0d7de",
-      sectionBkgColor: isDark ? "#161b22" : "#f6f8fa",
-      sectionBkgColor2: isDark ? "#0d1117" : "#ffffff",
-    },
-    gantt: {
-      useMaxWidth: true,
-      htmlLabels: false,
-    },
-  };
-};
 
 function getPreviewTheme(): MermaidTheme {
   const attr = document

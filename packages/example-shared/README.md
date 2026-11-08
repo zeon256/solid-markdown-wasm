@@ -6,7 +6,7 @@ Shared resources for the solid-markdown-wasm example applications. This package 
 
 ### Assets (`./assets/*`)
 
-- `haxiom.svg` - Haxiom logo used in both examples
+- `logo.svg` - Project logo used in both examples (header + favicon)
 - `markdown_preview.md` - Default markdown content for the editors
 
 ### Styles (`./styles/*`)
@@ -42,7 +42,7 @@ JavaScript exports:
 ### Importing Assets
 
 ```typescript
-import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
+import logo from "@solid-markdown-wasm/example-shared/assets/logo.svg";
 import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
 ```
 

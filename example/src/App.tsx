@@ -1,4 +1,4 @@
-import haxiomLogo from "@solid-markdown-wasm/example-shared/assets/haxiom.svg";
+import logo from "@solid-markdown-wasm/example-shared/assets/logo.svg";
 import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
 import {
   CODE_THEMES,
@@ -126,12 +126,7 @@ const App: Component = () => {
       >
         {/* Left side - Logo and project name */}
         <div class="flex items-center gap-3">
-          <img
-            src={haxiomLogo}
-            alt="Haxiom"
-            class="h-6 w-6"
-            classList={{ invert: isDarkMode() }}
-          />
+          <img src={logo} alt="" class="h-6 w-6" />
           <span
             class="font-semibold"
             classList={{
@@ -139,27 +134,11 @@ const App: Component = () => {
               "text-gray-900": !isDarkMode(),
             }}
           >
-            Haxiom
-          </span>
-          <span
-            classList={{
-              "text-gray-500": isDarkMode(),
-              "text-gray-400": !isDarkMode(),
-            }}
-          >
-            /
-          </span>
-          <span
-            classList={{
-              "text-gray-400": isDarkMode(),
-              "text-gray-500": !isDarkMode(),
-            }}
-          >
             solid-markdown-wasm
           </span>
         </div>
 
-        {/* Right side - Theme selectors and Try Haxiom */}
+        {/* Right side - Theme selectors and project link */}
         <div class="flex items-center gap-6">
           <label
             class="flex items-center gap-2 text-sm font-medium"
@@ -218,14 +197,13 @@ const App: Component = () => {
               class="cursor-pointer"
             />
           </label>
-          {/* Try Haxiom link */}
           <a
-            href="https://haxiom.io"
+            href="https://github.com/zeon256/solid-markdown-wasm"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm font-medium px-3 py-1.5 rounded transition-colors hover:opacity-80 bg-(--haxiom-accent-color) text-(--haxiom-fg-color)"
+            class={selectClass()}
           >
-            Try Haxiom
+            GitHub
           </a>
         </div>
       </div>

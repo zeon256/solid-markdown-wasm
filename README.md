@@ -26,7 +26,6 @@
 
 ## Users
 
-- [Haxiom](https://haxiom.io)
 - Using this project and want your company/project here? Feel free to open a PR!
 
 ## Examples
