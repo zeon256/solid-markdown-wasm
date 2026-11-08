@@ -116,6 +116,47 @@ const App: Component = () => {
 export default App;
 ```
 
+## Scroll Sync
+
+Every rendered block carries a `data-sourcepos` attribute, so the preview can follow an editor (and the editor can follow the preview) by source line. Positions are measured from the live DOM, so it stays aligned when Mermaid diagrams are rendered or toggled back to source, code blocks collapse, or iframes and other raw HTML sit between blocks. Paragraphs and code shown as source line up per source line; content with no line structure (rendered diagrams, images, iframes) is interpolated across its height. When content re-renders or changes height, the preview keeps the last synced line at the top.
+
+| Prop              | Type                                 | Description                                                                                                                            |
+| ----------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `scrollSyncRef`   | `(sync: MarkdownScrollSync) => void` | Receives `{ scrollToLine(line) }`. It scrolls the preview so a 1-based source line (fractional values are allowed) sits at the top.    |
+| `onScrollLine`    | `(line: number) => void`             | Called with the source line at the top of the preview when the user scrolls it. Scrolls made through `scrollToLine` do not trigger it. |
+| `scrollContainer` | `HTMLElement`                        | Element that scrolls the preview. Defaults to the nearest scrollable ancestor, or the document.                                        |
+
+Scroll sync is inactive unless `scrollSyncRef` or `onScrollLine` is provided. Your editor-side code must also skip the scroll events it causes when following the preview. Here is a Monaco example (`setScrollTop` with `ScrollType.Immediate` fires its scroll event synchronously):
+
+```tsx
+let preview: MarkdownScrollSync | undefined;
+let applying = false;
+
+// Monaco onMount
+editor.onDidScrollChange((e) => {
+  if (!e.scrollTopChanged || applying) return;
+  // Top visible line; add a fraction for partially scrolled lines.
+  preview?.scrollToLine(editor.getVisibleRanges()[0].startLineNumber);
+});
+
+const scrollEditorToLine = (line: number) => {
+  applying = true;
+  editor.setScrollTop(
+    editor.getTopForLineNumber(Math.floor(line)),
+    monaco.editor.ScrollType.Immediate,
+  );
+  applying = false;
+};
+
+<MarkdownRenderer
+  markdown={markdown()}
+  scrollSyncRef={(sync) => (preview = sync)}
+  onScrollLine={scrollEditorToLine}
+/>;
+```
+
+See `example/src/editor.ts` for a version that interpolates within wrapped lines.
+
 ## Customising Code Block Headers
 
 The rendered code blocks include a header with a language label and buttons for copying and collapsing code. You can customise these using CSS.

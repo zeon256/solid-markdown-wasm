@@ -1,37 +1,37 @@
-<h1>Simlimprice.com: A Price Comparison Platform for Singapore Computer Parts 🇸🇬</h1>
-<p>It's currently challenging to find a centralized price comparison tool for computer parts specifically within Singapore's Sim Lim Square. Many individuals resort to downloading PDF price lists or visiting stores in person to inquire about prices. 😩</p>
-<p>This initiative proposes the development of a price comparison tool designed to parse price lists (potentially utilizing Deepseek OCR or classic PDF parsing techniques) and offer a single platform for users to search and identify the best prices available. 🚀</p>
-<p>This is a novel concept, as there isn't a readily available solution addressing this need, especially considering Singapore's tech-savvy population and abundance of computer science graduates. 💡</p>
-<h2>Technical Approach 💻</h2>
-<p>Our plan is to maintain a <strong>super simple</strong> architecture:</p>
-<ul>
-<li><strong>Database:</strong> We will utilize <strong>LibSQL</strong> as our database.</li>
-<li><strong>Data Ingestion:</strong> Prices will be downloaded and parsed nightly, then inserted into the database.</li>
-<li><strong>Local-First Architecture:</strong> Initially, we aim for a local-first approach, potentially using <strong>WASM Turso</strong>. This allows direct connection to a remote read-only replica.
-<ul>
-<li><em>SEO Consideration:</em> The impact on SEO with this architecture is being considered. Server-side rendering (SSR) might be necessary, but this is a secondary concern for now. 🤔</li>
+<h1 data-sourcepos="1:1-1:84">Simlimprice.com: A Price Comparison Platform for Singapore Computer Parts 🇸🇬</h1>
+<p data-sourcepos="3:1-3:251">It's currently challenging to find a centralized price comparison tool for computer parts specifically within Singapore's Sim Lim Square. Many individuals resort to downloading PDF price lists or visiting stores in person to inquire about prices. 😩</p>
+<p data-sourcepos="5:1-5:261">This initiative proposes the development of a price comparison tool designed to parse price lists (potentially utilizing Deepseek OCR or classic PDF parsing techniques) and offer a single platform for users to search and identify the best prices available. 🚀</p>
+<p data-sourcepos="7:1-7:197">This is a novel concept, as there isn't a readily available solution addressing this need, especially considering Singapore's tech-savvy population and abundance of computer science graduates. 💡</p>
+<h2 data-sourcepos="9:1-9:27">Technical Approach 💻</h2>
+<p data-sourcepos="11:1-11:56">Our plan is to maintain a <strong data-sourcepos="11:27-11:42">super simple</strong> architecture:</p>
+<ul data-sourcepos="13:1-16:184">
+<li data-sourcepos="13:1-13:61"><strong data-sourcepos="13:5-13:17">Database:</strong> We will utilize <strong data-sourcepos="13:35-13:44">LibSQL</strong> as our database.</li>
+<li data-sourcepos="14:1-14:102"><strong data-sourcepos="14:5-14:23">Data Ingestion:</strong> Prices will be downloaded and parsed nightly, then inserted into the database.</li>
+<li data-sourcepos="15:1-17:0"><strong data-sourcepos="15:5-15:33">Local-First Architecture:</strong> Initially, we aim for a local-first approach, potentially using <strong data-sourcepos="15:99-15:112">WASM Turso</strong>. This allows direct connection to a remote read-only replica.
+<ul data-sourcepos="16:5-16:184">
+<li data-sourcepos="16:5-16:184"><em data-sourcepos="16:9-16:28">SEO Consideration:</em> The impact on SEO with this architecture is being considered. Server-side rendering (SSR) might be necessary, but this is a secondary concern for now. 🤔</li>
 </ul>
 </li>
 </ul>
-<h2>Monetization Strategy 💰</h2>
-<p>Our proposed monetization strategies include:</p>
-<ul>
-<li><strong>Affiliate Marketing:</strong> Partnering with retailers and earning commissions on sales generated through our platform.</li>
-<li><strong>Google Ads:</strong> Displaying targeted advertisements on the website.</li>
-<li><strong>Shareable Part Lists:</strong> Implementing a &quot;share&quot; button allowing users to create and share their custom computer part lists. This can also contribute to SEO efforts by generating user-created content. 📝</li>
+<h2 data-sourcepos="18:1-18:29">Monetization Strategy 💰</h2>
+<p data-sourcepos="20:1-20:45">Our proposed monetization strategies include:</p>
+<ul data-sourcepos="22:1-24:209">
+<li data-sourcepos="22:1-22:119"><strong data-sourcepos="22:5-22:28">Affiliate Marketing:</strong> Partnering with retailers and earning commissions on sales generated through our platform.</li>
+<li data-sourcepos="23:1-23:70"><strong data-sourcepos="23:5-23:19">Google Ads:</strong> Displaying targeted advertisements on the website.</li>
+<li data-sourcepos="24:1-25:0"><strong data-sourcepos="24:5-24:29">Shareable Part Lists:</strong> Implementing a &quot;share&quot; button allowing users to create and share their custom computer part lists. This can also contribute to SEO efforts by generating user-created content. 📝</li>
 </ul>
-<h2>Additional Revenue Streams &amp; Considerations 📈</h2>
-<p>We are exploring other avenues for revenue generation:</p>
-<ul>
-<li><strong>Price Alerts:</strong> While a valuable feature, implementing real-time alerts would necessitate a departure from our current local-first architecture, potentially requiring a more robust backend infrastructure. This is a trade-off to consider carefully. 🔔</li>
+<h2 data-sourcepos="26:1-26:51">Additional Revenue Streams &amp; Considerations 📈</h2>
+<p data-sourcepos="28:1-28:54">We are exploring other avenues for revenue generation:</p>
+<ul data-sourcepos="30:1-30:258">
+<li data-sourcepos="30:1-31:0"><strong data-sourcepos="30:5-30:21">Price Alerts:</strong> While a valuable feature, implementing real-time alerts would necessitate a departure from our current local-first architecture, potentially requiring a more robust backend infrastructure. This is a trade-off to consider carefully. 🔔</li>
 </ul>
-<h1>Technical Details</h1>
-<h2>Prompt</h2>
-<h2>Stage 0: Partition</h2>
-<p>Partition using classic PDF techniques and export each one.</p>
-<h2>Stage 1: Routing</h2>
-<p>Use the following prompt to decide the section.</p>
-<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-markdown"><span class="code-lang-data" data-lang="markdown" hidden></span><span style="color:#dcdfe4;">You are an expert PC hardware category classifier for Singapore/Malaysia PC shops (Sim Lim Square style).
+<h1 data-sourcepos="32:1-32:19">Technical Details</h1>
+<h2 data-sourcepos="34:1-34:10">Prompt</h2>
+<h2 data-sourcepos="36:1-36:21">Stage 0: Partition</h2>
+<p data-sourcepos="38:1-38:59">Partition using classic PDF techniques and export each one.</p>
+<h2 data-sourcepos="40:1-40:20">Stage 1: Routing</h2>
+<p data-sourcepos="42:1-42:47">Use the following prompt to decide the section.</p>
+<div class="code-block-wrapper" data-sourcepos="44:1-107:3"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-markdown"><span class="code-lang-data" data-lang="markdown" hidden></span><span style="color:#dcdfe4;">You are an expert PC hardware category classifier for Singapore/Malaysia PC shops (Sim Lim Square style).
 </span><span style="color:#dcdfe4;">
 </span><span style="color:#61afef;">## YOUR JOB:
 </span><span style="color:#dcdfe4;">Given a </span><span style="color:#c678dd;">**single extracted PDF section/box**</span><span style="color:#dcdfe4;">, classify it into </span><span style="color:#c678dd;">**EXACTLY ONE**</span><span style="color:#dcdfe4;"> PC hardware category.
@@ -93,8 +93,8 @@
 </span><span style="color:#dcdfe4;">  </span><span style="color:#98c379;">&quot;category&quot;</span><span style="color:#dcdfe4;">: </span><span style="color:#98c379;">&quot;EXACT_CATEGORY_NAME&quot;</span><span style="color:#dcdfe4;">,
 </span><span style="color:#dcdfe4;">  </span><span style="color:#98c379;">&quot;reasoning&quot;</span><span style="color:#dcdfe4;">: </span><span style="color:#98c379;">&quot;Brief explanation (1 sentence)&quot;
 </span><span style="color:#dcdfe4;">}
-</span></code></pre>
-<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-markdown"><span class="code-lang-data" data-lang="markdown" hidden></span><span style="color:#dcdfe4;">You are an expert PC hardware price extractor for Singapore PC shops (Sim Lim Square style).
+</span></code></pre></div>
+<div class="code-block-wrapper" data-sourcepos="110:1-176:3"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-markdown"><span class="code-lang-data" data-lang="markdown" hidden></span><span style="color:#dcdfe4;">You are an expert PC hardware price extractor for Singapore PC shops (Sim Lim Square style).
 </span><span style="color:#dcdfe4;">
 </span><span style="color:#61afef;">## IMPORTANT: CATEGORY-SPECIFIC EXTRACTION MODE
 </span><span style="color:#dcdfe4;">
@@ -159,9 +159,9 @@
 </span><span style="color:#dcdfe4;">    }
 </span><span style="color:#dcdfe4;">  }
 </span><span style="color:#dcdfe4;">]
-</span></code></pre>
-<h2>Data format</h2>
-<div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-typescript"><span class="code-lang-data" data-lang="typescript" hidden></span><span style="color:#c678dd;">type </span><span style="color:#dcdfe4;">Category </span><span style="color:#c678dd;">=
+</span></code></pre></div>
+<h2 data-sourcepos="178:1-178:14">Data format</h2>
+<div class="code-block-wrapper" data-sourcepos="180:1-218:3"><div class="code-block-header"><span class="code-block-language">Code</span></div><pre style="background-color:#282c34;"><code class="language-typescript"><span class="code-lang-data" data-lang="typescript" hidden></span><span style="color:#c678dd;">type </span><span style="color:#dcdfe4;">Category </span><span style="color:#c678dd;">=
 </span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;CPU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;GPU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Motherboard&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;RAM&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;SSD&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;HDD&quot;
 </span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;PSU&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Cooler&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Case&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Monitor&quot;
 </span><span style="color:#dcdfe4;">  </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Keyboard&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;Mouse&quot; </span><span style="color:#c678dd;">| </span><span style="color:#98c379;">&quot;KeyboardMouseCombo&quot;
@@ -198,4 +198,4 @@
 </span><span style="color:#dcdfe4;">        </span><span style="color:#e06c75;">comboSaving</span><span style="color:#c678dd;">?: </span><span style="color:#dcdfe4;">number;
 </span><span style="color:#dcdfe4;">      }
 </span><span style="color:#dcdfe4;">    });
-</span></code></pre>
+</span></code></pre></div>

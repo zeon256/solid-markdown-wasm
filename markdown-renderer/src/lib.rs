@@ -120,6 +120,8 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options.extension.math_dollars = true;
     options.extension.front_matter_delimiter = Some("---".into());
     options.render.r#unsafe = true;
+    // `data-sourcepos` lets the preview map scroll positions back to source lines.
+    options.render.sourcepos = true;
 
     options
 });
@@ -138,6 +140,8 @@ static OPTIONS: LazyLock<Options> = LazyLock::new(|| {
     options.extension.math_dollars = true;
     options.extension.front_matter_delimiter = Some("---".into());
     options.render.r#unsafe = true;
+    // `data-sourcepos` lets the preview map scroll positions back to source lines.
+    options.render.sourcepos = true;
 
     options
 });
@@ -451,8 +455,8 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
 
     builder.tag_attributes(tag_attributes);
 
-    // Allow style and class on all elements
-    builder.add_generic_attributes(["style", "class"]);
+    // Allow style and class on all elements; data-sourcepos drives scroll sync
+    builder.add_generic_attributes(["style", "class", "data-sourcepos"]);
 
     // Allow certain URL schemes
     let url_schemes = ["https", "http", "mailto", "data"]
@@ -554,7 +558,8 @@ mod test {
 
     /// Render markdown without caching - used for generating ground truth test data.
     fn render_md_uncached(markdown: &str, theme: &str) -> String {
-        markdown_to_html_with_plugins(markdown, &OPTIONS, &UNCACHED_PLUGINS[theme])
+        let html = markdown_to_html_with_plugins(markdown, &OPTIONS, &UNCACHED_PLUGINS[theme]);
+        close_code_block_wrappers(&html)
     }
 
     #[ignore = "Run manually to see all themes: cargo test print_all_themes -- --ignored"]
@@ -847,6 +852,31 @@ mod test {
         assert!(
             !result.contains("<HTA:APplication"),
             "mermaid source should not render HTA-like tags as markup: {}",
+            result
+        );
+    }
+
+    /// Scroll sync in the component relies on block sourcepos surviving sanitization,
+    /// with code fences reporting their lines on the outer wrapper.
+    #[test]
+    #[cfg(feature = "sanitize")]
+    fn test_sourcepos_survives_sanitization() {
+        let markdown = "# Title\n\n```mermaid\ngraph TD; A-->B;\n```\n\ntext\n";
+        let result = render_md(markdown, Themes::OneHalfDark);
+
+        assert!(
+            result.contains(r#"<h1 data-sourcepos="1:1-1:7">"#),
+            "heading sourcepos should be preserved: {}",
+            result
+        );
+        assert!(
+            result.contains(r#"<div class="code-block-wrapper" data-sourcepos="3:1-5:3">"#),
+            "code fence sourcepos should be on the wrapper: {}",
+            result
+        );
+        assert!(
+            result.contains(r#"<p data-sourcepos="7:1-7:4">"#),
+            "paragraph sourcepos should be preserved: {}",
             result
         );
     }

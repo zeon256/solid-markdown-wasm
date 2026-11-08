@@ -14,7 +14,7 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
-import { MarkdownRenderer } from "solid-markdown-wasm";
+import { MarkdownRenderer, type MarkdownScrollSync } from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
 import { Header } from "./components/Header";
 import { Pane } from "./components/Pane";
@@ -24,6 +24,7 @@ import {
   EDITOR_THEME_DARK,
   EDITOR_THEME_LIGHT,
   defineEditorThemes,
+  syncEditorScroll,
 } from "./editor";
 import { color, font } from "./tokens.stylex";
 
@@ -156,6 +157,11 @@ const App: Component = () => {
     );
   };
 
+  // Scroll sync: each side reports the source line at its top; the other side
+  // follows. Neither echoes scrolls it was told to make, so they cannot loop.
+  let previewScroll: MarkdownScrollSync | undefined;
+  let scrollEditorToLine: ((line: number) => void) | undefined;
+
   onMount(() => {
     const mediaQuery = window.matchMedia(DARK_MODE_MEDIA_QUERY);
 
@@ -231,6 +237,9 @@ const App: Component = () => {
                 monaco.editor.setTheme(
                   isDark() ? EDITOR_THEME_DARK : EDITOR_THEME_LIGHT,
                 );
+                scrollEditorToLine = syncEditorScroll(monaco, editor, (line) =>
+                  previewScroll?.scrollToLine(line),
+                );
               }}
               loadingState={<Spinner label="Loading editor" />}
             />
@@ -251,6 +260,8 @@ const App: Component = () => {
                 fallback={<Spinner label="Loading renderer" />}
                 onLoaded={() => setWasmReady(true)}
                 immediateRenderMermaid={autoRenderMermaid()}
+                scrollSyncRef={(sync) => (previewScroll = sync)}
+                onScrollLine={(line) => scrollEditorToLine?.(line)}
               />
             </div>
           </div>
