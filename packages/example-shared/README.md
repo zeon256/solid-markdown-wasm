@@ -5,6 +5,7 @@ Shared resources for the solid-markdown-wasm example applications. This package 
 ## What's Included
 
 ### Assets (`./assets/*`)
+
 - `haxiom.svg` - Haxiom logo used in both examples
 - `markdown_preview.md` - Default markdown content for the editors
 
@@ -18,6 +19,7 @@ Shared resources for the solid-markdown-wasm example applications. This package 
 ### Constants (`./constants`)
 
 TypeScript exports:
+
 - `CODE_THEMES` - Array of 40+ available syntax highlighting themes
 - `EDITOR_THEMES` - Array of Monaco editor themes (Light, Dark, High Contrast)
 - `DEFAULT_MERMAID_CONFIG` - Mermaid configuration function for consistent diagram theming
@@ -28,6 +30,7 @@ TypeScript exports:
 ### Vite Config (`./vite-config`)
 
 JavaScript exports:
+
 - `getManualChunks(chunkName)` - Function for vendor code splitting
 - `getAssetFileNames()` - Asset file naming function with WASM support
 - `OPTIMIZE_DEPS_EXCLUDE` - Dependencies to exclude from optimization

@@ -11,6 +11,7 @@
 </p>
 
 # solid-markdown-wasm
+
 > CommonMark markdown renderer for solidjs using wasm
 
 ## Features
@@ -85,7 +86,7 @@ const App: Component = () => {
   const [markdown, setMarkdown] = createSignal<string>("# Hello, Markdown!");
 
   const handleInput = (
-    event: InputEvent & { currentTarget: HTMLTextAreaElement }
+    event: InputEvent & { currentTarget: HTMLTextAreaElement },
   ) => {
     setMarkdown(event.currentTarget.value);
   };
@@ -101,11 +102,13 @@ const App: Component = () => {
         placeholder="Enter your markdown here..."
       />
       <h2>Preview:</h2>
-      <MarkdownRenderer 
-        markdown={markdown()} 
+      <MarkdownRenderer
+        markdown={markdown()}
         theme="base16-ocean-dark"
-        onLoaded={() => {console.log("Markdown rendered successfully")}}
-        fallback={<div>Loading...</div>} 
+        onLoaded={() => {
+          console.log("Markdown rendered successfully");
+        }}
+        fallback={<div>Loading...</div>}
       />
     </div>
   );
@@ -120,16 +123,16 @@ The rendered code blocks include a header with a language label and buttons for 
 
 ### CSS Classes
 
-| Class | Description |
-|-------|-------------|
-| `.code-block-wrapper` | Container wrapping the entire code block |
-| `.code-block-header` | The header bar containing language label and buttons |
-| `.code-block-language` | The language label text (e.g., "typescript") |
-| `.code-block-buttons` | Container for the action buttons |
-| `.code-block-copy` | The copy button |
-| `.code-block-collapse` | The collapse/expand button |
-| `.code-block-wrapper.collapsed` | Applied when code block is collapsed |
-| `.code-block-copy.copied` | Applied when code has been copied (for 2 seconds) |
+| Class                           | Description                                          |
+| ------------------------------- | ---------------------------------------------------- |
+| `.code-block-wrapper`           | Container wrapping the entire code block             |
+| `.code-block-header`            | The header bar containing language label and buttons |
+| `.code-block-language`          | The language label text (e.g., "typescript")         |
+| `.code-block-buttons`           | Container for the action buttons                     |
+| `.code-block-copy`              | The copy button                                      |
+| `.code-block-collapse`          | The collapse/expand button                           |
+| `.code-block-wrapper.collapsed` | Applied when code block is collapsed                 |
+| `.code-block-copy.copied`       | Applied when code has been copied (for 2 seconds)    |
 
 ### Example CSS
 
@@ -204,15 +207,15 @@ The rendered code blocks include a header with a language label and buttons for 
 
 The default styles use CSS variables that you can override:
 
-| Variable | Description | Default (dark) |
-|----------|-------------|----------------|
-| `--bgColor-muted` | Header background | `#151b23` |
-| `--borderColor-muted` | Border color | `#3d444db3` |
-| `--fgColor-muted` | Muted text/icon color | `#9198a1` |
-| `--fgColor-default` | Default text/icon color | `#f0f6fc` |
-| `--bgColor-neutral-muted` | Hover background | `#656c7633` |
-| `--borderColor-default` | Hover border color | `#3d444d` |
-| `--fgColor-success` | Success state color | `#5eeed8` |
+| Variable                  | Description             | Default (dark) |
+| ------------------------- | ----------------------- | -------------- |
+| `--bgColor-muted`         | Header background       | `#151b23`      |
+| `--borderColor-muted`     | Border color            | `#3d444db3`    |
+| `--fgColor-muted`         | Muted text/icon color   | `#9198a1`      |
+| `--fgColor-default`       | Default text/icon color | `#f0f6fc`      |
+| `--bgColor-neutral-muted` | Hover background        | `#656c7633`    |
+| `--borderColor-default`   | Hover border color      | `#3d444d`      |
+| `--fgColor-success`       | Success state color     | `#5eeed8`      |
 
 ## Mermaid Diagrams
 
@@ -220,22 +223,22 @@ The default styles use CSS variables that you can override:
 
 ### Props
 
-| Prop | Type | Description | Default |
-|------|------|-------------|---------|
+| Prop                     | Type      | Description                                        | Default |
+| ------------------------ | --------- | -------------------------------------------------- | ------- |
 | `immediateRenderMermaid` | `boolean` | If true, diagrams render immediately on page load. | `false` |
 
 ### Customizing Mermaid Styles
 
 You can customize the appearance of Mermaid diagrams and the full-screen preview modal using the following CSS classes.
 
-| Class | Description |
-|-------|-------------|
-| `.mermaid-render-btn` | The button shown when `immediateRenderMermaid` is `false`. |
-| `.mermaid-clickable` | Applied to the container when diagrams are clickable for preview. |
-| `.code-block-maximize` | The maximize button in the code block header for Mermaid diagrams. |
-| `.mermaid-preview-overlay` | The full-screen modal backdrop for the preview. |
-| `.mermaid-preview-content` | Container for the SVG in the full-screen preview. |
-| `.mermaid-preview-close` | The close button in the full-screen preview. |
+| Class                      | Description                                                        |
+| -------------------------- | ------------------------------------------------------------------ |
+| `.mermaid-render-btn`      | The button shown when `immediateRenderMermaid` is `false`.         |
+| `.mermaid-clickable`       | Applied to the container when diagrams are clickable for preview.  |
+| `.code-block-maximize`     | The maximize button in the code block header for Mermaid diagrams. |
+| `.mermaid-preview-overlay` | The full-screen modal backdrop for the preview.                    |
+| `.mermaid-preview-content` | Container for the SVG in the full-screen preview.                  |
+| `.mermaid-preview-close`   | The close button in the full-screen preview.                       |
 
 > **Tip:** In addition to the maximize button, users can also click directly on a rendered Mermaid diagram to open the full-screen preview.
 
@@ -284,17 +287,19 @@ For a list of available themes and languages, please refer to [THEMES_AND_LANGS.
 ## Internals
 
 Internally, the renderer is implemented using a [forked version of comrak](https://github.com/DoublePrecision/comrak "comrak fork") (with added math rendering support) and then compiled down to webassembly using [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack github")
-which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). The fork extends the original [comrak](https://github.com/kivikakk/comrak "comrak github") library to include mathematical expression rendering capabilities. 
+which is [called](./vite.config.ts) by [vite](https://vite.dev/ "vite website"). The fork extends the original [comrak](https://github.com/kivikakk/comrak "comrak github") library to include mathematical expression rendering capabilities.
 
 ## Security
 
 `solid-markdown-wasm` prioritizes security through multiple layers of protection:
 
 ### Supply Chain Security
+
 - **SHA-pinned GitHub Actions**: All 14 CI/CD actions are pinned to immutable commit SHAs, preventing supply chain attacks from compromised action tags. [Verify with `bun verify-actions.ts`]
 - **NPM Trusted Publishing**: Uses OIDC instead of long-lived tokens, with cryptographic provenance attestations for every release
 
 ### Runtime Security
+
 - **Safe-by-default rendering**: Raw HTML and dangerous links are sanitized using the [ammonia](https://github.com/rust-ammonia/ammonia) library
 - **WebAssembly sandbox**: Markdown rendering is isolated in a WASM sandbox with no direct system access
 - **No unsafe options**: We don't expose comrak's "unsafe" rendering options
@@ -315,6 +320,7 @@ For more details, see [SECURITY.md](./SECURITY.md).
 ## Compiling From Source
 
 You will need the following tools to compile from source
+
 - [Rust compiler](https://www.rust-lang.org/ "rust compiler")
 - [wasm-pack](https://github.com/rustwasm/wasm-pack "wasm-pack")
 - [NodeJS/Bun](https://bun.sh/ "bun runtime")
@@ -344,7 +350,9 @@ If you find `solid-markdown-wasm` useful and would like to support its developme
 Thank you for your support!
 
 ## License
+
 `solid-markdown-wasm` is released under the [MIT License](./LICENSE.md).
 
 ### Contribution
+
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in `solid-markdown-wasm` by you, shall be licensed as MIT, without any additional terms or conditions.

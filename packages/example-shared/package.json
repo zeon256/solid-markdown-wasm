@@ -13,10 +13,10 @@
     }
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.7",
     "mermaid": "^11.12.2",
     "typescript": "^5.8.3",
     "vite": "^6.0.0",
-    "vite-plugin-wasm": "^3.5.0",
-    "@tailwindcss/vite": "^4.1.7"
+    "vite-plugin-wasm": "^3.5.0"
   }
 }

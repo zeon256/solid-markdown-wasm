@@ -2,19 +2,13 @@
   "name": "vite-template-solid",
   "version": "0.0.0",
   "description": "",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "typescript": "^5.7.2",
-    "vite": "^6.0.0",
-    "vite-plugin-solid": "^2.11.6",
-    "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
     "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
@@ -23,5 +17,11 @@
     "solid-markdown-wasm": "file:..",
     "solid-monaco": "^0.3.0",
     "tailwindcss": "^4.1.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vite": "^6.0.0",
+    "vite-plugin-solid": "^2.11.6",
+    "vite-plugin-wasm": "^3.5.0"
   }
 }

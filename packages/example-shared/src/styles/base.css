@@ -28,8 +28,9 @@ code,
 pre,
 kbd,
 samp {
-  font-family: ui-monospace, Iosevka, SFMono-Regular, Consolas,
-    "Liberation Mono", Menlo, monospace;
+  font-family:
+    ui-monospace, Iosevka, SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+    monospace;
 }
 
 /* Spinner Animation */

@@ -251,7 +251,7 @@
   padding: var(--base-size-8) var(--base-size-16);
   margin-bottom: var(--base-size-16);
   color: inherit;
-  border-left: .25em solid var(--borderColor-default);
+  border-left: 0.25em solid var(--borderColor-default);
 }
 
 .markdown-body .markdown-alert > :first-child {
