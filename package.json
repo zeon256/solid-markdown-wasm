@@ -1,15 +1,25 @@
 {
   "name": "solid-markdown-wasm",
-  "private": false,
   "version": "1.5.1",
+  "private": false,
+  "workspaces": [
+    "example",
+    "example-react",
+    "packages/*"
+  ],
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE.md"
+  ],
   "type": "module",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
-  },
   "module": "./dist/solid-markdown-wasm.es.js",
   "types": "./dist/solid-markdown-wasm.es.d.ts",
-  "workspaces": ["example", "example-react", "packages/*"],
+  "publishConfig": {
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -23,14 +33,10 @@
     "lint": "oxlint",
     "check": "oxfmt --check && oxlint"
   },
-  "files": ["dist", "package.json", "README.md", "LICENSE.md"],
   "dependencies": {
     "lucide-solid": "^0.562.0",
     "markdown-renderer": "file:./markdown-renderer/pkg/",
     "mermaid": "^11.12.2"
-  },
-  "peerDependencies": {
-    "solid-js": "^1.9.5"
   },
   "devDependencies": {
     "oxfmt": "0.75.0",
@@ -40,5 +46,8 @@
     "vite": "^6.3.5",
     "vite-plugin-dts": "^4.5.4",
     "vite-plugin-solid": "^2.11.6"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.5"
   }
 }

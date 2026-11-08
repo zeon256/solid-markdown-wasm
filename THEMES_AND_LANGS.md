@@ -59,13 +59,13 @@
 - **CSS**: `css`, `css.erb`, `css.liquid`
 - **Clojure**: `clj`, `cljc`, `cljs`, `edn`
 - **D**: `d`, `di`
-- **DMD Output**: 
+- **DMD Output**:
 - **Diff**: `diff`, `patch`
 - **Erlang**: `erl`, `hrl`, `Emakefile`, `emakefile`, `escript`
 - **HTML (Erlang)**: `yaws`
 - **Git Attributes**: `attributes`, `gitattributes`, `.gitattributes`
 - **Git Commit**: `COMMIT_EDITMSG`, `MERGE_MSG`, `TAG_EDITMSG`
-- **Git Common**: 
+- **Git Common**:
 - **Git Config**: `gitconfig`, `.gitconfig`, `.gitmodules`
 - **Git Ignore**: `exclude`, `gitignore`, `.gitignore`
 - **Git Link**: `.git`
@@ -80,36 +80,36 @@
 - **Literate Haskell**: `lhs`
 - **Java Server Page (JSP)**: `jsp`
 - **Java**: `java`, `bsh`
-- **Javadoc**: 
+- **Javadoc**:
 - **Java Properties**: `properties`
 - **JSON**: `json`, `sublime-settings`, `sublime-menu`, `sublime-keymap`, `sublime-mousemap`, `sublime-theme`, `sublime-build`, `sublime-project`, `sublime-completions`, `sublime-commands`, `sublime-macro`, `sublime-color-scheme`, `ipynb`, `Pipfile.lock`
 - **JavaScript**: `js`, `htc`
-- **Regular Expressions (Javascript)**: 
+- **Regular Expressions (Javascript)**:
 - **BibTeX**: `bib`
-- **LaTeX Log**: 
+- **LaTeX Log**:
 - **LaTeX**: `tex`, `ltx`
 - **TeX**: `sty`, `cls`
 - **Lisp**: `lisp`, `cl`, `clisp`, `l`, `mud`, `el`, `scm`, `ss`, `lsp`, `fasl`
 - **Lua**: `lua`
-- **Make Output**: 
+- **Make Output**:
 - **Makefile**: `make`, `GNUmakefile`, `makefile`, `Makefile`, `makefile.am`, `Makefile.am`, `makefile.in`, `Makefile.in`, `OCamlMakefile`, `mak`, `mk`
 - **Markdown**: `md`, `mdown`, `markdown`, `markdn`
-- **MultiMarkdown**: 
+- **MultiMarkdown**:
 - **MATLAB**: `matlab`
 - **OCaml**: `ml`, `mli`
 - **OCamllex**: `mll`
 - **OCamlyacc**: `mly`
-- **camlp4**: 
+- **camlp4**:
 - **Objective-C++**: `mm`, `M`, `h`
 - **Objective-C**: `m`, `h`
-- **PHP Source**: 
+- **PHP Source**:
 - **PHP**: `php`, `php3`, `php4`, `php5`, `php7`, `phps`, `phpt`, `phtml`
-- **Regular Expressions (PHP)**: 
+- **Regular Expressions (PHP)**:
 - **Pascal**: `pas`, `p`, `dpr`
 - **Perl**: `pl`, `pc`, `pm`, `pmc`, `pod`, `t`
 - **Python**: `py`, `py3`, `pyw`, `pyi`, `pyx`, `pyx.in`, `pxd`, `pxd.in`, `pxi`, `pxi.in`, `rpy`, `cpy`, `SConstruct`, `Sconstruct`, `sconstruct`, `SConscript`, `gyp`, `gypi`, `Snakefile`, `vpy`, `wscript`, `bazel`, `bzl`
-- **Regular Expressions (Python)**: 
-- **R Console**: 
+- **Regular Expressions (Python)**:
+- **R Console**:
 - **R**: `R`, `r`, `Rprofile`
 - **Rd (R Documentation)**: `rd`
 - **HTML (Rails)**: `rails`, `rhtml`, `erb`, `html.erb`
@@ -120,13 +120,13 @@
 - **Regular Expression**: `re`
 - **reStructuredText**: `rst`, `rest`
 - **Ruby**: `rb`, `Appfile`, `Appraisals`, `Berksfile`, `Brewfile`, `capfile`, `cgi`, `Cheffile`, `config.ru`, `Deliverfile`, `Fastfile`, `fcgi`, `Gemfile`, `gemspec`, `Guardfile`, `irbrc`, `jbuilder`, `Podfile`, `podspec`, `prawn`, `rabl`, `rake`, `Rakefile`, `Rantfile`, `rbx`, `rjs`, `ruby.rail`, `Scanfile`, `simplecov`, `Snapfile`, `thor`, `Thorfile`, `Vagrantfile`
-- **Cargo Build Results**: 
+- **Cargo Build Results**:
 - **Rust**: `rs`
 - **SQL**: `sql`, `ddl`, `dml`
 - **Scala**: `scala`, `sbt`, `sc`
 - **Bourne Again Shell (bash)**: `sh`, `bash`, `zsh`, `ash`, `.bash_aliases`, `.bash_completions`, `.bash_functions`, `.bash_login`, `.bash_logout`, `.bash_profile`, `.bash_variables`, `.bashrc`, `.profile`, `.textmate_init`, `.zlogin`, `.zlogout`, `.zprofile`, `.zshenv`, `.zshrc`, `PKGBUILD`, `.ebuild`, `.eclass`
-- **Shell-Unix-Generic**: 
-- **commands-builtin-shell-bash**: 
+- **Shell-Unix-Generic**:
+- **commands-builtin-shell-bash**:
 - **HTML (Tcl)**: `adp`
 - **Tcl**: `tcl`
 - **Textile**: `textile`
@@ -155,16 +155,16 @@
 - **CMake C++ Header**: `hh.in`, `hpp.in`, `hxx.in`, `h++.in`
 - **CMake**: `CMakeLists.txt`, `cmake`
 - **CMakeCache**: `CMakeCache.txt`
-- **CMakeCommands**: 
+- **CMakeCommands**:
 - **Generic Config**: `cfg`, `conf`, `config`, `ini`, `pro`, `mak`, `mk`, `Doxyfile`, `inputrc`, `.inputrc`, `dircolors`, `.dircolors`, `gitmodules`, `.gitmodules`, `gitignore`, `.gitignore`, `gitattributes`, `.gitattributes`
-- **Elm Compile Messages**: 
-- **Elm Documentation**: 
+- **Elm Compile Messages**:
+- **Elm Documentation**:
 - **Elm**: `elm`
 - **Fortran (Fixed Form)**: `f`, `F`, `f77`, `F77`, `for`, `FOR`, `fpp`, `FPP`
 - **Fortran (Modern)**: `f90`, `F90`, `f95`, `F95`, `f03`, `F03`, `f08`, `F08`
 - **Fortran Namelist**: `namelist`
-- **GFortran Build Results**: 
-- **OpenMP (Fortran)**: 
+- **GFortran Build Results**:
+- **OpenMP (Fortran)**:
 - **SCSS**: `scss`
 - **Sass**: `sass`
 - **Linker Script**: `ld`

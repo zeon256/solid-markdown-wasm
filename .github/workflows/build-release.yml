@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js for NPM OIDC
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - name: Publish Library to NPM (dry run) # Keeping the name for context, but it's now npm
         continue-on-error: true
         # Only run if the commit is tagged with v<version>
@@ -88,7 +88,7 @@ jobs:
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: 22.14.0
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - name: Install semantic-release toolchain
         run: npm --prefix release-package install --no-save semantic-release@25.0.3 @semantic-release/git@10.0.1
       - name: Prepare release package

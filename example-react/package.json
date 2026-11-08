@@ -1,7 +1,8 @@
 {
   "name": "vite-template-react",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -9,7 +10,6 @@
     "build": "vite build",
     "serve": "vite preview"
   },
-  "license": "MIT",
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
