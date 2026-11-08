@@ -1,245 +1,261 @@
-import logo from "@solid-markdown-wasm/example-shared/assets/logo.svg";
 import initialMarkdown from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
 import {
-  CODE_THEMES,
-  EDITOR_THEMES,
-  EXAMPLE_MERMAID_CONFIG,
+  DARK_MODE_MEDIA_QUERY,
   type Themes,
-  parseCodeTheme,
+  getDefaultCodeTheme,
+  getPrefersDark,
 } from "@solid-markdown-wasm/example-shared/constants";
+import * as stylex from "@stylexjs/stylex";
 import {
   type Component,
-  For,
+  createEffect,
+  createMemo,
   createSignal,
   onCleanup,
   onMount,
 } from "solid-js";
 import { MarkdownRenderer } from "solid-markdown-wasm";
 import { MonacoEditor } from "solid-monaco";
+import { Header } from "./components/Header";
+import { Pane } from "./components/Pane";
+import { Spinner } from "./components/Spinner";
+import {
+  EDITOR_OPTIONS,
+  EDITOR_THEME_DARK,
+  EDITOR_THEME_LIGHT,
+  defineEditorThemes,
+} from "./editor";
+import { color, font } from "./tokens.stylex";
 
-const LoadingFallback = () => (
-  <div class="flex justify-center items-center h-full">
-    <div class="spinner" />
-  </div>
-);
+type View = "editor" | "preview";
+
+// Rendering is synchronous WASM; only very large documents need a debounce.
+const LARGE_DOCUMENT_CHARS = 100_000;
+const LARGE_DOCUMENT_DEBOUNCE_MS = 50;
+
+// Below this width the editor and preview stop sitting side by side.
+const COMPACT = "@media (max-width: 900px)";
+
+const styles = stylex.create({
+  app: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100dvh",
+    backgroundColor: color.bg,
+    color: color.fg,
+    fontFamily: font.sans,
+    fontSize: 14,
+  },
+  viewSwitch: {
+    display: {
+      default: "none",
+      [COMPACT]: "flex",
+    },
+    gap: 4,
+    padding: 4,
+    marginBlock: 10,
+    marginInline: 16,
+    borderRadius: 8,
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: color.border,
+  },
+  viewButton: {
+    flexGrow: 1,
+    height: 30,
+    borderWidth: 0,
+    borderRadius: 6,
+    backgroundColor: "transparent",
+    color: color.muted,
+    font: "inherit",
+    fontWeight: 500,
+    cursor: "pointer",
+    outline: {
+      default: "none",
+      ":focus-visible": `2px solid ${color.focus}`,
+    },
+  },
+  viewButtonActive: {
+    backgroundColor: color.bg,
+    color: color.fg,
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.12)",
+  },
+  workspace: {
+    display: "grid",
+    gridTemplateColumns: {
+      default: "minmax(0, 1fr) minmax(0, 1fr)",
+      [COMPACT]: "minmax(0, 1fr)",
+    },
+    gap: 1,
+    flexGrow: 1,
+    minHeight: 0,
+    backgroundColor: color.border,
+    borderTopWidth: {
+      default: 0,
+      [COMPACT]: 1,
+    },
+    borderTopStyle: "solid",
+    borderTopColor: color.border,
+  },
+  fill: {
+    position: "absolute",
+    inset: 0,
+  },
+  previewScroll: {
+    position: "absolute",
+    inset: 0,
+    overflowY: "auto",
+    paddingBlock: 28,
+    paddingInline: "clamp(20px, 4vw, 40px)",
+  },
+  previewContent: {
+    maxWidth: 860,
+    marginInline: "auto",
+  },
+  hiddenWhenCompact: {
+    display: {
+      default: "flex",
+      [COMPACT]: "none",
+    },
+  },
+});
 
 const App: Component = () => {
-  const [markdown, setMarkdown] = createSignal("");
-  const [debouncedMarkdown, setDebouncedMarkdown] = createSignal("");
-
-  const [isDarkMode, setIsDarkMode] = createSignal(
-    window.matchMedia("(prefers-color-scheme: dark)").matches,
-  );
+  const prefersDark = getPrefersDark();
+  const [isDark, setIsDark] = createSignal(prefersDark);
 
   const [codeTheme, setCodeTheme] = createSignal<Themes>(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "ayu-dark"
-      : "ayu-light",
+    getDefaultCodeTheme(prefersDark),
   );
 
-  const [editorTheme, setEditorTheme] = createSignal<string>(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "vs-dark"
-      : "vs",
-  );
+  const [autoRenderMermaid, setAutoRenderMermaid] = createSignal(false);
+  const [markdown, setMarkdown] = createSignal(initialMarkdown);
+  const [renderedMarkdown, setRenderedMarkdown] = createSignal(initialMarkdown);
+  const [wasmReady, setWasmReady] = createSignal(false);
+  const [view, setView] = createSignal<View>("editor");
 
-  const [immediateMermaid, setImmediateMermaid] = createSignal(false);
-  let timeoutId: number | NodeJS.Timeout | undefined;
+  const words = createMemo(() => markdown().match(/\S+/g)?.length ?? 0);
 
-  const debouncedSetMarkdown = (value: string) => {
-    // Cancel any pending debounce
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
-
-    const debounceAmount = value.length > 100000 ? 50 : 0;
-
-    // Schedule a new update
-    timeoutId = setTimeout(() => {
-      setDebouncedMarkdown(value);
-    }, debounceAmount);
+  // The page follows the OS scheme until the user overrides it; either way the
+  // code theme snaps to the matching default (the select can still override).
+  const applyColorScheme = (dark: boolean) => {
+    setIsDark(dark);
+    setCodeTheme(getDefaultCodeTheme(dark));
   };
 
-  const handleInput = (str: string) => {
-    setMarkdown(str);
-    debouncedSetMarkdown(str);
+  let debounceId: number | undefined;
+
+  const handleEditorChange = (value: string) => {
+    setMarkdown(value);
+    clearTimeout(debounceId);
+
+    debounceId = window.setTimeout(
+      () => setRenderedMarkdown(value),
+      value.length > LARGE_DOCUMENT_CHARS ? LARGE_DOCUMENT_DEBOUNCE_MS : 0,
+    );
   };
 
-  // Preload markdown on mount
-  onMount(async () => {
-    try {
-      setMarkdown(initialMarkdown);
-      setDebouncedMarkdown(initialMarkdown);
-    } catch (error) {
-      console.error("Failed to load initial markdown:", error);
-    }
+  onMount(() => {
+    const mediaQuery = window.matchMedia(DARK_MODE_MEDIA_QUERY);
 
-    // Listen for color scheme changes
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleSchemeChange = (event: MediaQueryListEvent) =>
+      applyColorScheme(event.matches);
 
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches);
-      setCodeTheme(e.matches ? "ayu-dark" : "ayu-light");
-      setEditorTheme(e.matches ? "vs-dark" : "vs");
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    onCleanup(() => {
-      mediaQuery.removeEventListener("change", handleChange);
-    });
+    mediaQuery.addEventListener("change", handleSchemeChange);
+    onCleanup(() =>
+      mediaQuery.removeEventListener("change", handleSchemeChange),
+    );
   });
 
-  // Clean up any pending timeouts when the component unmounts
-  onCleanup(() => {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
-  });
+  onCleanup(() => clearTimeout(debounceId));
 
-  const editorOptions = () => ({
-    fontFamily: "'Iosevka', monospace",
-    fontSize: 22,
-    theme: editorTheme(),
+  // On <html> so the theme variables resolve for the StyleX tokens, the
+  // document background, and the renderer's Mermaid theme lookup.
+  createEffect(() => {
+    document.documentElement.dataset.theme = isDark() ? "dark" : "light";
   });
-
-  const selectClass = () =>
-    `px-3 py-1.5 rounded border text-sm font-medium cursor-pointer ${
-      isDarkMode()
-        ? "bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600"
-        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-    }`;
 
   return (
-    <div
-      class="flex flex-col w-screen h-screen"
-      data-theme={isDarkMode() ? "dark" : "light"}
-      classList={{ "bg-[#1e1e1e]": isDarkMode(), "bg-white": !isDarkMode() }}
-    >
-      {/* Toolbar */}
-      <div
-        class="flex items-center justify-between px-6 py-3 border-b"
-        classList={{
-          "bg-black border-gray-700": isDarkMode(),
-          "bg-gray-100 border-gray-200": !isDarkMode(),
-        }}
-      >
-        {/* Left side - Logo and project name */}
-        <div class="flex items-center gap-3">
-          <img src={logo} alt="" class="h-6 w-6" />
-          <span
-            class="font-semibold"
-            classList={{
-              "text-white": isDarkMode(),
-              "text-gray-900": !isDarkMode(),
-            }}
-          >
-            solid-markdown-wasm
-          </span>
-        </div>
+    <div {...stylex.attrs(styles.app)}>
+      <Header
+        isDark={isDark()}
+        onToggleColorScheme={() => applyColorScheme(!isDark())}
+        codeTheme={codeTheme()}
+        onCodeThemeChange={setCodeTheme}
+        autoRenderMermaid={autoRenderMermaid()}
+        onAutoRenderMermaidChange={setAutoRenderMermaid}
+      />
 
-        {/* Right side - Theme selectors and project link */}
-        <div class="flex items-center gap-6">
-          <label
-            class="flex items-center gap-2 text-sm font-medium"
-            classList={{
-              "text-gray-300": isDarkMode(),
-              "text-gray-700": !isDarkMode(),
-            }}
-          >
-            Editor Theme:
-            <select
-              class={selectClass()}
-              value={editorTheme()}
-              onChange={(e) => setEditorTheme(e.currentTarget.value)}
-            >
-              <For each={EDITOR_THEMES}>
-                {(theme) => <option value={theme.value}>{theme.label}</option>}
-              </For>
-            </select>
-          </label>
-
-          <label
-            class="flex items-center gap-2 text-sm font-medium"
-            classList={{
-              "text-gray-300": isDarkMode(),
-              "text-gray-700": !isDarkMode(),
-            }}
-          >
-            Code Block Theme:
-            <select
-              class={selectClass()}
-              value={codeTheme()}
-              onChange={(e) => {
-                const theme = parseCodeTheme(e.currentTarget.value);
-
-                if (theme) setCodeTheme(theme);
-              }}
-            >
-              <For each={CODE_THEMES}>
-                {(theme) => <option value={theme}>{theme}</option>}
-              </For>
-            </select>
-          </label>
-
-          <label
-            class="flex items-center gap-2 text-sm font-medium"
-            classList={{
-              "text-gray-300": isDarkMode(),
-              "text-gray-700": !isDarkMode(),
-            }}
-          >
-            Auto-render Mermaid:
-            <input
-              type="checkbox"
-              checked={immediateMermaid()}
-              onChange={(e) => setImmediateMermaid(e.currentTarget.checked)}
-              class="cursor-pointer"
-            />
-          </label>
-          <a
-            href="https://github.com/zeon256/solid-markdown-wasm"
-            target="_blank"
-            rel="noopener noreferrer"
-            class={selectClass()}
-          >
-            GitHub
-          </a>
-        </div>
+      <div {...stylex.attrs(styles.viewSwitch)}>
+        <button
+          type="button"
+          aria-pressed={view() === "editor"}
+          {...stylex.attrs(
+            styles.viewButton,
+            view() === "editor" && styles.viewButtonActive,
+          )}
+          onClick={() => setView("editor")}
+        >
+          Editor
+        </button>
+        <button
+          type="button"
+          aria-pressed={view() === "preview"}
+          {...stylex.attrs(
+            styles.viewButton,
+            view() === "preview" && styles.viewButtonActive,
+          )}
+          onClick={() => setView("preview")}
+        >
+          Preview
+        </button>
       </div>
 
-      {/* Main content */}
-      <div class="flex flex-1 overflow-hidden">
-        <div class="w-1/2 flex flex-col m-4">
-          <MonacoEditor
-            language="markdown"
-            options={editorOptions()}
-            value={markdown()}
-            onChange={(val, _ev) => {
-              handleInput(val);
-            }}
-          />
-        </div>
-        <div
-          class="w-1/2 flex flex-col"
-          classList={{
-            "bg-[#0d1117]": isDarkMode(),
-            "bg-white": !isDarkMode(),
-          }}
+      <main {...stylex.attrs(styles.workspace)}>
+        <Pane
+          title="Markdown"
+          meta={`${words().toLocaleString()} words`}
+          xstyle={view() !== "editor" && styles.hiddenWhenCompact}
         >
-          <div class="m-0 h-full shadow-sm overflow-y-auto p-4 px-6">
-            <MarkdownRenderer
-              markdown={debouncedMarkdown()}
-              theme={codeTheme()}
-              class="markdown-body"
-              fallback={<LoadingFallback />}
-              onLoaded={() => console.log("WASM Loaded")}
-              immediateRenderMermaid={immediateMermaid()}
-              mermaidConfig={EXAMPLE_MERMAID_CONFIG}
+          <div {...stylex.attrs(styles.fill)}>
+            <MonacoEditor
+              language="markdown"
+              theme={isDark() ? EDITOR_THEME_DARK : EDITOR_THEME_LIGHT}
+              options={EDITOR_OPTIONS}
+              value={markdown()}
+              onChange={handleEditorChange}
+              onMount={(monaco, editor) => {
+                // solid-monaco only forwards `theme` on later changes.
+                defineEditorThemes(monaco, editor);
+                monaco.editor.setTheme(
+                  isDark() ? EDITOR_THEME_DARK : EDITOR_THEME_LIGHT,
+                );
+              }}
+              loadingState={<Spinner label="Loading editor" />}
             />
           </div>
-        </div>
-      </div>
+        </Pane>
+
+        <Pane
+          title="Preview"
+          meta={wasmReady() ? "Rendered by Rust → WASM" : "Loading WASM…"}
+          xstyle={view() !== "preview" && styles.hiddenWhenCompact}
+        >
+          <div {...stylex.attrs(styles.previewScroll)}>
+            <div {...stylex.attrs(styles.previewContent)}>
+              <MarkdownRenderer
+                markdown={renderedMarkdown()}
+                theme={codeTheme()}
+                class="markdown-body"
+                fallback={<Spinner label="Loading renderer" />}
+                onLoaded={() => setWasmReady(true)}
+                immediateRenderMermaid={autoRenderMermaid()}
+              />
+            </div>
+          </div>
+        </Pane>
+      </main>
     </div>
   );
 };

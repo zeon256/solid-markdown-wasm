@@ -2,7 +2,9 @@
  * React example styles - imports from shared package
  */
 
-/* Shared base styles (includes Tailwind, spinner, theme variables) */
+@import "tailwindcss";
+
+/* Shared base styles (spinner, theme variables) */
 @import "@solid-markdown-wasm/example-shared/styles/base.css";
 
 /* Markdown rendering styles */

@@ -1,23 +1,15 @@
-/**
- * Solid example styles - imports from shared package
+/*
+ * Global styles for the Solid example. App chrome is styled with StyleX; the
+ * markdown output is HTML injected by the WASM renderer, so it keeps plain CSS.
  */
 
-/* Shared base styles (includes Tailwind, spinner, theme variables) */
 @import "@solid-markdown-wasm/example-shared/styles/base.css";
-
-/* Markdown rendering styles */
 @import "@solid-markdown-wasm/example-shared/styles/markdown.css";
-
-/* Code block enhancements */
 @import "@solid-markdown-wasm/example-shared/styles/code-blocks.css";
-
-/* Mermaid diagram styles */
 @import "@solid-markdown-wasm/example-shared/styles/mermaid.css";
 
-/* Tailwind source directives for Solid's JIT compiler */
-@source inline('inline-block');
-@source inline('align-middle');
-@source inline('text-center');
-@source inline('block');
-
-/* Solid-specific overrides (if any) can go here */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

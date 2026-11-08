@@ -3,8 +3,6 @@
  * Includes spinner animation, root variables, and base typography
  */
 
-@import "tailwindcss";
-
 :root {
   color: #111827;
   background: #ffffff;
