@@ -73,7 +73,9 @@ const getSystemTheme = (): "dark" | "default" => {
     const attr = document
       .querySelector("[data-theme]")
       ?.getAttribute("data-theme");
+
     if (attr === "dark") return "dark";
+
     if (attr === "light") return "default";
 
     // Fallback to system preference
@@ -81,17 +83,20 @@ const getSystemTheme = (): "dark" | "default" => {
       ? "dark"
       : "default";
   }
+
   return "default";
 };
 
 // Simple hash function to generate stable keys from Mermaid source
 function simpleHash(str: string): string {
   let hash = 0;
+
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
+
   return Math.abs(hash).toString(36);
 }
 
@@ -99,13 +104,18 @@ function simpleHash(str: string): string {
 function loadCache(): Map<string, string> {
   try {
     const cached = localStorage.getItem(CACHE_KEY);
+
     if (cached) {
+      // SAFETY: CACHE_KEY is only written by saveCache() as JSON of
+      // Map<string, string> entries; malformed data throws into the catch below.
       const entries = JSON.parse(cached) as [string, string][];
+
       return new Map(entries);
     }
   } catch (error) {
     console.warn("Failed to load Mermaid cache:", error);
   }
+
   return new Map();
 }
 
@@ -123,6 +133,7 @@ function saveCache(cache: Map<string, string>): void {
 function evictOldest(cache: Map<string, string>): Map<string, string> {
   const entries = [...cache.entries()];
   entries.shift(); // Remove oldest entry
+
   return new Map(entries);
 }
 
@@ -159,6 +170,7 @@ export function useMermaidRenderer(
 
     // Check cache first
     const cached = mermaidCache.get(hash);
+
     if (cached) {
       return cached;
     }
@@ -182,12 +194,14 @@ export function useMermaidRenderer(
       return svg;
     } catch (error) {
       console.error("Mermaid render error:", error);
+
       const errorSvg = `
         <div class="mermaid-error" style="color: red; padding: 1rem; border: 1px solid red; border-radius: 4px;">
           <strong>Mermaid Error:</strong><br/>
           ${error instanceof Error ? error.message : "Unknown error"}
         </div>
       `;
+
       return errorSvg;
     }
   };
@@ -204,14 +218,17 @@ export function useMermaidRenderer(
 
     for (const block of blocks) {
       const code = block.textContent?.trim() || "";
+
       if (!code) continue;
 
-      const container = block.parentElement as HTMLElement;
+      const container = block.parentElement;
+
       if (!container) continue;
 
       // Skip if already processed UNLESS the code/theme/config changed
       const theme = getSystemTheme();
       const configHash = simpleHash(currentConfigFn.toString());
+
       const hash = simpleHash(
         `${code}_${theme}_${STYLE_VERSION}_${configHash}`,
       );

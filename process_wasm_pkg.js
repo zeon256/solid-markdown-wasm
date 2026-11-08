@@ -28,6 +28,7 @@ try {
 
   // Verify no base64 inlining
   const base64Pattern = /data:application\/wasm;base64,/;
+
   if (base64Pattern.test(content)) {
     console.error(
       "✗ Found base64-encoded wasm! This shouldn't happen with wasm-pack --target web",

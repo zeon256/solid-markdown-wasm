@@ -53,5 +53,9 @@ jobs:
         run: bun install
       - name: Build React example
         run: bun run example-react:build
+      - name: Set up Node.js (oxlint loads the TypeScript anti-slop plugin)
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: 24
       - name: Run format + lint check
         run: bun run check

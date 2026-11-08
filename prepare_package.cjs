@@ -7,6 +7,7 @@ fs.readFile(packageJsonPath, "utf8", (err, data) => {
   if (err) {
     console.error("Failed to read package.json:", err);
     process.exit(1);
+
     return;
   }
 
@@ -28,8 +29,10 @@ fs.readFile(packageJsonPath, "utf8", (err, data) => {
       if (writeErr) {
         console.error("Failed to write updated package.json:", writeErr);
         process.exit(1);
+
         return;
       }
+
       console.log("Successfully prepared package.json for publishing.");
     });
   } catch (parseErr) {

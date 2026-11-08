@@ -5,13 +5,8 @@ import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
 import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
 import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-(
-  self as typeof self & {
-    MonacoEnvironment: {
-      getWorker(_: string, label: string): Worker;
-    };
-  }
-).MonacoEnvironment = {
+
+self.MonacoEnvironment = {
   getWorker(_, label) {
     switch (label) {
       case "json":

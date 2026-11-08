@@ -39,6 +39,7 @@
     "mermaid": "^11.12.2"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.90.0",
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",
     "solid-js": "^1.9.5",

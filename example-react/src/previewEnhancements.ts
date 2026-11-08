@@ -90,12 +90,15 @@ function getPreviewTheme(): MermaidTheme {
   const attr = document
     .querySelector("[data-theme]")
     ?.getAttribute("data-theme");
+
   if (attr === "dark") {
     return "dark";
   }
+
   if (attr === "light") {
     return "default";
   }
+
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "default";
@@ -103,19 +106,25 @@ function getPreviewTheme(): MermaidTheme {
 
 function simpleHash(value: string): string {
   let hash = 0;
+
   for (let index = 0; index < value.length; index += 1) {
     hash = (hash << 5) - hash + value.charCodeAt(index);
     hash |= 0;
   }
+
   return Math.abs(hash).toString(36);
 }
 
 function loadCache(): Map<string, string> {
   try {
     const cached = localStorage.getItem(CACHE_KEY);
+
     if (!cached) {
       return new Map();
     }
+
+    // SAFETY: CACHE_KEY is only written by saveCache() as JSON of
+    // Map<string, string> entries; malformed data throws into the catch below.
     return new Map(JSON.parse(cached) as [string, string][]);
   } catch {
     return new Map();
@@ -134,13 +143,17 @@ const mermaidCache = loadCache();
 
 function rememberMermaidSvg(key: string, svg: string): void {
   mermaidCache.set(key, svg);
+
   while (mermaidCache.size > MAX_CACHE_SIZE) {
     const oldestKey = mermaidCache.keys().next().value;
+
     if (!oldestKey) {
       break;
     }
+
     mermaidCache.delete(oldestKey);
   }
+
   saveCache(mermaidCache);
 }
 
@@ -156,9 +169,11 @@ type IconComponent =
 function setButtonIcon(button: HTMLButtonElement, Icon: IconComponent): void {
   const existingRoot = iconRoots.get(button);
   const root = existingRoot ?? createRoot(button);
+
   if (!existingRoot) {
     iconRoots.set(button, root);
   }
+
   root.render(
     createElement(Icon, {
       size: ICON_SIZE,
@@ -171,6 +186,7 @@ function ensureButton(
   className: string,
 ): HTMLButtonElement {
   const existing = container.querySelector(`.${className}`);
+
   if (existing instanceof HTMLButtonElement) {
     return existing;
   }
@@ -179,15 +195,19 @@ function ensureButton(
   button.type = "button";
   button.className = className;
   container.appendChild(button);
+
   return button;
 }
 
 function getCodeBlockWrapper(target: Element | null): HTMLElement | null {
-  return target?.closest(".code-block-wrapper") as HTMLElement | null;
+  const wrapper = target?.closest(".code-block-wrapper");
+
+  return wrapper instanceof HTMLElement ? wrapper : null;
 }
 
 function getWrapperLanguage(wrapper: HTMLElement): string {
   const storedLanguage = wrapper.dataset.codeLanguage?.trim();
+
   if (storedLanguage) {
     return storedLanguage;
   }
@@ -196,23 +216,29 @@ function getWrapperLanguage(wrapper: HTMLElement): string {
     .querySelector(".code-lang-data")
     ?.getAttribute("data-lang")
     ?.trim();
+
   if (languageFromData) {
     wrapper.dataset.codeLanguage = languageFromData;
+
     return languageFromData;
   }
 
   const codeClass = wrapper.querySelector("code")?.className ?? "";
+
   const languageClass = codeClass
     .split(/\s+/)
     .find((entry) => entry.startsWith("language-"));
+
   const resolvedLanguage = languageClass?.replace("language-", "") ?? "code";
   wrapper.dataset.codeLanguage = resolvedLanguage;
+
   return resolvedLanguage;
 }
 
 function getMermaidSource(wrapper: HTMLElement): string {
   const pre = wrapper.querySelector("pre");
   const datasetSource = pre?.getAttribute("data-mermaid-source")?.trim();
+
   if (datasetSource) {
     return datasetSource;
   }
@@ -227,11 +253,13 @@ function updateWrapperButtons(
   immediateRenderMermaid: boolean,
 ): void {
   const header = wrapper.querySelector(".code-block-header");
+
   if (!(header instanceof HTMLElement)) {
     return;
   }
 
   const languageLabel = header.querySelector(".code-block-language");
+
   if (languageLabel) {
     languageLabel.textContent = getWrapperLanguage(wrapper);
   }
@@ -239,11 +267,13 @@ function updateWrapperButtons(
   let buttonContainer = header.querySelector<HTMLElement>(
     ".code-block-buttons",
   );
+
   if (!buttonContainer) {
     buttonContainer = document.createElement("div");
     buttonContainer.className = "code-block-buttons";
     header.appendChild(buttonContainer);
   }
+
   const controls = buttonContainer;
 
   // Check if this is a mermaid block first to determine button order
@@ -259,6 +289,7 @@ function updateWrapperButtons(
     existingMaximize?.remove();
     delete wrapper.dataset.mermaidStatus;
     const pre = wrapper.querySelector("pre");
+
     if (pre instanceof HTMLElement) {
       delete pre.dataset.mermaidStatus;
     }
@@ -277,6 +308,7 @@ function updateWrapperButtons(
     const copyButton = ensureButton(controls, "code-block-copy");
     copyButton.setAttribute("aria-label", "Copy code");
     setButtonIcon(copyButton, Copy);
+
     return;
   }
 
@@ -288,7 +320,9 @@ function updateWrapperButtons(
       ? "rendered"
       : "unrendered";
   }
+
   const pre = wrapper.querySelector("pre");
+
   if (pre instanceof HTMLElement && !pre.dataset.mermaidStatus) {
     pre.dataset.mermaidStatus = wrapper.dataset.mermaidStatus;
   }
@@ -325,6 +359,7 @@ function updateWrapperButtons(
 
 function renderSvgMarkup(markup: string): DocumentFragment {
   const range = document.createRange();
+
   return range.createContextualFragment(markup);
 }
 
@@ -352,10 +387,13 @@ async function renderMermaidSvg(
   mermaid.initialize(mermaidConfig(theme));
 
   const configHash = simpleHash(mermaidConfig.toString());
+
   const cacheKey = simpleHash(
     `${source}_${theme}_${STYLE_VERSION}_${configHash}`,
   );
+
   const cached = mermaidCache.get(cacheKey);
+
   if (cached) {
     return cached;
   }
@@ -364,7 +402,9 @@ async function renderMermaidSvg(
     `example-react-mermaid-${cacheKey}`,
     source,
   );
+
   rememberMermaidSvg(cacheKey, svg);
+
   return svg;
 }
 
@@ -374,11 +414,13 @@ async function renderMermaidIntoWrapper(
   mermaidConfig: MermaidConfigFn,
 ): Promise<void> {
   const pre = wrapper.querySelector("pre");
+
   if (!(pre instanceof HTMLElement)) {
     return;
   }
 
   const source = getMermaidSource(wrapper);
+
   if (!source) {
     return;
   }
@@ -389,9 +431,11 @@ async function renderMermaidIntoWrapper(
 
   try {
     const svg = await renderMermaidSvg(source, mermaidConfig);
+
     if (!pre.isConnected || !root.contains(pre)) {
       return;
     }
+
     pre.replaceChildren(renderSvgMarkup(svg));
     pre.dataset.mermaidSource = source;
     pre.dataset.mermaidProcessed = "true";
@@ -402,6 +446,7 @@ async function renderMermaidIntoWrapper(
     if (!pre.isConnected || !root.contains(pre)) {
       return;
     }
+
     pre.dataset.mermaidStatus = "unrendered";
     wrapper.dataset.mermaidStatus = "unrendered";
     setMermaidError(
@@ -415,11 +460,13 @@ async function renderMermaidIntoWrapper(
 
 function showMermaidSource(wrapper: HTMLElement): void {
   const pre = wrapper.querySelector("pre");
+
   if (!(pre instanceof HTMLElement)) {
     return;
   }
 
   const source = getMermaidSource(wrapper);
+
   if (!source) {
     return;
   }
@@ -440,6 +487,7 @@ async function copyText(text: string): Promise<void> {
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);
+
       return;
     }
   } catch {
@@ -461,6 +509,7 @@ async function copyText(text: string): Promise<void> {
 
 function flashCopySuccess(button: HTMLButtonElement): void {
   const existingTimer = copyResetTimers.get(button);
+
   if (existingTimer) {
     window.clearTimeout(existingTimer);
   }
@@ -488,24 +537,29 @@ export async function applyPreviewEnhancements(
     if (!(wrapper instanceof HTMLElement)) {
       continue;
     }
+
     updateWrapperButtons(wrapper, options.immediateRenderMermaid);
   }
 
   const mermaidWrappers = root.querySelectorAll(".code-block-wrapper");
+
   for (const wrapper of mermaidWrappers) {
     if (!(wrapper instanceof HTMLElement)) {
       continue;
     }
+
     if (getWrapperLanguage(wrapper).toLowerCase() !== "mermaid") {
       continue;
     }
 
     const source = getMermaidSource(wrapper);
+
     if (!source) {
       continue;
     }
 
     const sourceKey = simpleHash(source);
+
     const shouldRender =
       options.immediateRenderMermaid || expandedMermaidSources.has(sourceKey);
 
@@ -517,10 +571,13 @@ export async function applyPreviewEnhancements(
     if (!wrapper.dataset.mermaidStatus) {
       wrapper.dataset.mermaidStatus = "unrendered";
     }
+
     const pre = wrapper.querySelector("pre");
+
     if (pre instanceof HTMLElement) {
       pre.dataset.mermaidStatus = "unrendered";
     }
+
     updateWrapperButtons(wrapper, options.immediateRenderMermaid);
   }
 }
@@ -531,57 +588,74 @@ export async function handlePreviewInteraction(
   options: PreviewInteractionOptions,
 ): Promise<void> {
   const target = event.target;
+
   if (!(target instanceof Element) || !root.contains(target)) {
     return;
   }
 
   const collapseButton = target.closest(".code-block-collapse");
+
   if (collapseButton instanceof HTMLButtonElement) {
     event.stopPropagation();
     const wrapper = getCodeBlockWrapper(collapseButton);
+
     if (!wrapper) {
       return;
     }
+
     wrapper.classList.toggle("collapsed");
     updateWrapperButtons(wrapper, false);
+
     return;
   }
 
   const copyButton = target.closest(".code-block-copy");
+
   if (copyButton instanceof HTMLButtonElement) {
     event.stopPropagation();
     const wrapper = getCodeBlockWrapper(copyButton);
+
     if (!wrapper) {
       return;
     }
+
     const pre = wrapper.querySelector("pre");
+
     const rawCode =
       wrapper.querySelector("code")?.textContent ??
       pre?.getAttribute("data-mermaid-source") ??
       "";
+
     if (!rawCode) {
       return;
     }
+
     await copyText(rawCode);
     flashCopySuccess(copyButton);
+
     return;
   }
 
   const maximizeButton = target.closest(".code-block-maximize");
+
   if (maximizeButton instanceof HTMLButtonElement) {
     event.stopPropagation();
     const wrapper = getCodeBlockWrapper(maximizeButton);
+
     if (!wrapper) {
       return;
     }
 
     const svg = wrapper.querySelector("pre svg");
+
     if (svg instanceof SVGElement) {
       options.onOpenMermaidPreview(svg.outerHTML);
+
       return;
     }
 
     const source = getMermaidSource(wrapper);
+
     if (!source) {
       return;
     }
@@ -590,24 +664,30 @@ export async function handlePreviewInteraction(
       source,
       options.mermaidConfig ?? DEFAULT_MERMAID_CONFIG,
     );
+
     options.onOpenMermaidPreview(markup);
+
     return;
   }
 
   const playButton = target.closest(".code-block-play");
+
   if (playButton instanceof HTMLButtonElement) {
     event.stopPropagation();
     const wrapper = getCodeBlockWrapper(playButton);
+
     if (!wrapper) {
       return;
     }
 
     if (wrapper.dataset.mermaidStatus === "rendered") {
       showMermaidSource(wrapper);
+
       return;
     }
 
     playButton.disabled = true;
+
     try {
       await renderMermaidIntoWrapper(
         root,
@@ -617,12 +697,14 @@ export async function handlePreviewInteraction(
     } finally {
       playButton.disabled = false;
     }
+
     return;
   }
 
   const renderedMermaid = target.closest(
     'pre[data-mermaid-processed="true"] svg',
   );
+
   if (renderedMermaid instanceof SVGElement) {
     event.stopPropagation();
     options.onOpenMermaidPreview(renderedMermaid.outerHTML);

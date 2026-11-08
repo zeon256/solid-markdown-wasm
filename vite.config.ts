@@ -20,8 +20,10 @@ export default defineConfig({
           __dirname,
           "markdown-renderer/pkg/markdown_renderer_bg.wasm",
         );
+
         if (existsSync(wasmPath)) {
           console.log("✓ WASM already built, skipping cargo build.");
+
           return;
         }
 
@@ -78,6 +80,7 @@ export default defineConfig({
           if (assetInfo.name?.endsWith(".wasm")) {
             return "[name][extname]";
           }
+
           return "assets/[name]-[hash][extname]";
         },
         paths: {

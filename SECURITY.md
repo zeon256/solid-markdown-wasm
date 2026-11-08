@@ -23,7 +23,7 @@ All GitHub Actions in our CI/CD workflows are pinned to specific commit SHAs rat
 | --------------------- | ----------------- |
 | `build-release.yml`   | 10 actions pinned |
 | `github-pages.yml`    | 4 actions pinned  |
-| `quality-checks.yaml` | 4 actions pinned  |
+| `quality-checks.yaml` | 5 actions pinned  |
 
 **Verification:** Run `bun verify-actions.ts` to verify all actions are correctly pinned.
 

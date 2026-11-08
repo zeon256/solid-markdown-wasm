@@ -24,6 +24,7 @@ export function getAssetFileNames() {
     if (assetInfo.name?.endsWith(".wasm")) {
       return "assets/[name][extname]";
     }
+
     return "assets/[name]-[hash][extname]";
   };
 }

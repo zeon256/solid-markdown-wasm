@@ -5,6 +5,7 @@ import {
   EDITOR_THEMES,
   EXAMPLE_MERMAID_CONFIG,
   type Themes,
+  parseCodeTheme,
 } from "@solid-markdown-wasm/example-shared/constants";
 import {
   type Component,
@@ -25,19 +26,23 @@ const LoadingFallback = () => (
 const App: Component = () => {
   const [markdown, setMarkdown] = createSignal("");
   const [debouncedMarkdown, setDebouncedMarkdown] = createSignal("");
+
   const [isDarkMode, setIsDarkMode] = createSignal(
     window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
+
   const [codeTheme, setCodeTheme] = createSignal<Themes>(
     window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "ayu-dark"
       : "ayu-light",
   );
+
   const [editorTheme, setEditorTheme] = createSignal<string>(
     window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "vs-dark"
       : "vs",
   );
+
   const [immediateMermaid, setImmediateMermaid] = createSignal(false);
   let timeoutId: number | NodeJS.Timeout | undefined;
 
@@ -71,11 +76,13 @@ const App: Component = () => {
 
     // Listen for color scheme changes
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
     const handleChange = (e: MediaQueryListEvent) => {
       setIsDarkMode(e.matches);
       setCodeTheme(e.matches ? "ayu-dark" : "ayu-light");
       setEditorTheme(e.matches ? "vs-dark" : "vs");
     };
+
     mediaQuery.addEventListener("change", handleChange);
 
     onCleanup(() => {
@@ -184,7 +191,11 @@ const App: Component = () => {
             <select
               class={selectClass()}
               value={codeTheme()}
-              onChange={(e) => setCodeTheme(e.currentTarget.value as Themes)}
+              onChange={(e) => {
+                const theme = parseCodeTheme(e.currentTarget.value);
+
+                if (theme) setCodeTheme(theme);
+              }}
             >
               <For each={CODE_THEMES}>
                 {(theme) => <option value={theme}>{theme}</option>}

@@ -108,6 +108,16 @@ export const EDITOR_THEMES = [
 
 export type EditorTheme = (typeof EDITOR_THEMES)[number]["value"];
 
+/** Narrow an untrusted `<select>` value to a known code theme. */
+export function parseCodeTheme(value: string): Themes | undefined {
+  return CODE_THEMES.find((theme) => theme === value);
+}
+
+/** Narrow an untrusted `<select>` value to a known Monaco theme. */
+export function parseEditorTheme(value: string): EditorTheme | undefined {
+  return EDITOR_THEMES.find((theme) => theme.value === value)?.value;
+}
+
 /** Function type for generating Mermaid configuration based on theme */
 export type MermaidConfigFn = (theme: MermaidTheme) => MermaidConfig;
 
