@@ -1,4 +1,4 @@
-import type { MonacoEditorProps } from "solid-monaco";
+import type { Editor, EditorOptions, Monaco } from "./components/MonacoEditor";
 
 export const EDITOR_THEME_LIGHT = "site-light";
 export const EDITOR_THEME_DARK = "site-dark";
@@ -15,14 +15,12 @@ export const EDITOR_OPTIONS = {
   scrollBeyondLastLine: false,
   automaticLayout: true,
   renderLineHighlight: "line",
-} satisfies MonacoEditorProps["options"];
+} satisfies EditorOptions;
 
 // Monaco's built-in themes paint their own background; these inherit them but
 // mirror the light/dark tokens in example-shared/styles/base.css so the editor
 // pane matches the preview pane.
-export const defineEditorThemes: NonNullable<MonacoEditorProps["onMount"]> = (
-  monaco,
-) => {
+export const defineEditorThemes = (monaco: Monaco) => {
   monaco.editor.defineTheme(EDITOR_THEME_LIGHT, {
     base: "vs",
     inherit: true,
@@ -51,12 +49,6 @@ export const defineEditorThemes: NonNullable<MonacoEditorProps["onMount"]> = (
     },
   });
 };
-
-type EditorOnMount = NonNullable<MonacoEditorProps["onMount"]>;
-
-type Monaco = Parameters<EditorOnMount>[0];
-
-type Editor = Parameters<EditorOnMount>[1];
 
 // Line 1 starts at the very top (above Monaco's padding), mirroring the
 // preview, which maps line 1 to scrollTop 0.

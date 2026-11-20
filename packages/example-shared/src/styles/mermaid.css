@@ -60,11 +60,14 @@
   cursor: zoom-in;
 }
 
-/* Fullscreen preview overlay */
-dialog.mermaid-preview-overlay {
+/* Fullscreen preview overlay: a <dialog> in the React example, a <div> in the Solid one */
+.mermaid-preview-overlay {
   position: fixed;
   inset: 0;
-  display: none;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
   max-width: none;
@@ -77,10 +80,8 @@ dialog.mermaid-preview-overlay {
   backdrop-filter: blur(8px);
 }
 
-dialog.mermaid-preview-overlay[open] {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+dialog.mermaid-preview-overlay:not([open]) {
+  display: none;
 }
 
 dialog.mermaid-preview-overlay::backdrop {

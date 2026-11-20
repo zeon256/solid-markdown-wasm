@@ -3,4 +3,20 @@
 minimumReleaseAge = 604800
 
 # Packages that bypass the age requirement
-minimumReleaseAgeExcludes = ["@types/bun", "typescript"]
+minimumReleaseAgeExcludes = [
+  "@types/bun",
+  "typescript",
+  # Solid 2 shipped 2026-11-17; exempted to adopt it before the cooldown elapses.
+  # Versions are pinned exactly in package.json. Drop these after 2026-11-26.
+  "solid-js",
+  "@solidjs/web",
+  "@solidjs/signals",
+  "@solidjs/compiler",
+  "@solidjs/compiler-darwin-x64",
+  "@solidjs/compiler-darwin-arm64",
+  "@solidjs/compiler-linux-x64-gnu",
+  "@solidjs/compiler-linux-arm64-gnu",
+  "@solidjs/compiler-win32-x64-msvc",
+  "@solidjs/compiler-wasm32-wasi",
+  "@solidjs/vite-plugin",
+]

@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 
 export default defineConfig({
   plugins: [
@@ -73,7 +73,11 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["solid-js", "solid-js/web", "markdown-renderer"],
+      external: [
+        /^solid-js(\/|$)/,
+        /^@solidjs\/web(\/|$)/,
+        "markdown-renderer",
+      ],
       output: {
         assetFileNames: (assetInfo) => {
           // Keep .wasm files with their original names
