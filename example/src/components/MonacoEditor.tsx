@@ -20,26 +20,24 @@ export interface MonacoEditorProps {
   /**
    * Identifies the document being edited. Each path gets its own model, so
    * switching paths keeps that document's undo stack, cursor, and scroll.
-   * Free a path's model with `disposeModel` once it is gone for good.
+   * Null shows no document.
    */
-  path: string;
+  path: string | null;
+  /** Paths whose models stay alive; any other model is disposed. */
+  openPaths: readonly string[];
   value: string;
   language: string;
   theme: string;
   options?: EditorOptions;
-  /** Called with the full text after each user edit (not after `value` syncs). */
-  onChange?: (value: string) => void;
+  /**
+   * Called with the full text and the edited path after each user edit (not
+   * after `value` syncs).
+   */
+  onChange?: (value: string, path: string) => void;
   /** Called once the editor exists, before `theme` is first applied. */
   onMount?: (monaco: Monaco, editor: Editor) => void;
   loadingState?: JSX.Element;
 }
-
-const modelUri = (monaco: Monaco, path: string) =>
-  monaco.Uri.from({ scheme: "inmemory", path: `/${path}` });
-
-/** Dispose the model of `path`, e.g. after its document is closed. */
-export const disposeModel = (monaco: Monaco, path: string) =>
-  monaco.editor.getModel(modelUri(monaco, path))?.dispose();
 
 const styles = stylex.create({
   root: {
@@ -67,7 +65,7 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
   // Models this editor created, and the view state of each one not shown.
   const models = new Map<string, MonacoApi.editor.ITextModel>();
   const viewStates = new Map<string, MonacoApi.editor.ICodeEditorViewState>();
-  let shownPath: string | undefined;
+  let shownPath: string | null = null;
 
   const getModel = (
     monaco: Monaco,
@@ -79,11 +77,13 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
 
     if (existing) return existing;
 
-    const model = monaco.editor.createModel(
-      value,
-      language,
-      modelUri(monaco, path),
-    );
+    const uri = monaco.Uri.from({ scheme: "inmemory", path: `/${path}` });
+
+    // A model left behind under the same URI (e.g. by hot reload) would make
+    // createModel throw; adopt it, and the value sync below corrects its text.
+    const model =
+      monaco.editor.getModel(uri) ??
+      monaco.editor.createModel(value, language, uri);
 
     models.set(path, model);
     model.onWillDispose(() => {
@@ -103,14 +103,18 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
 
       const created = monaco.editor.create(container, {
         ...props.options,
-        model: getModel(monaco, props.path, props.value, props.language),
+        model:
+          props.path === null
+            ? null
+            : getModel(monaco, props.path, props.value, props.language),
         automaticLayout: true,
       });
 
       editor = created;
       shownPath = props.path;
       created.onDidChangeModelContent(() => {
-        if (!applyingValue) props.onChange?.(created.getValue());
+        if (!applyingValue && shownPath !== null)
+          props.onChange?.(created.getValue(), shownPath);
       });
       props.onMount?.(monaco, created);
       setInstance({ monaco, editor: created });
@@ -136,24 +140,29 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
       if (!current) return;
 
       const { monaco, editor } = current;
-      const model = getModel(monaco, path, value, language);
+
+      const model =
+        path === null ? null : getModel(monaco, path, value, language);
+
       const shown = editor.getModel();
 
       if (shown !== model) {
         // Null when the shown model was disposed (its document closed).
         const viewState = shown && editor.saveViewState();
 
-        if (viewState && shownPath !== undefined)
+        if (viewState && shownPath !== null)
           viewStates.set(shownPath, viewState);
 
         editor.setModel(model);
 
-        const saved = viewStates.get(path);
+        const saved = path === null ? undefined : viewStates.get(path);
 
         if (saved) editor.restoreViewState(saved);
       }
 
       shownPath = path;
+
+      if (!model) return;
 
       if (model.getLanguageId() !== language)
         monaco.editor.setModelLanguage(model, language);
@@ -174,6 +183,16 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
         editor.pushUndoStop();
       } finally {
         applyingValue = false;
+      }
+    },
+  );
+
+  createEffect(
+    () => props.openPaths,
+    (openPaths) => {
+      // Deleting the current entry during Map iteration is safe.
+      for (const [path, model] of models) {
+        if (!openPaths.includes(path)) model.dispose();
       }
     },
   );

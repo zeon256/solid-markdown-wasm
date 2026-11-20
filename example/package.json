@@ -11,6 +11,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@pierre/trees": "1.0.0",
     "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
     "@solidjs/web": "2.0.3",
     "@stylexjs/stylex": "0.19.1",
