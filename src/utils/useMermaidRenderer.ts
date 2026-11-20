@@ -1,5 +1,5 @@
 import mermaid, { type MermaidConfig } from "mermaid";
-import { onMount } from "solid-js";
+import { onSettled } from "solid-js";
 
 const CACHE_KEY = "mermaid-cache-v3";
 const MAX_CACHE_SIZE = 50;
@@ -147,7 +147,7 @@ export function useMermaidRenderer(
   let mermaidCache = loadCache();
 
   // Save cache periodically
-  onMount(() => {
+  onSettled(() => {
     const interval = setInterval(() => {
       saveCache(mermaidCache);
     }, 5000); // Save every 5 seconds if changed

@@ -30,7 +30,7 @@
 
 ## Examples
 
-- **SolidJS example (`./example`)**: Visit [live-preview.inve.rs](https://live-preview.inve.rs "live-preview") to see the deployed SolidJS demo. It uses [solid-monaco](https://github.com/alxnddr/solid-monaco "solid-monaco") + [StyleX](https://stylexjs.com/ "stylex") + [solidjs](https://www.solidjs.com/ "solidjs").
+- **SolidJS example (`./example`)**: Visit [live-preview.inve.rs](https://live-preview.inve.rs "live-preview") to see the deployed SolidJS demo. It uses [Monaco](https://microsoft.github.io/monaco-editor/ "monaco-editor") + [StyleX](https://stylexjs.com/ "stylex") + [solidjs](https://www.solidjs.com/ "solidjs").
 - **React example (`./example-react`)**: A React + Monaco demo showcasing the same WASM markdown renderer APIs in a React app.
 
 Run them locally from the repository root:
@@ -43,8 +43,10 @@ bun run example-react:dev
 ## Installation
 
 ```bash
-npm install solid-markdown-wasm
+npm install solid-markdown-wasm solid-js @solidjs/web
 ```
+
+Requires Solid 2 (`solid-js` and `@solidjs/web` `^2.0.3`). For Solid 1.x, use `solid-markdown-wasm@1`.
 
 ## Vite Configuration
 
@@ -62,7 +64,7 @@ bun add -d vite-plugin-wasm
 
 ```typescript
 import { defineConfig } from "vite";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({

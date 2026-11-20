@@ -7,20 +7,20 @@ import {
 } from "@solid-markdown-wasm/example-shared/vite-config";
 import stylex from "@stylexjs/unplugin";
 import { defineConfig } from "vite";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-  // StyleX must run before solid(): vite-plugin-solid only feeds JSX files to
-  // Babel, so `*.stylex.ts` modules would otherwise reach the browser uncompiled.
+  // StyleX must run before solid(): the Solid plugin only compiles JSX files,
+  // so `*.stylex.ts` modules would otherwise reach the browser uncompiled.
   plugins: [stylex.vite({ useCSSLayers: true }), wasm(), solid()],
   resolve: {
-    dedupe: ["solid-js"],
+    dedupe: ["solid-js", "@solidjs/web"],
   },
   build: {
     rollupOptions: {
       output: {
-        manualChunks: getManualChunks("solid-monaco"),
+        manualChunks: getManualChunks("monaco-editor"),
         assetFileNames: getAssetFileNames(),
       },
     },

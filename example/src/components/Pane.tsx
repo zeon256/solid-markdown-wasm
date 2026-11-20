@@ -1,5 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
-import type { Component, JSX } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import type { Component } from "solid-js";
 import { color } from "../tokens.stylex";
 
 const styles = stylex.create({

@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 import {
   Check,
   ChevronsDownUp,
@@ -7,18 +8,17 @@ import {
   Maximize,
   Play,
   X,
-} from "lucide-solid";
+} from "lucide";
 import init, { render_md, type Themes } from "markdown-renderer";
 import {
   type Component,
-  type JSX,
   Show,
   createEffect,
+  createMemo,
   createSignal,
-  onCleanup,
-  onMount,
+  onSettled,
 } from "solid-js";
-import { render } from "solid-js/web";
+import { createIcon, setIcon } from "../utils/icons";
 import {
   type MermaidConfigFn,
   useMermaidRenderer,
@@ -163,16 +163,12 @@ export interface MarkdownRendererProps {
 }
 
 export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
-  const [renderedHtml, setRenderedHtml] = createSignal("");
   const [loadingWasm, setLoadingWasm] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
   const [fullScreenSvg, setFullScreenSvg] = createSignal<string | null>(null);
 
-  // Initialize Mermaid renderer
-  const { processBlocks, renderMermaid } = useMermaidRenderer(
-    props.immediateRenderMermaid ?? false,
-    props.mermaidConfig,
-  );
+  // Current props are passed on every call, so no defaults are needed here.
+  const { processBlocks, renderMermaid } = useMermaidRenderer();
 
   // Store iframe data: element, wrapper, source, and dimensions
   const iframeCache = new Map<string, CachedIframe>();
@@ -273,12 +269,20 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     props.onScrollLine?.(anchorLine);
   };
 
-  props.scrollSyncRef?.({
+  const scrollSync: MarkdownScrollSync = {
     scrollToLine: (line) => {
       anchorLine = line;
       applyAnchorLine();
     },
-  });
+  };
+
+  createEffect(
+    () => props.scrollSyncRef,
+    (scrollSyncRef) => {
+      // Block body: an effect's return value is treated as its cleanup.
+      scrollSyncRef?.(scrollSync);
+    },
+  );
 
   // Layout changed: offsets are stale, and the pinned line may have moved.
   const handleLayoutChange = () => {
@@ -286,11 +290,8 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     applyAnchorLine();
   };
 
-  // Track dispose functions for rendered icons
-  const iconDisposeCallbacks: (() => void)[] = [];
-
   // Inject copy buttons into code block headers
-  const injectCopyButtons = () => {
+  const injectCopyButtons = (immediateRenderMermaid: boolean) => {
     if (!contentRef) return;
 
     const headers = contentRef.querySelectorAll(".code-block-header");
@@ -315,7 +316,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
       if (isMermaid) {
         // Set initial status on wrapper if not already set
-        const initialStatus = props.immediateRenderMermaid
+        const initialStatus = immediateRenderMermaid
           ? "rendered"
           : "unrendered";
 
@@ -326,8 +327,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         const maxBtn = document.createElement("button");
         maxBtn.className = "code-block-maximize";
         maxBtn.setAttribute("aria-label", "Show preview");
-        const maxDispose = render(() => <Maximize size={ICON_SIZE} />, maxBtn);
-        iconDisposeCallbacks.push(maxDispose);
+        setIcon(maxBtn, Maximize, ICON_SIZE);
         buttonContainer.appendChild(maxBtn);
 
         // Create play/code toggle button
@@ -338,17 +338,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           initialStatus === "rendered" ? "Show code" : "Render diagram",
         );
 
-        const playDispose = render(
-          () =>
-            initialStatus === "rendered" ? (
-              <Code size={ICON_SIZE} />
-            ) : (
-              <Play size={ICON_SIZE} />
-            ),
-          playBtn,
-        );
-
-        iconDisposeCallbacks.push(playDispose);
+        setIcon(playBtn, initialStatus === "rendered" ? Code : Play, ICON_SIZE);
         buttonContainer.appendChild(playBtn);
       }
 
@@ -357,20 +347,14 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
       collapseBtn.className = "code-block-collapse";
       collapseBtn.setAttribute("aria-label", "Collapse code");
 
-      const collapseDispose = render(
-        () => <ChevronsDownUp size={ICON_SIZE} />,
-        collapseBtn,
-      );
-
-      iconDisposeCallbacks.push(collapseDispose);
+      setIcon(collapseBtn, ChevronsDownUp, ICON_SIZE);
       buttonContainer.appendChild(collapseBtn);
 
       // Create copy button
       const copyBtn = document.createElement("button");
       copyBtn.className = "code-block-copy";
       copyBtn.setAttribute("aria-label", "Copy code");
-      const copyDispose = render(() => <Copy size={ICON_SIZE} />, copyBtn);
-      iconDisposeCallbacks.push(copyDispose);
+      setIcon(copyBtn, Copy, ICON_SIZE);
       buttonContainer.appendChild(copyBtn);
 
       header.appendChild(buttonContainer);
@@ -396,24 +380,11 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
       const isCollapsed = wrapper.classList.toggle("collapsed");
 
-      // Clear and re-render icon
-      collapseBtn.textContent = "";
-
       if (isCollapsed) {
-        const dispose = render(
-          () => <ChevronsUpDown size={ICON_SIZE} />,
-          collapseBtn,
-        );
-
-        iconDisposeCallbacks.push(dispose);
+        setIcon(collapseBtn, ChevronsUpDown, ICON_SIZE);
         collapseBtn.setAttribute("aria-label", "Expand code");
       } else {
-        const dispose = render(
-          () => <ChevronsDownUp size={ICON_SIZE} />,
-          collapseBtn,
-        );
-
-        iconDisposeCallbacks.push(dispose);
+        setIcon(collapseBtn, ChevronsDownUp, ICON_SIZE);
         collapseBtn.setAttribute("aria-label", "Collapse code");
       }
 
@@ -449,9 +420,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           mermaidPre.dataset.mermaidStatus = "code";
 
           // Update icon to Play
-          playBtn.textContent = "";
-          const playDispose = render(() => <Play size={ICON_SIZE} />, playBtn);
-          iconDisposeCallbacks.push(playDispose);
+          setIcon(playBtn, Play, ICON_SIZE);
           playBtn.setAttribute("aria-label", "Render diagram");
           playBtn.dataset.iconSet = "play";
         } else {
@@ -462,7 +431,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           mermaidPre.innerHTML =
             '<div class="mermaid-loading">⏳ Rendering diagram...</div>';
 
-          renderMermaid(code)
+          renderMermaid(code, props.mermaidConfig)
             .then((svg) => {
               mermaidPre.innerHTML = svg;
               wrapper.dataset.mermaidStatus = "rendered";
@@ -474,14 +443,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
               }
 
               // Update icon to Code
-              playBtn.textContent = "";
-
-              const codeDispose = render(
-                () => <Code size={ICON_SIZE} />,
-                playBtn,
-              );
-
-              iconDisposeCallbacks.push(codeDispose);
+              setIcon(playBtn, Code, ICON_SIZE);
               playBtn.setAttribute("aria-label", "Show code");
               playBtn.dataset.iconSet = "code";
               playBtn.disabled = false;
@@ -527,7 +489,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         // We have the source! Let's render it specifically for the preview
         const renderAndPreview = async () => {
           try {
-            const svgMarkup = await renderMermaid(code);
+            const svgMarkup = await renderMermaid(code, props.mermaidConfig);
             setFullScreenSvg(svgMarkup);
           } catch (err) {
             console.error("Failed to render Mermaid for preview:", err);
@@ -542,7 +504,9 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
           wrapper.querySelector("code");
 
         if (codeEl?.textContent) {
-          renderMermaid(codeEl.textContent.trim()).then(setFullScreenSvg);
+          renderMermaid(codeEl.textContent.trim(), props.mermaidConfig).then(
+            setFullScreenSvg,
+          );
         }
       }
 
@@ -582,25 +546,11 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         .writeText(rawCode)
         .then(() => {
           // Visual feedback - swap icon to checkmark
-          copyBtn.textContent = "";
-
-          const checkDispose = render(
-            () => <Check size={ICON_SIZE} />,
-            copyBtn,
-          );
-
-          iconDisposeCallbacks.push(checkDispose);
+          setIcon(copyBtn, Check, ICON_SIZE);
           copyBtn.classList.add("copied");
 
           setTimeout(() => {
-            copyBtn.textContent = "";
-
-            const copyIconDispose = render(
-              () => <Copy size={ICON_SIZE} />,
-              copyBtn,
-            );
-
-            iconDisposeCallbacks.push(copyIconDispose);
+            setIcon(copyBtn, Copy, ICON_SIZE);
             copyBtn.classList.remove("copied");
           }, 2000);
         })
@@ -610,8 +560,10 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     }
   };
 
-  // Initialize wasm module
-  onMount(async () => {
+  // Mount-time setup; the returned cleanup runs when the component unmounts.
+  onSettled(() => {
+    let disposed = false;
+
     // Set up click handler for code block buttons
     document.addEventListener("click", handleCodeBlockClick);
 
@@ -625,75 +577,94 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
     const handleScroll = () => repositionIframes();
     window.addEventListener("scroll", handleScroll, true);
 
-    setLoadingWasm(true);
+    // Initialize wasm module
+    const loadWasm = async () => {
+      try {
+        const initOutput = await init();
+        console.debug(initOutput);
+        console.debug("Loaded WASM successfully");
+      } catch (err) {
+        console.error("Error initializing WASM:", err);
 
-    try {
-      const initOutput = await init();
-      console.debug(initOutput);
-    } catch (err) {
-      console.error("Error initializing WASM:", err);
-      setError(`Failed to initialize WASM: ${err}`);
-    } finally {
+        if (!disposed) setError(`Failed to initialize WASM: ${err}`);
+      }
+
+      if (disposed) return;
+
       setLoadingWasm(false);
-      console.debug("Loaded WASM successfully");
       props.onLoaded?.();
-    }
+    };
 
-    onCleanup(() => {
+    void loadWasm();
+
+    return () => {
+      disposed = true;
       document.removeEventListener("click", handleCodeBlockClick);
       window.removeEventListener("scroll", handleScroll, true);
       resizeObserver?.disconnect();
-
-      // Dispose all rendered icons
-      for (const dispose of iconDisposeCallbacks) {
-        dispose();
-      }
-    });
+    };
   });
 
   // Track the preview's scroll container while scroll sync is in use.
-  createEffect(() => {
-    if (loadingWasm() || error() || !scrollSyncEnabled() || !containerRef) {
-      return;
-    }
+  createEffect(
+    () =>
+      !loadingWasm() && !error() && scrollSyncEnabled()
+        ? (props.scrollContainer ?? null)
+        : undefined,
+    (scrollContainer) => {
+      // undefined: scroll sync is off or the preview is not mounted yet.
+      if (scrollContainer === undefined || !containerRef) return;
 
-    const target = props.scrollContainer ?? findScrollContainer(containerRef);
-    const eventTarget = scrollEventTarget(target);
+      const target = scrollContainer ?? findScrollContainer(containerRef);
+      const eventTarget = scrollEventTarget(target);
 
-    scroller = target;
-    scrollMap = null;
-    eventTarget.addEventListener("scroll", handlePreviewScroll, {
-      passive: true,
-    });
-
-    onCleanup(() => {
-      eventTarget.removeEventListener("scroll", handlePreviewScroll);
-      scroller = null;
+      scroller = target;
       scrollMap = null;
-    });
-  });
+      eventTarget.addEventListener("scroll", handlePreviewScroll, {
+        passive: true,
+      });
 
-  createEffect(() => {
-    // Track reactive dependencies at top level
+      return () => {
+        eventTarget.removeEventListener("scroll", handlePreviewScroll);
+        scroller = null;
+        scrollMap = null;
+      };
+    },
+  );
+
+  // Markdown -> HTML (with iframes swapped for placeholders). Pure, so the
+  // innerHTML binding and the DOM post-processing effect below share it.
+  const rendered = createMemo(() => {
+    if (loadingWasm() || error()) return null;
+
     const markdown = props.markdown;
     const theme = props.theme ?? "one-dark";
-    const isLoading = loadingWasm();
+    const startTime = performance.now();
+    console.log("[MarkdownRenderer] Rendering with theme:", theme);
 
-    if (!isLoading) {
-      const startTime = performance.now();
-      console.log("[MarkdownRenderer] Rendering with theme:", theme);
-      const result = render_md(markdown, theme);
-      lineCount = countLines(markdown);
+    const result = extractIframes(render_md(markdown, theme));
+    console.debug(`Time taken: ${performance.now() - startTime}`);
 
-      // Extract iframes and replace with placeholders
-      const { html, iframes } = extractIframes(result);
+    return { ...result, lineCount: countLines(markdown) };
+  });
+
+  // Runs after the innerHTML binding has committed the new HTML.
+  createEffect(
+    () => ({
+      doc: rendered(),
+      immediateRenderMermaid: props.immediateRenderMermaid ?? false,
+      mermaidConfig: props.mermaidConfig,
+    }),
+    ({ doc, immediateRenderMermaid, mermaidConfig }) => {
+      if (!doc || !contentRef) return;
+
+      lineCount = doc.lineCount;
 
       // Track which iframe IDs are still in use
       const usedIds = new Set<string>();
 
-      // Pre-create any new iframes BEFORE setting HTML (so they start loading early)
       if (iframeOverlayRef) {
-        for (const [id, data] of iframes) {
+        for (const [id, data] of doc.iframes) {
           usedIds.add(id);
           const cached = iframeCache.get(id);
 
@@ -747,99 +718,81 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
         }
       }
 
-      setRenderedHtml(html);
+      // Update language labels from hidden spans
+      const codeBlocks = contentRef.querySelectorAll(".code-block-wrapper");
 
-      // After DOM update, set up observers and position iframes
-      queueMicrotask(() => {
-        if (!contentRef) return;
+      for (const wrapper of codeBlocks) {
+        const langDataSpan = wrapper.querySelector(".code-lang-data");
+        const langLabel = wrapper.querySelector(".code-block-language");
 
-        // Update language labels from hidden spans
-        const codeBlocks = contentRef.querySelectorAll(".code-block-wrapper");
+        if (langDataSpan && langLabel) {
+          const lang = langDataSpan.getAttribute("data-lang");
 
-        for (const wrapper of codeBlocks) {
-          const langDataSpan = wrapper.querySelector(".code-lang-data");
-          const langLabel = wrapper.querySelector(".code-block-language");
-
-          if (langDataSpan && langLabel) {
-            const lang = langDataSpan.getAttribute("data-lang");
-
-            if (lang) {
-              langLabel.textContent = lang;
-            }
+          if (lang) {
+            langLabel.textContent = lang;
           }
         }
+      }
 
-        // Inject copy buttons into code block headers
-        injectCopyButtons();
+      // Inject copy buttons into code block headers
+      injectCopyButtons(immediateRenderMermaid);
 
-        // Process Mermaid diagrams
-        processBlocks(
-          contentRef,
-          props.immediateRenderMermaid ?? false,
-          props.mermaidConfig,
-        ).then(() => {
-          // Sync wrapper status with pre status after block processing
-          if (contentRef) {
-            const pres = contentRef.querySelectorAll(
-              "pre[data-mermaid-status]",
-            );
+      // Process Mermaid diagrams
+      const content = contentRef;
+      // Set by this effect's cleanup once a newer render (or unmount) supersedes it.
+      let stale = false;
 
-            for (const pre of pres) {
-              const wrapper = pre.closest(".code-block-wrapper");
+      processBlocks(content, immediateRenderMermaid, mermaidConfig).then(() => {
+        if (stale) return;
+
+        // Sync wrapper status with pre status after block processing
+        const pres = content.querySelectorAll("pre[data-mermaid-status]");
+
+        for (const pre of pres) {
+          const wrapper = pre.closest(".code-block-wrapper");
+
+          if (pre instanceof HTMLElement && wrapper instanceof HTMLElement) {
+            const status = pre.dataset.mermaidStatus;
+            wrapper.dataset.mermaidStatus = status;
+
+            // Update toggle button icon if it exists
+            if (status === "rendered") {
+              const toggleBtn = wrapper.querySelector(".code-block-play");
 
               if (
-                pre instanceof HTMLElement &&
-                wrapper instanceof HTMLElement
+                toggleBtn instanceof HTMLButtonElement &&
+                toggleBtn.dataset.iconSet !== "code"
               ) {
-                const status = pre.dataset.mermaidStatus;
-                wrapper.dataset.mermaidStatus = status;
-
-                // Update toggle button icon if it exists
-                if (status === "rendered") {
-                  const toggleBtn = wrapper.querySelector(".code-block-play");
-
-                  if (
-                    toggleBtn instanceof HTMLButtonElement &&
-                    toggleBtn.dataset.iconSet !== "code"
-                  ) {
-                    toggleBtn.textContent = "";
-
-                    const codeDispose = render(
-                      () => <Code size={ICON_SIZE} />,
-                      toggleBtn,
-                    );
-
-                    iconDisposeCallbacks.push(codeDispose);
-                    toggleBtn.setAttribute("aria-label", "Show code");
-                    toggleBtn.dataset.iconSet = "code";
-                  }
-                }
+                setIcon(toggleBtn, Code, ICON_SIZE);
+                toggleBtn.setAttribute("aria-label", "Show code");
+                toggleBtn.dataset.iconSet = "code";
               }
             }
           }
-        });
-
-        // Observe content for size changes
-        if (resizeObserver && contentRef) {
-          resizeObserver.disconnect();
-          resizeObserver.observe(contentRef);
         }
-
-        // Position iframes over their placeholders
-        repositionIframes();
-
-        // New DOM: re-measure and keep the synced source line in place
-        handleLayoutChange();
-
-        console.debug("[iframe-cache] Cache after update:", [
-          ...iframeCache.keys(),
-        ]);
       });
 
-      const endTime = performance.now();
-      console.debug(`Time taken: ${endTime - startTime}`);
-    }
-  });
+      // Observe content for size changes
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver.observe(contentRef);
+      }
+
+      // Position iframes over their placeholders
+      repositionIframes();
+
+      // New DOM: re-measure and keep the synced source line in place
+      handleLayoutChange();
+
+      console.debug("[iframe-cache] Cache after update:", [
+        ...iframeCache.keys(),
+      ]);
+
+      return () => {
+        stale = true;
+      };
+    },
+  );
 
   return (
     <div>
@@ -867,9 +820,9 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
 
           <div
             ref={contentRef}
-            innerHTML={renderedHtml()}
+            class="mermaid-clickable"
+            innerHTML={rendered()?.html ?? ""}
             style={{ position: "relative" }}
-            classList={{ "mermaid-clickable": true }}
           />
         </div>
       </Show>
@@ -883,7 +836,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             if (e.key === "Escape") setFullScreenSvg(null);
           }}
           role="presentation"
-          tabIndex={-1}
+          tabindex={-1}
         >
           <div
             class="mermaid-preview-content"
@@ -901,7 +854,7 @@ export const MarkdownRenderer: Component<MarkdownRendererProps> = (props) => {
             aria-label="Close preview"
             onClick={() => setFullScreenSvg(null)}
           >
-            <X size={24} />
+            {createIcon(X, 24)}
           </button>
         </div>
       </Show>

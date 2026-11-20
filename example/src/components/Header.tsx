@@ -5,9 +5,10 @@ import {
   parseCodeTheme,
 } from "@solid-markdown-wasm/example-shared/constants";
 import * as stylex from "@stylexjs/stylex";
-import { Moon, Package, Sun } from "lucide-solid";
+import { Moon, Package, Sun } from "lucide";
 import { type Component, For, Show } from "solid-js";
 import { color } from "../tokens.stylex";
+import { Icon } from "./Icon";
 
 const REPO_URL = "https://github.com/zeon256/solid-markdown-wasm";
 const NPM_URL = "https://www.npmjs.com/package/solid-markdown-wasm";
@@ -219,8 +220,11 @@ export const Header: Component<HeaderProps> = (props) => (
           }
           onClick={() => props.onToggleColorScheme()}
         >
-          <Show when={props.isDark} fallback={<Moon size={ICON_SIZE} />}>
-            <Sun size={ICON_SIZE} />
+          <Show
+            when={props.isDark}
+            fallback={<Icon icon={Moon} size={ICON_SIZE} />}
+          >
+            <Icon icon={Sun} size={ICON_SIZE} />
           </Show>
         </button>
         <a
@@ -231,7 +235,7 @@ export const Header: Component<HeaderProps> = (props) => (
           title="npm"
           {...stylex.attrs(styles.iconButton)}
         >
-          <Package size={ICON_SIZE} />
+          <Icon icon={Package} size={ICON_SIZE} />
         </a>
         <a
           href={REPO_URL}

@@ -11,12 +11,11 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  onCleanup,
-  onMount,
+  onSettled,
 } from "solid-js";
 import { MarkdownRenderer, type MarkdownScrollSync } from "solid-markdown-wasm";
-import { MonacoEditor } from "solid-monaco";
 import { Header } from "./components/Header";
+import { MonacoEditor } from "./components/MonacoEditor";
 import { Pane } from "./components/Pane";
 import { Spinner } from "./components/Spinner";
 import {
@@ -162,25 +161,28 @@ const App: Component = () => {
   let previewScroll: MarkdownScrollSync | undefined;
   let scrollEditorToLine: ((line: number) => void) | undefined;
 
-  onMount(() => {
+  onSettled(() => {
     const mediaQuery = window.matchMedia(DARK_MODE_MEDIA_QUERY);
 
     const handleSchemeChange = (event: MediaQueryListEvent) =>
       applyColorScheme(event.matches);
 
     mediaQuery.addEventListener("change", handleSchemeChange);
-    onCleanup(() =>
-      mediaQuery.removeEventListener("change", handleSchemeChange),
-    );
-  });
 
-  onCleanup(() => clearTimeout(debounceId));
+    return () => {
+      mediaQuery.removeEventListener("change", handleSchemeChange);
+      clearTimeout(debounceId);
+    };
+  });
 
   // On <html> so the theme variables resolve for the StyleX tokens, the
   // document background, and the renderer's Mermaid theme lookup.
-  createEffect(() => {
-    document.documentElement.dataset.theme = isDark() ? "dark" : "light";
-  });
+  createEffect(
+    () => (isDark() ? "dark" : "light"),
+    (theme) => {
+      document.documentElement.dataset.theme = theme;
+    },
+  );
 
   return (
     <div {...stylex.attrs(styles.app)}>
@@ -196,7 +198,7 @@ const App: Component = () => {
       <div {...stylex.attrs(styles.viewSwitch)}>
         <button
           type="button"
-          aria-pressed={view() === "editor"}
+          aria-pressed={view() === "editor" ? "true" : "false"}
           {...stylex.attrs(
             styles.viewButton,
             view() === "editor" && styles.viewButtonActive,
@@ -207,7 +209,7 @@ const App: Component = () => {
         </button>
         <button
           type="button"
-          aria-pressed={view() === "preview"}
+          aria-pressed={view() === "preview" ? "true" : "false"}
           {...stylex.attrs(
             styles.viewButton,
             view() === "preview" && styles.viewButtonActive,
@@ -232,11 +234,8 @@ const App: Component = () => {
               value={markdown()}
               onChange={handleEditorChange}
               onMount={(monaco, editor) => {
-                // solid-monaco only forwards `theme` on later changes.
-                defineEditorThemes(monaco, editor);
-                monaco.editor.setTheme(
-                  isDark() ? EDITOR_THEME_DARK : EDITOR_THEME_LIGHT,
-                );
+                // Runs before `theme` is first applied, so the themes exist.
+                defineEditorThemes(monaco);
                 scrollEditorToLine = syncEditorScroll(monaco, editor, (line) =>
                   previewScroll?.scrollToLine(line),
                 );
