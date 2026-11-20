@@ -96,6 +96,15 @@ export const syncEditorScroll = (
     if (event.scrollTopChanged && !applying) onScrollLine(getTopLine(editor));
   });
 
+  // A document switch starts the view at the top and may restore a saved
+  // position without a scroll event, so report the line once it has settled
+  // (the caller restores view state right after setModel).
+  editor.onDidChangeModel(() => {
+    queueMicrotask(() => {
+      if (editor.getModel()) onScrollLine(getTopLine(editor));
+    });
+  });
+
   return (line) => {
     const whole = Math.min(Math.max(Math.floor(line), 1), lineCountOf(editor));
     const fraction = Math.min(Math.max(line - whole, 0), 1);

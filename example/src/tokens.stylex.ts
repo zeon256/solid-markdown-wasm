@@ -12,6 +12,7 @@ export const color = stylex.defineVars({
   fg: "var(--fgColor-default)",
   muted: "var(--fgColor-muted)",
   accent: "var(--fgColor-accent)",
+  danger: "var(--fgColor-danger)",
   bg: "var(--bgColor-default)",
   surface: "var(--bgColor-muted)",
   hover: "var(--bgColor-neutral-muted)",

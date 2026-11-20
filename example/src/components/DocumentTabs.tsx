@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { Plus, X } from "lucide";
-import { type Component, For, Show, createMemo } from "solid-js";
-import { type MarkdownDocument, documentTitle } from "../documents";
+import { type Component, For, createMemo, onFlush } from "solid-js";
+import { type MarkdownFile, baseName } from "../workspace";
 import { color } from "../tokens.stylex";
 import { Icon } from "./Icon";
 
@@ -63,9 +63,6 @@ const styles = stylex.create({
     },
     outlineOffset: -2,
   },
-  selectOnly: {
-    paddingInlineEnd: 14,
-  },
   iconButton: {
     display: "inline-flex",
     alignItems: "center",
@@ -100,20 +97,41 @@ const styles = stylex.create({
 });
 
 interface DocumentTabsProps {
-  documents: readonly MarkdownDocument[];
-  activeId: string;
+  files: readonly MarkdownFile[];
+  /** Null only when no tab is open. */
+  activeId: string | null;
+  /** Id of the element the tabs control (the editor panel). */
+  panelId: string;
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onAdd: () => void;
 }
 
+/** DOM id of a file's tab, for the panel's `aria-labelledby`. */
+export const tabId = (fileId: string) => `tab-${fileId}`;
+
 export const DocumentTabs: Component<DocumentTabsProps> = (props) => {
   let list: HTMLDivElement | undefined;
+  let addButton: HTMLButtonElement | undefined;
 
-  // Arrow keys, Home and End move between tabs (automatic activation).
-  const handleKeyDown = (event: KeyboardEvent) => {
-    const ids = props.documents.map((doc) => doc.id);
-    const index = ids.indexOf(props.activeId);
+  // Open files per name: a shared name shows the whole path instead.
+  const nameCounts = createMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const file of props.files) {
+      const name = baseName(file.path);
+
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+
+    return counts;
+  });
+
+  // Arrow keys, Home and End move between tabs (automatic activation);
+  // Delete closes the focused tab and hands focus to the tab that takes over.
+  const handleKeyDown = (event: KeyboardEvent, id: string) => {
+    const ids = props.files.map((file) => file.id);
+    const index = ids.indexOf(id);
     let next: number;
 
     switch (event.key) {
@@ -129,6 +147,20 @@ export const DocumentTabs: Component<DocumentTabsProps> = (props) => {
       case "End":
         next = ids.length - 1;
         break;
+      case "Delete":
+        event.preventDefault();
+        props.onClose(id);
+        // The closed tab's button is gone after the update; with no tabs
+        // left, focus lands on "New file" rather than the page.
+        onFlush(() => {
+          const activeTab = list?.querySelector<HTMLElement>(
+            '[role="tab"][aria-selected="true"]',
+          );
+
+          (activeTab ?? addButton)?.focus();
+        });
+
+        return;
       default:
         return;
     }
@@ -143,62 +175,69 @@ export const DocumentTabs: Component<DocumentTabsProps> = (props) => {
       <div
         ref={list}
         role="tablist"
-        aria-label="Documents"
+        aria-label="Open files"
         {...stylex.attrs(styles.list)}
       >
-        <For each={props.documents} keyed={(doc) => doc.id}>
-          {(doc) => {
-            const title = createMemo(() => documentTitle(doc().content));
-            const active = () => doc().id === props.activeId;
-            const closable = () => props.documents.length > 1;
+        <For each={props.files} keyed={(file) => file.id}>
+          {(file) => {
+            const active = () => file().id === props.activeId;
+
+            const label = () => {
+              const name = baseName(file().path);
+
+              return (nameCounts().get(name) ?? 0) > 1 ? file().path : name;
+            };
 
             return (
               <div
                 {...stylex.attrs(
                   styles.tab,
-                  doc().id === props.activeId && styles.tabActive,
+                  file().id === props.activeId && styles.tabActive,
                 )}
-                // Middle click closes, as in browsers and editors.
-                onAuxClick={(event) => {
-                  if (event.button === 1 && closable()) props.onClose(doc().id);
-                }}
               >
                 <button
                   type="button"
                   role="tab"
+                  id={tabId(file().id)}
+                  aria-controls={props.panelId}
                   aria-selected={active() ? "true" : "false"}
+                  aria-keyshortcuts="Delete"
                   tabindex={active() ? 0 : -1}
-                  title={title()}
-                  {...stylex.attrs(
-                    styles.select,
-                    props.documents.length === 1 && styles.selectOnly,
-                  )}
-                  onClick={() => props.onSelect(doc().id)}
-                  onKeyDown={handleKeyDown}
+                  title={file().path}
+                  {...stylex.attrs(styles.select)}
+                  onClick={() => props.onSelect(file().id)}
+                  onKeyDown={(event) => handleKeyDown(event, file().id)}
+                  // Middle click closes, as in browsers and editors; stopping
+                  // the press keeps it from starting autoscroll.
+                  onMouseDown={(event) => {
+                    if (event.button === 1) event.preventDefault();
+                  }}
+                  onAuxClick={(event) => {
+                    if (event.button === 1) props.onClose(file().id);
+                  }}
                 >
-                  {title()}
+                  {label()}
                 </button>
-                <Show when={closable()}>
-                  <button
-                    type="button"
-                    tabindex={-1}
-                    aria-label={`Close ${title()}`}
-                    title="Close"
-                    {...stylex.attrs(styles.iconButton, styles.close)}
-                    onClick={() => props.onClose(doc().id)}
-                  >
-                    <Icon icon={X} size={14} />
-                  </button>
-                </Show>
+                <button
+                  type="button"
+                  tabindex={-1}
+                  aria-label={`Close ${file().path}`}
+                  title="Close"
+                  {...stylex.attrs(styles.iconButton, styles.close)}
+                  onClick={() => props.onClose(file().id)}
+                >
+                  <Icon icon={X} size={14} />
+                </button>
               </div>
             );
           }}
         </For>
       </div>
       <button
+        ref={addButton}
         type="button"
-        aria-label="New document"
-        title="New document"
+        aria-label="New file"
+        title="New file"
         {...stylex.attrs(styles.iconButton, styles.add)}
         onClick={() => props.onAdd()}
       >
