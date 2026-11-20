@@ -14,10 +14,22 @@ import {
   onSettled,
 } from "solid-js";
 import { MarkdownRenderer, type MarkdownScrollSync } from "solid-markdown-wasm";
+import { DocumentTabs } from "./components/DocumentTabs";
 import { Header } from "./components/Header";
-import { MonacoEditor } from "./components/MonacoEditor";
+import {
+  type Editor,
+  type Monaco,
+  MonacoEditor,
+  disposeModel,
+} from "./components/MonacoEditor";
 import { Pane } from "./components/Pane";
 import { Spinner } from "./components/Spinner";
+import {
+  type MarkdownDocument,
+  createDocument,
+  loadDocuments,
+  saveDocuments,
+} from "./documents";
 import {
   EDITOR_OPTIONS,
   EDITOR_THEME_DARK,
@@ -130,12 +142,25 @@ const App: Component = () => {
   );
 
   const [autoRenderMermaid, setAutoRenderMermaid] = createSignal(false);
-  const [markdown, setMarkdown] = createSignal(initialMarkdown);
-  const [renderedMarkdown, setRenderedMarkdown] = createSignal(initialMarkdown);
+  const initial = loadDocuments(initialMarkdown);
+  const [documents, setDocuments] = createSignal(initial.documents);
+  const [activeId, setActiveId] = createSignal(initial.activeId);
+
+  // loadDocuments guarantees `activeId` names one of the documents.
+  const activeDocument = createMemo(
+    () => documents().find((doc) => doc.id === activeId()) ?? documents()[0],
+  );
+
+  const [renderedMarkdown, setRenderedMarkdown] = createSignal(
+    initial.documents.find((doc) => doc.id === initial.activeId)?.content ?? "",
+  );
+
   const [wasmReady, setWasmReady] = createSignal(false);
   const [view, setView] = createSignal<View>("editor");
 
-  const words = createMemo(() => markdown().match(/\S+/g)?.length ?? 0);
+  const words = createMemo(
+    () => activeDocument().content.match(/\S+/g)?.length ?? 0,
+  );
 
   // The page follows the OS scheme until the user overrides it; either way the
   // code theme snaps to the matching default (the select can still override).
@@ -145,9 +170,16 @@ const App: Component = () => {
   };
 
   let debounceId: number | undefined;
+  // Set once Monaco loads; needed to focus the editor and free closed models.
+  let monacoApi: Monaco | undefined;
+  let editorInstance: Editor | undefined;
 
   const handleEditorChange = (value: string) => {
-    setMarkdown(value);
+    const id = activeId();
+
+    setDocuments((docs) =>
+      docs.map((doc) => (doc.id === id ? { ...doc, content: value } : doc)),
+    );
     clearTimeout(debounceId);
 
     debounceId = window.setTimeout(
@@ -155,6 +187,53 @@ const App: Component = () => {
       value.length > LARGE_DOCUMENT_CHARS ? LARGE_DOCUMENT_DEBOUNCE_MS : 0,
     );
   };
+
+  // Switching documents renders the new one at once; a pending debounced
+  // render belongs to the old one.
+  const showDocument = (doc: MarkdownDocument) => {
+    clearTimeout(debounceId);
+    setActiveId(doc.id);
+    setRenderedMarkdown(doc.content);
+  };
+
+  const selectDocument = (id: string) => {
+    const doc = documents().find((candidate) => candidate.id === id);
+
+    if (doc && id !== activeId()) showDocument(doc);
+  };
+
+  const addDocument = () => {
+    const doc = createDocument();
+
+    setDocuments((docs) => [...docs, doc]);
+    showDocument(doc);
+    editorInstance?.focus();
+  };
+
+  const closeDocument = (id: string) => {
+    const docs = documents();
+    const index = docs.findIndex((doc) => doc.id === id);
+
+    // The last tab stays: the editor always shows a document.
+    if (index === -1 || docs.length === 1) return;
+
+    const remaining = docs.toSpliced(index, 1);
+
+    // Activate the right-hand neighbour, or the left one when closing the end.
+    if (id === activeId())
+      showDocument(remaining[Math.min(index, remaining.length - 1)]);
+
+    setDocuments(remaining);
+
+    if (monacoApi) disposeModel(monacoApi, id);
+  };
+
+  createEffect(
+    () => ({ documents: documents(), activeId: activeId() }),
+    (state) => {
+      saveDocuments(state);
+    },
+  );
 
   // Scroll sync: each side reports the source line at its top; the other side
   // follows. Neither echoes scrolls it was told to make, so they cannot loop.
@@ -224,16 +303,28 @@ const App: Component = () => {
         <Pane
           title="Markdown"
           meta={`${words().toLocaleString()} words`}
+          toolbar={
+            <DocumentTabs
+              documents={documents()}
+              activeId={activeDocument().id}
+              onSelect={selectDocument}
+              onClose={closeDocument}
+              onAdd={addDocument}
+            />
+          }
           xstyle={view() !== "editor" && styles.hiddenWhenCompact}
         >
           <div {...stylex.attrs(styles.fill)}>
             <MonacoEditor
+              path={activeDocument().id}
               language="markdown"
               theme={isDark() ? EDITOR_THEME_DARK : EDITOR_THEME_LIGHT}
               options={EDITOR_OPTIONS}
-              value={markdown()}
+              value={activeDocument().content}
               onChange={handleEditorChange}
               onMount={(monaco, editor) => {
+                monacoApi = monaco;
+                editorInstance = editor;
                 // Runs before `theme` is first applied, so the themes exist.
                 defineEditorThemes(monaco);
                 scrollEditorToLine = syncEditorScroll(monaco, editor, (line) =>
