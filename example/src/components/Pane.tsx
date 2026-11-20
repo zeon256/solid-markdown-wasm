@@ -48,6 +48,8 @@ const styles = stylex.create({
 interface PaneProps {
   title: string;
   meta: JSX.Element;
+  /** Optional bar between the header and the body, e.g. tabs. */
+  toolbar?: JSX.Element;
   xstyle?: stylex.StyleXStyles;
   children: JSX.Element;
 }
@@ -61,6 +63,7 @@ export const Pane: Component<PaneProps> = (props) => (
       <h2 {...stylex.attrs(styles.title)}>{props.title}</h2>
       <span {...stylex.attrs(styles.meta)}>{props.meta}</span>
     </div>
+    {props.toolbar}
     <div {...stylex.attrs(styles.body)}>{props.children}</div>
   </section>
 );

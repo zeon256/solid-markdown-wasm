@@ -17,6 +17,12 @@ export type EditorOptions =
   MonacoApi.editor.IStandaloneEditorConstructionOptions;
 
 export interface MonacoEditorProps {
+  /**
+   * Identifies the document being edited. Each path gets its own model, so
+   * switching paths keeps that document's undo stack, cursor, and scroll.
+   * Free a path's model with `disposeModel` once it is gone for good.
+   */
+  path: string;
   value: string;
   language: string;
   theme: string;
@@ -27,6 +33,13 @@ export interface MonacoEditorProps {
   onMount?: (monaco: Monaco, editor: Editor) => void;
   loadingState?: JSX.Element;
 }
+
+const modelUri = (monaco: Monaco, path: string) =>
+  monaco.Uri.from({ scheme: "inmemory", path: `/${path}` });
+
+/** Dispose the model of `path`, e.g. after its document is closed. */
+export const disposeModel = (monaco: Monaco, path: string) =>
+  monaco.editor.getModel(modelUri(monaco, path))?.dispose();
 
 const styles = stylex.create({
   root: {
@@ -51,6 +64,35 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
   const [instance, setInstance] = createSignal<Instance>();
   // True while `value` is written into the model, so that edit is not echoed.
   let applyingValue = false;
+  // Models this editor created, and the view state of each one not shown.
+  const models = new Map<string, MonacoApi.editor.ITextModel>();
+  const viewStates = new Map<string, MonacoApi.editor.ICodeEditorViewState>();
+  let shownPath: string | undefined;
+
+  const getModel = (
+    monaco: Monaco,
+    path: string,
+    value: string,
+    language: string,
+  ) => {
+    const existing = models.get(path);
+
+    if (existing) return existing;
+
+    const model = monaco.editor.createModel(
+      value,
+      language,
+      modelUri(monaco, path),
+    );
+
+    models.set(path, model);
+    model.onWillDispose(() => {
+      models.delete(path);
+      viewStates.delete(path);
+    });
+
+    return model;
+  };
 
   onSettled(() => {
     let disposed = false;
@@ -61,12 +103,12 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
 
       const created = monaco.editor.create(container, {
         ...props.options,
-        value: props.value,
-        language: props.language,
+        model: getModel(monaco, props.path, props.value, props.language),
         automaticLayout: true,
       });
 
       editor = created;
+      shownPath = props.path;
       created.onDidChangeModelContent(() => {
         if (!applyingValue) props.onChange?.(created.getValue());
       });
@@ -76,43 +118,63 @@ export const MonacoEditor: Component<MonacoEditorProps> = (props) => {
 
     return () => {
       disposed = true;
-      editor?.getModel()?.dispose();
       editor?.dispose();
+
+      // Each dispose deletes its own entry, which Map iteration tolerates.
+      for (const model of models.values()) model.dispose();
     };
   });
 
   createEffect(
-    () => ({ current: instance(), value: props.value }),
-    ({ current, value }) => {
-      const model = current?.editor.getModel();
+    () => ({
+      current: instance(),
+      path: props.path,
+      value: props.value,
+      language: props.language,
+    }),
+    ({ current, path, value, language }) => {
+      if (!current) return;
 
-      if (!current || !model || value === model.getValue()) return;
+      const { monaco, editor } = current;
+      const model = getModel(monaco, path, value, language);
+      const shown = editor.getModel();
+
+      if (shown !== model) {
+        // Null when the shown model was disposed (its document closed).
+        const viewState = shown && editor.saveViewState();
+
+        if (viewState && shownPath !== undefined)
+          viewStates.set(shownPath, viewState);
+
+        editor.setModel(model);
+
+        const saved = viewStates.get(path);
+
+        if (saved) editor.restoreViewState(saved);
+      }
+
+      shownPath = path;
+
+      if (model.getLanguageId() !== language)
+        monaco.editor.setModelLanguage(model, language);
+
+      if (value === model.getValue()) return;
 
       applyingValue = true;
 
       try {
         // An edit rather than setValue keeps the undo stack intact.
-        current.editor.executeEdits("", [
+        editor.executeEdits("", [
           {
             range: model.getFullModelRange(),
             text: value,
             forceMoveMarkers: true,
           },
         ]);
-        current.editor.pushUndoStop();
+        editor.pushUndoStop();
       } finally {
         applyingValue = false;
       }
-    },
-  );
-
-  createEffect(
-    () => ({ current: instance(), language: props.language }),
-    ({ current, language }) => {
-      const model = current?.editor.getModel();
-
-      if (current && model)
-        current.monaco.editor.setModelLanguage(model, language);
     },
   );
 
