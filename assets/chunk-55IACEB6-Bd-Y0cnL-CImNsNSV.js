@@ -1,0 +1,1 @@
+import{c as e,r as t}from"./src-iADVJDMk-Cv3e-mdz.js";var n=e((e,n)=>{let r;return n===`sandbox`&&(r=t(`#i`+e)),t(n===`sandbox`?r.nodes()[0].contentDocument.body:`body`).select(`[id="${e}"]`)},`getDiagramElement`);export{n as t};

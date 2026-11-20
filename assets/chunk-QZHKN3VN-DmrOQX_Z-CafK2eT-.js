@@ -1,0 +1,1 @@
+import{c as e}from"./src-iADVJDMk-Cv3e-mdz.js";var t=class{constructor(e){this.init=e,this.records=this.init()}static{e(this,`ImperativeState`)}reset(){this.records=this.init()}};export{t};
