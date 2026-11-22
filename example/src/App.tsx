@@ -5,30 +5,25 @@ import {
   getPrefersDark,
 } from "@solid-markdown-wasm/example-shared/constants";
 import * as stylex from "@stylexjs/stylex";
-import type { FileTree } from "@pierre/trees";
 import {
   type Component,
   For,
   createEffect,
   createMemo,
   createSignal,
-  onCleanup,
   onFlush,
   onSettled,
   Show,
 } from "solid-js";
 import { MarkdownRenderer, type MarkdownScrollSync } from "solid-markdown-wasm";
+import type { FileTreeModel, FileTreeMutationEvent } from "solid-trees";
 import { DocumentTabs, tabId } from "./components/DocumentTabs";
 import { FileExplorer } from "./components/FileExplorer";
 import { Header } from "./components/Header";
 import { type Editor, MonacoEditor } from "./components/MonacoEditor";
 import { Pane } from "./components/Pane";
 import { Spinner } from "./components/Spinner";
-import {
-  type EntryKind,
-  type WorkspaceTreeHandlers,
-  createWorkspaceTree,
-} from "./fileTree";
+import { type EntryKind, createWorkspaceTree } from "./fileTree";
 import {
   STORAGE_KEY,
   type Workspace,
@@ -186,45 +181,41 @@ const App: Component = () => {
 
   const [autoRenderMermaid, setAutoRenderMermaid] = createSignal(false);
 
-  const handlers: WorkspaceTreeHandlers = {
-    onMutation: (event) => {
-      setWorkspace((current) => applyTreeMutation(current, event, newFileId));
+  const handleTreeMutation = (event: FileTreeMutationEvent) => {
+    setWorkspace((current) => applyTreeMutation(current, event, newFileId));
 
-      if (naming === null) return;
+    if (naming === null) return;
 
-      // Dropping the name removes the new file; go back to the tab before it.
-      if (event.operation === "remove" && event.path === naming.path) {
-        const { returnTo } = naming;
+    // Dropping the name removes the new file; go back to the tab before it.
+    if (event.operation === "remove" && event.path === naming.path) {
+      const { returnTo } = naming;
 
-        if (returnTo !== null)
-          setWorkspace((current) => activate(current, returnTo));
-      }
+      if (returnTo !== null)
+        setWorkspace((current) => activate(current, returnTo));
+    }
 
-      naming = null;
-    },
-    onCreate: (kind, folder) => createEntry(kind, folder, true),
+    naming = null;
   };
 
   // The tree throws on paths it can't hold. Saved data is validated first,
   // but if the tree still refuses it, set it aside rather than fail on every
   // load.
-  const startTree = (): [Workspace, FileTree] => {
+  const startTree = (): [Workspace, FileTreeModel] => {
     const saved = loadWorkspace();
 
     try {
-      return [saved, createWorkspaceTree(saved, handlers)];
+      return [saved, createWorkspaceTree(saved, handleTreeMutation)];
     } catch (error) {
       console.error(error);
 
       const fresh = discardSavedWorkspace();
 
-      return [fresh, createWorkspaceTree(fresh, handlers)];
+      return [fresh, createWorkspaceTree(fresh, handleTreeMutation)];
     }
   };
 
+  // Disposed with this component.
   const [initialWorkspace, tree] = startTree();
-
-  onCleanup(() => tree.cleanUp());
 
   const [workspace, setWorkspace] = createSignal(initialWorkspace);
 
@@ -461,6 +452,7 @@ const App: Component = () => {
         <FileExplorer
           tree={tree}
           onOpenFile={openFromTree}
+          onCreate={(kind, folder) => createEntry(kind, folder, true)}
           onNewFile={() => createInFocusedFolder("file")}
           onNewFolder={() => createInFocusedFolder("folder")}
           xstyle={view() !== "files" && styles.hiddenWhenCompact}
