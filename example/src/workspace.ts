@@ -1,9 +1,9 @@
 import guide from "@solid-markdown-wasm/example-shared/assets/markdown_preview.md?raw";
-import type { FileTreeMutationEvent } from "@pierre/trees";
+import type { FileTreeMutationEvent } from "solid-trees";
 import gantt from "./assets/gantt_test.md?raw";
 
 /**
- * Paths follow @pierre/trees: `/`-separated, no leading slash, and folders
+ * Paths follow solid-trees: `/`-separated, no leading slash, and folders
  * end in `/` (`notes/`), files do not (`notes/todo.md`).
  */
 export interface MarkdownFile {

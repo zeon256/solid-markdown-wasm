@@ -1,8 +1,13 @@
-import type { FileTree } from "@pierre/trees";
 import * as stylex from "@stylexjs/stylex";
 import { FilePlus, FolderPlus } from "lucide";
 import { type Component, onSettled } from "solid-js";
-import { listenForFileActivation } from "../fileTree";
+import { FileTree, type FileTreeModel } from "solid-trees";
+import "solid-trees/styles.css";
+import {
+  type EntryKind,
+  WorkspaceTreeMenu,
+  listenForFileActivation,
+} from "../fileTree";
 import { color, font } from "../tokens.stylex";
 import { Icon } from "./Icon";
 import { Pane } from "./Pane";
@@ -35,7 +40,7 @@ const styles = stylex.create({
       ":focus-visible": `2px solid ${color.focus}`,
     },
   },
-  // The tree renders in a shadow root; these variables are its theme surface.
+  // The tree's theme surface; its stylesheet reads these from any ancestor.
   tree: {
     position: "absolute",
     inset: 0,
@@ -56,31 +61,26 @@ const styles = stylex.create({
 });
 
 interface FileExplorerProps {
-  tree: FileTree;
+  tree: FileTreeModel;
   /** A file was clicked, or Enter was pressed on it, in the tree. */
   onOpenFile: (path: string) => void;
+  /** "New file" / "New folder" was chosen for `folder` in the context menu. */
+  onCreate: (kind: EntryKind, folder: string) => void;
   onNewFile: () => void;
   onNewFolder: () => void;
   xstyle?: stylex.StyleXStyles;
 }
 
-/** Sidebar that mounts `tree` for as long as it is rendered. */
+/** Sidebar showing `tree`. */
 export const FileExplorer: Component<FileExplorerProps> = (props) => {
   let host: HTMLDivElement | undefined;
 
   onSettled(() => {
     if (!host) return;
 
-    props.tree.render({ fileTreeContainer: host });
-
-    const stopListening = listenForFileActivation(props.tree, host, (path) =>
+    return listenForFileActivation(props.tree, host, (path) =>
       props.onOpenFile(path),
     );
-
-    return () => {
-      stopListening();
-      props.tree.unmount();
-    };
   });
 
   return (
@@ -110,7 +110,21 @@ export const FileExplorer: Component<FileExplorerProps> = (props) => {
       }
       xstyle={props.xstyle}
     >
-      <div ref={host} {...stylex.attrs(styles.tree)} />
+      <div ref={host} {...stylex.attrs(styles.tree)}>
+        <FileTree
+          model={props.tree}
+          // Bounded here too: the stylesheet's `height: 100%` sits in `@scope`.
+          style={{ height: "100%" }}
+          renderContextMenu={(item, context) => (
+            <WorkspaceTreeMenu
+              tree={props.tree}
+              item={item}
+              context={context}
+              onCreate={props.onCreate}
+            />
+          )}
+        />
+      </div>
     </Pane>
   );
 };

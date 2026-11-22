@@ -11,14 +11,14 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@pierre/trees": "1.0.0",
     "@solid-markdown-wasm/example-shared": "file:../packages/example-shared",
     "@solidjs/web": "2.0.3",
     "@stylexjs/stylex": "0.19.1",
     "lucide": "^1.72.0",
     "monaco-editor": "^0.48.0",
     "solid-js": "2.0.3",
-    "solid-markdown-wasm": "file:.."
+    "solid-markdown-wasm": "file:..",
+    "solid-trees": "1.0.0"
   },
   "devDependencies": {
     "@solidjs/vite-plugin": "3.0.1",

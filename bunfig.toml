@@ -19,4 +19,7 @@ minimumReleaseAgeExcludes = [
   "@solidjs/compiler-win32-x64-msvc",
   "@solidjs/compiler-wasm32-wasi",
   "@solidjs/vite-plugin",
+  # Our own Solid 2 port of @pierre/trees, first published 2026-11-22; pinned
+  # exactly in example/package.json. Drop after 2026-11-29.
+  "solid-trees",
 ]

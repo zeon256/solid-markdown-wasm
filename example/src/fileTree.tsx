@@ -1,31 +1,24 @@
+import * as stylex from "@stylexjs/stylex";
+import { FilePlus, FolderPlus, Pencil, Trash2 } from "lucide";
+import { type Component, onCleanup } from "solid-js";
 import {
   type ContextMenuAnchorRect,
   type ContextMenuItem,
   type ContextMenuOpenContext,
-  FileTree,
+  type FileTreeModel,
   type FileTreeMutationEvent,
-} from "@pierre/trees";
-import { render } from "@solidjs/web";
-import * as stylex from "@stylexjs/stylex";
-import { FilePlus, FolderPlus, Pencil, Trash2 } from "lucide";
-import { type Component, onCleanup } from "solid-js";
+  createFileTree,
+} from "solid-trees";
 import { Icon } from "./components/Icon";
 import { color } from "./tokens.stylex";
 import { type Workspace, isFolder } from "./workspace";
 
 export type EntryKind = "file" | "folder";
 
-export interface WorkspaceTreeHandlers {
-  /** The tree's paths changed (rename, drag and drop, add, delete). */
-  onMutation: (event: FileTreeMutationEvent) => void;
-  /** "New file" / "New folder" was chosen for `folder`. */
-  onCreate: (kind: EntryKind, folder: string) => void;
-}
-
 const styles = stylex.create({
   menu: {
-    // The tree's shadow root clips with `overflow: hidden` (and has no
-    // transform or containment), so a fixed menu escapes the sidebar.
+    // The tree's root clips with `overflow: hidden` (and has no transform or
+    // containment), so a fixed menu escapes the sidebar.
     position: "fixed",
     zIndex: 10,
     display: "flex",
@@ -70,11 +63,12 @@ const styles = stylex.create({
   },
 });
 
-interface TreeMenuProps {
-  tree: FileTree;
+interface WorkspaceTreeMenuProps {
+  tree: FileTreeModel;
   item: ContextMenuItem;
   context: ContextMenuOpenContext;
-  onCreate: WorkspaceTreeHandlers["onCreate"];
+  /** "New file" / "New folder" was chosen for `folder`. */
+  onCreate: (kind: EntryKind, folder: string) => void;
 }
 
 const GAP = 4;
@@ -136,7 +130,8 @@ const handleMenuKeyDown = (
   items[next]?.focus();
 };
 
-const TreeMenu: Component<TreeMenuProps> = (props) => {
+/** The tree's context menu; `<FileTree renderContextMenu>` mounts one per open. */
+export const WorkspaceTreeMenu: Component<WorkspaceTreeMenuProps> = (props) => {
   const isFolder = props.item.kind === "directory";
   // Canonical tree path: folders end in `/`.
   const path = props.item.path;
@@ -219,20 +214,19 @@ const TreeMenu: Component<TreeMenuProps> = (props) => {
 };
 
 /**
- * Build the sidebar tree over the workspace's files and folders. The tree owns
- * structure edits (rename, drag and drop, add, delete) and reports each one
- * through `onMutation`; the workspace follows along. Opening files is not tied
- * to selection, which renames, drags, deletes and multi-select also change;
- * see `listenForFileActivation`.
+ * Build the sidebar tree over the workspace's files and folders, owned by the
+ * current reactive owner. The tree owns structure edits (rename, drag and
+ * drop, add, delete) and reports each one through `onMutation`; the workspace
+ * follows along. Opening files is not tied to selection, which renames, drags,
+ * deletes and multi-select also change; see `listenForFileActivation`.
  */
 export const createWorkspaceTree = (
   workspace: Workspace,
-  handlers: WorkspaceTreeHandlers,
-): FileTree => {
+  onMutation: (event: FileTreeMutationEvent) => void,
+): FileTreeModel => {
   const active = workspace.files.find((file) => file.id === workspace.activeId);
-  let disposeMenu: (() => void) | undefined;
 
-  const tree: FileTree = new FileTree({
+  const tree = createFileTree({
     paths: [...workspace.folders, ...workspace.files.map((file) => file.path)],
     initialExpansion: "open",
     initialSelectedPaths: active ? [active.path] : [],
@@ -243,40 +237,19 @@ export const createWorkspaceTree = (
     // Failures are shown, not swallowed; the tree has already reverted.
     renaming: { onError: (message) => window.alert(message) },
     dragAndDrop: { onDropError: (message) => window.alert(message) },
+    // The menu itself comes from `<FileTree renderContextMenu>`.
     composition: {
-      contextMenu: {
-        triggerMode: "both",
-        buttonVisibility: "when-needed",
-        render: (item, context) => {
-          const host = document.createElement("div");
-
-          disposeMenu?.();
-          disposeMenu = render(
-            () => (
-              <TreeMenu
-                tree={tree}
-                item={item}
-                context={context}
-                onCreate={handlers.onCreate}
-              />
-            ),
-            host,
-          );
-
-          return host;
-        },
-        onClose: () => {
-          disposeMenu?.();
-          disposeMenu = undefined;
-        },
-      },
+      contextMenu: { triggerMode: "both", buttonVisibility: "when-needed" },
     },
   });
 
-  tree.onMutation("*", handlers.onMutation);
+  tree.onMutation("*", onMutation);
 
   return tree;
 };
+
+// The ⋯ button and the open menu sit in this anchor, outside the rows.
+const MENU_ANCHOR = '[data-type="context-menu-anchor"]';
 
 /**
  * Open files the user activates in the tree: a plain click on a file row, or
@@ -284,7 +257,7 @@ export const createWorkspaceTree = (
  * focused match). Returns a function that stops listening.
  */
 export const listenForFileActivation = (
-  tree: FileTree,
+  tree: FileTreeModel,
   host: HTMLElement,
   onOpen: (path: string) => void,
 ): (() => void) => {
@@ -292,34 +265,30 @@ export const listenForFileActivation = (
     const modified =
       event.shiftKey || event.ctrlKey || event.metaKey || event.altKey;
 
-    if (event.button !== 0 || modified) return;
+    if (event.button !== 0 || modified || !(event.target instanceof Element))
+      return;
 
-    for (const entry of event.composedPath()) {
-      // Clicks inside the rename input or on the row's ⋯ button aren't opens.
-      if (entry instanceof HTMLInputElement) return;
+    // Clicks in the rename input, on the ⋯ button or in the menu aren't opens.
+    if (event.target.closest(`input, ${MENU_ANCHOR}`)) return;
 
-      if (!(entry instanceof HTMLElement)) continue;
+    const row = event.target.closest<HTMLElement>('[role="treeitem"]');
+    const path = row?.dataset.itemPath;
 
-      if (entry.dataset.type === "context-menu-trigger") return;
-
-      if (entry.getAttribute("role") === "treeitem") {
-        const path = entry.dataset.itemPath;
-
-        if (entry.dataset.itemType === "file" && path) onOpen(path);
-
-        return;
-      }
-    }
+    if (row?.dataset.itemType === "file" && path) onOpen(path);
   };
 
-  // Capture phase: the tree stops Enter from propagating inside search.
+  // Capture phase, so the tree's own Enter handling (it stops Enter inside
+  // search) can never hide the key from us.
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key !== "Enter" || event.isComposing) return;
 
-    // Enter in the rename input commits the name instead.
-    const typing = event.composedPath()[0] instanceof HTMLInputElement;
+    const target = event.target;
 
-    if (typing && !tree.isSearchOpen()) return;
+    // Enter in the menu picks a menu item.
+    if (target instanceof Element && target.closest(MENU_ANCHOR)) return;
+
+    // Enter in the rename input commits the name instead.
+    if (target instanceof HTMLInputElement && !tree.isSearchOpen()) return;
 
     const path = tree.getFocusedPath();
 
